@@ -2,6 +2,7 @@ import { IKRLStationsResponse, IStationState } from './types'
 import TrainRouteForm from './TrainRouteForm'
 
 async function getData(): Promise<IKRLStationsResponse> {
+  // cannot use internal /api because this is React server component
   const res = await fetch('https://api-partner.krl.co.id/krlweb/v1/krl-station')
   if (!res.ok) {
     throw new Error('Failed to fetch data')

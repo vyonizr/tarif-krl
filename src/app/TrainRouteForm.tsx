@@ -21,7 +21,7 @@ interface ITrainRouteFormProps {
   stations: IStationState
 }
 
-const ALL_STATIONS = 'Semua Stasiun'
+const ALL_STATIONS = 'Semua Jurusan'
 const FROM_NOW = 'Sekarang'
 
 function TrainRouteForm({ stations }: ITrainRouteFormProps) {
@@ -52,10 +52,10 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
         setIsLoadingFare(true)
         if (originStation && destinationStation) {
           const res = await fetch(
-            `https://api-partner.krl.co.id/krlweb/v1/fare?` +
+            `/api/fare?` +
               new URLSearchParams({
-                stationfrom: originStation.sta_id,
-                stationto: destinationStation.sta_id,
+                from: originStation.sta_id,
+                to: destinationStation.sta_id,
               })
           )
           const resJSON: IFareResponse = await res.json()
@@ -75,24 +75,21 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
     async function getSchedule(originStation: KRLStation | null) {
       try {
         if (originStation !== null) {
+          setSelectedLastStation(ALL_STATIONS)
           setIsLoadingSchedule(true)
           const res = await fetch(
-            `https://api-partner.krl.co.id/krlweb/v1/schedule?` +
+            `/api/schedule?` +
               new URLSearchParams({
-                stationid: originStation.sta_id,
-                timefrom: time === FROM_NOW ? getCurrentTimeInHHMM() : time,
-                timeto: '23:00',
+                station_id: originStation.sta_id,
+                time_from: time === FROM_NOW ? getCurrentTimeInHHMM() : time,
               })
           )
           const resJSON: IKRLScheduleResponse = await res.json()
-          const resJSONFilter = resJSON.data.filter((schedule) =>
-            /^(?!.*TIDAK ANGKUT PENUMPANG).*$/i.test(schedule.ka_name)
-          )
-          const lastStationsResponse = resJSONFilter.map(
+          const lastStationsResponse = resJSON.data.map(
             (schedule) => schedule.dest
           )
           const noDuplicateStations = [...new Set(lastStationsResponse)].sort()
-          setSchedule(resJSONFilter)
+          setSchedule(resJSON.data)
           setLastStationOptions(noDuplicateStations)
         }
       } catch (error) {
@@ -112,10 +109,6 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
     }
     return schedule.filter((schedule) => schedule.dest === selectedLastStation)
   }, [schedule, selectedLastStation])
-
-  useEffect(() => {
-    setSelectedLastStation(ALL_STATIONS)
-  }, [originStation])
 
   return (
     <div className='w-full mt-4'>
@@ -191,7 +184,8 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
               <hr className='mt-4' />
               <div className='flex flex-col items-center w-full'>
                 <h2 className='mt-2 text-xl text-center font-medium mb-4'>
-                  Jadwal Kereta di {convertToTitleCase(originStation?.sta_name)}
+                  Jadwal KRL{' '}
+                  <strong>{convertToTitleCase(originStation?.sta_name)}</strong>
                 </h2>
                 <div className='w-full'>
                   <label htmlFor='time' className='block'>
@@ -217,7 +211,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                 </div>
                 <div className='w-full mt-2'>
                   <label htmlFor='time' className='block'>
-                    Tujuan Akhir:
+                    Jurusan KRL:
                   </label>
                   <select
                     name='lastStation'
@@ -227,7 +221,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                     className='w-full py-2 px-4 bg-gray-100 rounded'
                     defaultValue={selectedLastStation}
                   >
-                    <option value={ALL_STATIONS}>Semua Stasiun</option>
+                    <option value={ALL_STATIONS}>Semua Jurusan</option>
                     {lastStationOptions.map((station) => (
                       <option key={station} value={station}>
                         {convertToTitleCase(station)}
@@ -238,10 +232,10 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                 {isLoadingSchedule ? (
                   <Spinner />
                 ) : (
-                  <table className='mt-4'>
+                  <table className='mt-4 w-full'>
                     <tr>
                       <th className='py-1'>Waktu Keberangkatan</th>
-                      <th className='py-1'>Tujuan Akhir</th>
+                      <th className='text-left py-1'>Jurusan</th>
                     </tr>
                     <tbody>
                       {filteredSchedule.map((schedule) => (
