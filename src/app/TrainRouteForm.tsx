@@ -118,8 +118,8 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
   }, [originStation])
 
   return (
-    <div className='w-full'>
-      <div className='mt-4'>
+    <div className='w-full mt-4'>
+      <div>
         <label htmlFor='originStation' className='block'>
           Stasiun Asal
         </label>
@@ -148,114 +148,118 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
           ))}
         </select>
       </div>
-      <div className='mt-2'>
-        <label htmlFor='originStation' className='block'>
-          Stasiun Tujuan
-        </label>
-        <select
-          name='destinationStation'
-          onChange={(e) => {
-            setDestinationStation(
-              stationList.find(
-                (station) => station.sta_id === e.target.value
-              ) || null
-            )
-          }}
-          className='w-full py-2 px-4 bg-gray-100 rounded'
-          value={destinationStation?.sta_id}
-        >
-          <option disabled selected>
-            Pilih Stasiun Tujuan
-          </option>
-          {stationList.map((station) => (
-            <option key={station.sta_id} value={station.sta_id}>
-              {convertToTitleCase(station.sta_name)}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className='mt-4 flex flex-col items-center'>
-        <p className='text-lg'>Tarif:</p>
-        <p className={`text-xl ${fare !== null ? 'text-red-500' : ''}`}>
-          {isLoadingFare ? (
-            <Spinner />
-          ) : (
-            <strong>{fare !== null ? formatToRupiah(fare) : '-'}</strong>
-          )}
-        </p>
-      </div>
-      {originStation ? (
+      {originStation !== null ? (
         <>
-          <hr className='mt-4' />
-          <div className='flex flex-col items-center w-full'>
-            <h2 className='mt-2 text-xl text-center font-medium mb-4'>
-              Jadwal Kereta {convertToTitleCase(originStation?.sta_name)}
-            </h2>
-            <div className='w-full'>
-              <label htmlFor='time' className='block'>
-                Waktu Keberangkatan dari
-              </label>
-              <select
-                name='time'
-                onChange={(e) => {
-                  setTime(e.target.value)
-                }}
-                className='w-full py-2 px-4 bg-gray-100 rounded'
-                value={time}
-              >
-                <option value={FROM_NOW} selected={time === FROM_NOW}>
-                  {FROM_NOW}
+          <div className='mt-2'>
+            <label htmlFor='originStation' className='block'>
+              Stasiun Tujuan
+            </label>
+            <select
+              name='destinationStation'
+              onChange={(e) => {
+                setDestinationStation(
+                  stationList.find(
+                    (station) => station.sta_id === e.target.value
+                  ) || null
+                )
+              }}
+              className='w-full py-2 px-4 bg-gray-100 rounded'
+              value={destinationStation?.sta_id}
+            >
+              <option disabled selected>
+                Pilih Stasiun Tujuan
+              </option>
+              {stationList.map((station) => (
+                <option key={station.sta_id} value={station.sta_id}>
+                  {convertToTitleCase(station.sta_name)}
                 </option>
-                {HOURS.map((hour, index) => (
-                  <option key={index} value={hour} selected={time === hour}>
-                    {hour}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className='w-full mt-2'>
-              <label htmlFor='time' className='block'>
-                Tujuan Akhir:
-              </label>
-              <select
-                name='lastStation'
-                onChange={(e) => {
-                  setSelectedLastStation(e.target.value)
-                }}
-                className='w-full py-2 px-4 bg-gray-100 rounded'
-                defaultValue={selectedLastStation}
-              >
-                <option value={ALL_STATIONS}>Semua Stasiun</option>
-                {lastStationOptions.map((station) => (
-                  <option key={station} value={station}>
-                    {convertToTitleCase(station)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {isLoadingSchedule ? (
-              <Spinner />
-            ) : (
-              <table className='mt-4'>
-                <tr>
-                  <th>Waktu Keberangkatan</th>
-                  <th>Tujuan Akhir</th>
-                </tr>
-                <tbody>
-                  {filteredSchedule.map((schedule) => (
-                    <tr key={schedule.train_id}>
-                      <td className='text-center py-1'>
-                        {convertTimeToHHMM(schedule.time_est)}
-                      </td>
-                      <td className='text-left py-1'>
-                        {convertToTitleCase(schedule.dest)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+              ))}
+            </select>
           </div>
+          <div className='mt-4 flex flex-col items-center'>
+            <p className='text-lg'>Tarif:</p>
+            <p className={`text-xl ${fare !== null ? 'text-red-500' : ''}`}>
+              {isLoadingFare ? (
+                <Spinner />
+              ) : (
+                <strong>{fare !== null ? formatToRupiah(fare) : '-'}</strong>
+              )}
+            </p>
+          </div>
+          {originStation ? (
+            <>
+              <hr className='mt-4' />
+              <div className='flex flex-col items-center w-full'>
+                <h2 className='mt-2 text-xl text-center font-medium mb-4'>
+                  Jadwal Kereta di {convertToTitleCase(originStation?.sta_name)}
+                </h2>
+                <div className='w-full'>
+                  <label htmlFor='time' className='block'>
+                    Waktu Keberangkatan dari
+                  </label>
+                  <select
+                    name='time'
+                    onChange={(e) => {
+                      setTime(e.target.value)
+                    }}
+                    className='w-full py-2 px-4 bg-gray-100 rounded'
+                    value={time}
+                  >
+                    <option value={FROM_NOW} selected={time === FROM_NOW}>
+                      {FROM_NOW}
+                    </option>
+                    {HOURS.map((hour, index) => (
+                      <option key={index} value={hour} selected={time === hour}>
+                        {hour}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className='w-full mt-2'>
+                  <label htmlFor='time' className='block'>
+                    Tujuan Akhir:
+                  </label>
+                  <select
+                    name='lastStation'
+                    onChange={(e) => {
+                      setSelectedLastStation(e.target.value)
+                    }}
+                    className='w-full py-2 px-4 bg-gray-100 rounded'
+                    defaultValue={selectedLastStation}
+                  >
+                    <option value={ALL_STATIONS}>Semua Stasiun</option>
+                    {lastStationOptions.map((station) => (
+                      <option key={station} value={station}>
+                        {convertToTitleCase(station)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {isLoadingSchedule ? (
+                  <Spinner />
+                ) : (
+                  <table className='mt-4'>
+                    <tr>
+                      <th className='py-1'>Waktu Keberangkatan</th>
+                      <th className='py-1'>Tujuan Akhir</th>
+                    </tr>
+                    <tbody>
+                      {filteredSchedule.map((schedule) => (
+                        <tr key={schedule.train_id}>
+                          <td className='text-center py-1'>
+                            {convertTimeToHHMM(schedule.time_est)}
+                          </td>
+                          <td className='text-left py-1'>
+                            {convertToTitleCase(schedule.dest)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </>
+          ) : null}
         </>
       ) : null}
     </div>
