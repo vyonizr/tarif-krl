@@ -7,6 +7,14 @@ module.exports = {
   ],
   theme: {
     extend: {},
+    height: theme => ({
+      ...theme,
+      screen: 'calc(var(--vh) * 100)',
+    }),
+    minHeight: theme => ({
+      ...theme,
+      screen: 'calc(var(--vh) * 100)',
+    }),
   },
   plugins: [],
 }

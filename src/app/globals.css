@@ -16,6 +16,6 @@
   }
 
   a {
-    @apply hover:underline;
+    @apply underline lg:no-underline lg:hover:underline;
   }
 }

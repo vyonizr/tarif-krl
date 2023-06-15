@@ -194,7 +194,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                 <Link
                   href='/rute-krl.png'
                   target='_blank'
-                  className='mb-4 underline text-blue-500'
+                  className='mb-4 text-blue-500'
                 >
                   Lihat peta rute
                 </Link>

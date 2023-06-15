@@ -1,6 +1,7 @@
 import './globals.css'
 import { Lexend_Deca } from 'next/font/google'
 import Link from 'next/link'
+import Script from 'next/script'
 
 const lexendDeca = Lexend_Deca({ subsets: ['latin'] })
 
@@ -16,7 +17,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en'>
-      <body className={lexendDeca.className}>
+      <body
+        className={
+          lexendDeca.className + ' justify-between min-h-screen flex flex-col'
+        }
+      >
         {children}
         <footer>
           © {new Date().getFullYear()}{' '}
@@ -27,7 +32,16 @@ export default function RootLayout({
           >
             vyonizr
           </Link>
+          {' | '}
+          <Link
+            href='https://github.com/vyonizr/tarif-krl'
+            target='_blank'
+            rel='noopener noreferrer'
+          >
+            GitHub
+          </Link>
         </footer>
+        <Script src='/fixVH.js' />
       </body>
     </html>
   )
