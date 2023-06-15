@@ -26,6 +26,6 @@ export async function GET(req: Request) {
       throw new Error('station_id or time_from is null')
     }
   } catch (err) {
-    return NextResponse.json({ error: 'failed to load data' })
+    return NextResponse.json({ error: err }, { status: 500 })
   }
 }
