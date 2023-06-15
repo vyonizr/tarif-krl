@@ -46,7 +46,9 @@ export default async function Home() {
 
   return (
     <main className='min-h-screen max-w-[380px] p-4 w-full'>
-      <h1 className='text-3xl font-bold text-center'>Tarif & Jadwal KRL</h1>
+      <h1 className='text-3xl font-bold text-center'>
+        Tarif & Jadwal KRL Jabodetabek
+      </h1>
       <TrainRouteForm stations={stations}></TrainRouteForm>
     </main>
   )

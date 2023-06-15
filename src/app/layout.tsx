@@ -1,11 +1,11 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
+import { Lexend_Deca } from 'next/font/google'
 
-const inter = Inter({ subsets: ['latin'] })
+const lexendDeca = Lexend_Deca({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Tarif dan Jadwal KRL',
-  description: 'Tarif dan Jadwal KRL',
+  title: 'Tarif dan Jadwal KRL Jabodetabek',
+  description: 'Tarif dan Jadwal KRL Jabodetabek',
 }
 
 export default function RootLayout({
@@ -14,8 +14,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang='en'>
+      <body className={lexendDeca.className}>{children}</body>
     </html>
   )
 }

@@ -1,5 +1,6 @@
 'use client'
 import { useState, useMemo, useEffect } from 'react'
+import Link from 'next/link'
 
 import { HOURS } from './constants'
 import {
@@ -183,10 +184,17 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
             <>
               <hr className='mt-4' />
               <div className='flex flex-col items-center w-full'>
-                <h2 className='mt-2 text-xl text-center font-medium mb-4'>
+                <h2 className='mt-2 text-xl text-center font-medium'>
                   Jadwal KRL{' '}
                   <strong>{convertToTitleCase(originStation?.sta_name)}</strong>
                 </h2>
+                <Link
+                  href='/rute-krl.png'
+                  target='_blank'
+                  className='mb-4 underline'
+                >
+                  Lihat peta rute
+                </Link>
                 <div className='w-full'>
                   <label htmlFor='time' className='block'>
                     Waktu Keberangkatan dari
@@ -235,7 +243,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                   <table className='mt-4 w-full'>
                     <tr>
                       <th className='py-1'>Waktu Keberangkatan</th>
-                      <th className='text-left py-1'>Jurusan</th>
+                      <th className='py-1'>Jurusan</th>
                     </tr>
                     <tbody>
                       {filteredSchedule.map((schedule) => (
