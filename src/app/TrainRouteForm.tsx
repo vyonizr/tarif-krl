@@ -131,8 +131,9 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
             )
           }}
           className='w-full py-2 px-4 bg-slate-100 rounded'
+          value={originStation?.sta_id || 'Pilih Stasiun Asal'}
         >
-          <option disabled selected className='py-2'>
+          <option disabled className='py-2'>
             Pilih Stasiun Asal
           </option>
           {stationList.map((station) => (
@@ -162,11 +163,9 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                 )
               }}
               className='w-full py-2 px-4 bg-slate-100 rounded'
-              value={destinationStation?.sta_id}
+              value={destinationStation?.sta_id || 'Pilih Stasiun Tujuan'}
             >
-              <option disabled selected>
-                Pilih Stasiun Tujuan
-              </option>
+              <option disabled>Pilih Stasiun Tujuan</option>
               {stationList.map((station) => (
                 <option key={station.sta_id} value={station.sta_id}>
                   {convertToTitleCase(station.sta_name)}
@@ -209,7 +208,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                       setSelectedLastStation(e.target.value)
                     }}
                     className='w-full py-2 px-4 bg-slate-100 rounded'
-                    defaultValue={selectedLastStation}
+                    value={selectedLastStation}
                   >
                     <option value={ALL_STATIONS}>Semua Jurusan</option>
                     {lastStationOptions.map((station) => (
@@ -231,11 +230,9 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                     className='w-full py-2 px-4 bg-slate-100 rounded'
                     value={time}
                   >
-                    <option value={FROM_NOW} selected={time === FROM_NOW}>
-                      {FROM_NOW}
-                    </option>
+                    <option value={FROM_NOW}>{FROM_NOW}</option>
                     {HOURS.map((hour, index) => (
-                      <option key={index} value={hour} selected={time === hour}>
+                      <option key={index} value={hour}>
                         {hour}
                       </option>
                     ))}

@@ -15,10 +15,6 @@
     @apply flex flex-col items-center text-slate-800;
   }
 
-  select option:checked {
-    @apply bg-blue-500 text-white;
-  }
-
   a {
     @apply hover:underline;
   }

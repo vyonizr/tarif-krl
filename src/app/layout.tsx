@@ -21,7 +21,7 @@ export default function RootLayout({
         <footer>
           © {new Date().getFullYear()}{' '}
           <Link
-            href='https://vyonizr.com/'
+            href='https://linktr.ee/vyonizr/'
             target='_blank'
             rel='noopener noreferrer'
           >
