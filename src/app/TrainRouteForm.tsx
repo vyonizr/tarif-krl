@@ -111,6 +111,10 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
     return schedule.filter((schedule) => schedule.dest === selectedLastStation)
   }, [schedule, selectedLastStation])
 
+  useEffect(() => {
+    setTime(FROM_NOW)
+  }, [originStation])
+
   return (
     <div className='w-full mt-4'>
       <div>
