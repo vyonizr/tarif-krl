@@ -1,5 +1,6 @@
 import './globals.css'
 import { Lexend_Deca } from 'next/font/google'
+import Link from 'next/link'
 
 const lexendDeca = Lexend_Deca({ subsets: ['latin'] })
 
@@ -15,7 +16,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en'>
-      <body className={lexendDeca.className}>{children}</body>
+      <body className={lexendDeca.className}>
+        {children}
+        <footer>
+          © {new Date().getFullYear()}{' '}
+          <Link
+            href='https://vyonizr.com/'
+            target='_blank'
+            rel='noopener noreferrer'
+          >
+            vyonizr
+          </Link>
+        </footer>
+      </body>
     </html>
   )
 }
