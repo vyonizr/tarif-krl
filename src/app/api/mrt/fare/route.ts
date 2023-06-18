@@ -89,35 +89,10 @@ async function getStations(
       (stop: IMRTStop) => stop.station_id === destinationStationId
     )
 
-    // let isReverse = false
-
-    // if (departingStopIndex > destinationStopIndex) {
-    //   responseRouteJSON = responseRouteJSON.reverse()
-    //   isReverse = true
-    // }
-
     const filteredStops = responseRouteJSON.filter(
       (_: IMRTStop, index: number) => {
-        // if (isReverse) {
-        //   return (
-        //     index >=
-        //       Math.abs(departingStopIndex - (responseRouteJSON.length - 1)) &&
-        //     index <=
-        //       Math.abs(destinationStopIndex - (responseRouteJSON.length - 1))
-        //   )
-        // }
         return index >= departingStopIndex && index <= destinationStopIndex
       }
-    )
-
-    console.log(
-      {
-        departingStopIndex,
-        destinationStopIndex,
-        responseRouteJSON,
-        filteredStops,
-      },
-      '<== filteredStops responseRouteJSON'
     )
 
     return filteredStops

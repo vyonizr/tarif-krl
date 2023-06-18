@@ -1,7 +1,9 @@
+import Balancer from 'react-wrap-balancer'
+import Link from 'next/link'
+
 import { IMRTStation, IOfficialMRTStation } from '../types'
 import MRTRouteForm from './MRTRouteForm'
 import { MRT_STATIONS_OFFICIAL_URL } from '../constants'
-import Link from 'next/link'
 
 const headers = new Headers()
 headers.set('Content-Type', 'application/json')
@@ -66,7 +68,7 @@ export default async function Home() {
         <span>← Kembali ke halaman utama</span>
       </Link>
       <h1 className='text-3xl font-bold text-center'>
-        Tarif & Jadwal MRT Jakarta
+        <Balancer>Tarif & Jadwal MRT Jakarta</Balancer>
       </h1>
       <MRTRouteForm
         stations={data}

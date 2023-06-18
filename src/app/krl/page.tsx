@@ -1,3 +1,5 @@
+import Balancer from 'react-wrap-balancer'
+
 import { IKRLStationsResponse, IStationState } from '../types'
 import TrainRouteForm from './TrainRouteForm'
 import Link from 'next/link'
@@ -51,7 +53,7 @@ export default async function Home() {
         <span>← Kembali ke halaman utama</span>
       </Link>
       <h1 className='text-3xl font-bold text-center'>
-        Tarif & Jadwal KRL Jabodetabek
+        <Balancer>Tarif & Jadwal KRL Jabodetabek</Balancer>
       </h1>
       <TrainRouteForm stations={stations}></TrainRouteForm>
     </main>

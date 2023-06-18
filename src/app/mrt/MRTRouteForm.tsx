@@ -1,5 +1,6 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, Fragment } from 'react'
+
 import { IMRTStation, IOfficialMRTStation, IMRTRoute, IMRTStop } from '../types'
 import Spinner from '../Spinner'
 import { formatToRupiah, getCurrentTimeInHHMM, getTypeOfDay } from '../utils'
@@ -15,6 +16,9 @@ const FROM_NOW = 'Sekarang'
 const TYPE_OF_DAY = {
   WEEKDAY: 'weekday',
   WEEKEND: 'weekend',
+}
+const STATIONS = {
+  LEBAK_BULUS_GRAB: 'Lebak Bulus Grab',
 }
 
 export default function MRTRouteForm({
@@ -72,6 +76,8 @@ export default function MRTRouteForm({
                 setRecommendedRoute(null)
               }
             }
+          } else {
+            setSelectedLastStation(filteredRoute[0].name)
           }
         }
       } catch (error) {
@@ -93,10 +99,10 @@ export default function MRTRouteForm({
       if (schedule) {
         const scheduleArray = parseStringTimeToArray(
           typeOfDay === 'weekday'
-            ? selectedLastStation === 'Lebak Bulus'
+            ? selectedLastStation === STATIONS.LEBAK_BULUS_GRAB
               ? schedule.jadwal_lb_biasa
               : schedule.jadwal_hi_biasa
-            : selectedLastStation === 'Lebak Bulus'
+            : selectedLastStation === STATIONS.LEBAK_BULUS_GRAB
             ? schedule.jadwal_lb_libur
             : schedule.jadwal_hi_libur
         )
@@ -119,8 +125,6 @@ export default function MRTRouteForm({
 
     return []
   }
-
-  console.log(passedStations, '<== passedStations')
 
   return (
     <div className='w-full mt-4'>
@@ -200,10 +204,10 @@ export default function MRTRouteForm({
                         </small>
                         <small>
                           {passedStations.map((station, index) => (
-                            <span key={station.id}>
+                            <Fragment key={station.id}>
                               {station.stations.name}
                               {index !== passedStations.length - 1 ? ' → ' : ''}
-                            </span>
+                            </Fragment>
                           ))}
                         </small>
                       </>
