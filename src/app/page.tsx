@@ -16,10 +16,14 @@ export default async function Home() {
       </h1>
       <div className='mt-4'>
         {NAVIGATIONS.map((nav) => (
-          <Link href={nav.href} key={nav.name} className='no-underline'>
+          <Link
+            href={nav.href}
+            key={nav.name}
+            className='no-underline hover:no-underline'
+          >
             <button
               key={nav.name}
-              className='mt-2 w-full flex flex-wrap gap-x-4 items-center justify-center bg-slate-200 rounded h-[3rem]'
+              className='mt-2 w-full grid grid-cols-[2rem_auto] gap-x-4 items-center justify-center bg-slate-200 lg:hover:bg-slate-300 rounded h-[3rem] transition-colors'
             >
               <Image src={nav.logo} alt={nav.name} className='w-8 h-8 inline' />
               <p>{nav.name}</p>
