@@ -49,6 +49,10 @@ export interface IMRTStop {
   created_at: string
   order: number
   station_id: number
+  stations: {
+    id: number
+    name: string
+  }
   route_id: number
 }
 

@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
-import { IMRTStation, IOfficialMRTStation, IMRTRoute } from '../types'
+import { IMRTStation, IOfficialMRTStation, IMRTRoute, IMRTStop } from '../types'
 import Spinner from '../Spinner'
 import { formatToRupiah, getCurrentTimeInHHMM, getTypeOfDay } from '../utils'
 import { SAME_STATION_PENALTY_FARE, HOURS } from '../constants'
@@ -34,6 +34,9 @@ export default function MRTRouteForm({
   const [typeOfDay, setTypeOfDay] = useState(getTypeOfDay())
   const [time, setTime] = useState<typeof HOURS[number] | 'Sekarang'>(FROM_NOW)
   const [routeOptions, setRouteOptions] = useState<IMRTRoute[]>([])
+  const [passedStations, setPassedStations] = useState<IMRTStop[]>([])
+  const [recommendedRoute, setRecommendedRoute] =
+    useState<IMRTRoute | null>(null)
 
   useEffect(() => {
     async function getSchedule() {
@@ -44,7 +47,6 @@ export default function MRTRouteForm({
             (route) => route.name !== originStation.name
           )
           setRouteOptions(filteredRoute)
-          setSelectedLastStation(filteredRoute[0].name)
           if (destinationStation) {
             if (originStation.id === destinationStation.id) {
               setFare(SAME_STATION_PENALTY_FARE)
@@ -58,6 +60,17 @@ export default function MRTRouteForm({
               )
               const responseJSON = await response.json()
               setFare(responseJSON.fare)
+              setPassedStations(responseJSON.passed_stations)
+              const designatedRoute = routes.find(
+                (route) => route.id === responseJSON.route_id
+              )
+              if (designatedRoute) {
+                setSelectedLastStation(designatedRoute.name)
+                setRecommendedRoute(designatedRoute)
+              } else {
+                setSelectedLastStation(filteredRoute[0].name)
+                setRecommendedRoute(null)
+              }
             }
           }
         }
@@ -106,6 +119,8 @@ export default function MRTRouteForm({
 
     return []
   }
+
+  console.log(passedStations, '<== passedStations')
 
   return (
     <div className='w-full mt-4'>
@@ -162,13 +177,40 @@ export default function MRTRouteForm({
             </div>
             <div className='mt-4 flex flex-col items-center'>
               <p className='text-lg'>Tarif:</p>
-              <p className={`text-2xl ${fare !== null ? 'text-red-500' : ''}`}>
-                {isLoadingFare ? (
-                  <Spinner />
-                ) : (
-                  <strong>{fare !== null ? formatToRupiah(fare) : '-'}</strong>
-                )}
-              </p>
+              {isLoadingFare ? (
+                <Spinner />
+              ) : (
+                <>
+                  <p
+                    className={`text-2xl ${
+                      fare !== null ? 'text-red-500' : ''
+                    }`}
+                  >
+                    <strong>
+                      {fare !== null ? formatToRupiah(fare) : '-'}
+                    </strong>
+                  </p>
+                  <p className='text-gray-500 text-center'>
+                    {passedStations.length > 0 &&
+                    originStation.name !== destinationStation?.name ? (
+                      <>
+                        <small>
+                          Jurusan <strong>{recommendedRoute?.name}</strong>
+                          <br />
+                        </small>
+                        <small>
+                          {passedStations.map((station, index) => (
+                            <span key={station.id}>
+                              {station.stations.name}
+                              {index !== passedStations.length - 1 ? ' → ' : ''}
+                            </span>
+                          ))}
+                        </small>
+                      </>
+                    ) : null}
+                  </p>
+                </>
+              )}
               {originStation.name === destinationStation?.name ? (
                 <small className='text-red-500'>
                   (Denda masuk dan keluar di stasiun yang sama)

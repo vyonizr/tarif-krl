@@ -24,7 +24,10 @@ function findSharedRoute(
 ) {
   for (let i = 0; i < departingStops.length; i++) {
     for (let j = 0; j < destinationStops.length; j++) {
-      if (departingStops[i].route_id === destinationStops[j].route_id) {
+      if (
+        departingStops[i].route_id === destinationStops[j].route_id &&
+        departingStops[i].order < destinationStops[j].order
+      ) {
         return departingStops[i].route_id
       }
     }
@@ -60,6 +63,69 @@ async function getStopsByStationId(stationId: number) {
   }
 }
 
+async function getStations(
+  routeId: number,
+  departingStationId: number,
+  destinationStationId: number
+) {
+  try {
+    const responseRoute = await fetch(
+      process.env.SUPABASE_URL +
+        '/stops?' +
+        new URLSearchParams({
+          select: 'id,order,station_id,stations(id,name),route_id',
+          route_id: `eq.${routeId}`,
+          order: 'order.asc',
+        }),
+      { headers }
+    )
+
+    let responseRouteJSON = await responseRoute.json()
+    const departingStopIndex = responseRouteJSON.findIndex(
+      (stop: IMRTStop) => stop.station_id === departingStationId
+    )
+
+    const destinationStopIndex = responseRouteJSON.findIndex(
+      (stop: IMRTStop) => stop.station_id === destinationStationId
+    )
+
+    // let isReverse = false
+
+    // if (departingStopIndex > destinationStopIndex) {
+    //   responseRouteJSON = responseRouteJSON.reverse()
+    //   isReverse = true
+    // }
+
+    const filteredStops = responseRouteJSON.filter(
+      (_: IMRTStop, index: number) => {
+        // if (isReverse) {
+        //   return (
+        //     index >=
+        //       Math.abs(departingStopIndex - (responseRouteJSON.length - 1)) &&
+        //     index <=
+        //       Math.abs(destinationStopIndex - (responseRouteJSON.length - 1))
+        //   )
+        // }
+        return index >= departingStopIndex && index <= destinationStopIndex
+      }
+    )
+
+    console.log(
+      {
+        departingStopIndex,
+        destinationStopIndex,
+        responseRouteJSON,
+        filteredStops,
+      },
+      '<== filteredStops responseRouteJSON'
+    )
+
+    return filteredStops
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
@@ -87,9 +153,21 @@ export async function GET(req: Request) {
         departingStop.order
       )
 
+      let passedStations = []
+
+      if (sharedRouteId !== null) {
+        passedStations = await getStations(
+          sharedRouteId,
+          parseInt(departingStationId),
+          parseInt(destinationStationId)
+        )
+      }
+
       const fare = calculateFare(numberOfStops)
-      console.log({ departingStop, destinationStop, numberOfStops, fare })
-      return NextResponse.json({ fare }, { status: 200 })
+      return NextResponse.json(
+        { fare, passed_stations: passedStations, route_id: sharedRouteId },
+        { status: 200 }
+      )
     }
   } catch (err) {
     return NextResponse.json({ error: err }, { status: 500 })
