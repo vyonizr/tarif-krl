@@ -120,7 +120,9 @@ export default function MRTRouteForm({
   function parseStringTimeToArray(time: string) {
     if (time) {
       const correctedTime = time.replace(/:\s/g, ', ')
-      return correctedTime.split(/,\s|\t|(?<!\d)(?=\d{2}:)/) || []
+      return correctedTime.split(/,\s|\t|(?:^|[^0-9])(?=[0-9]{2}:)/) || []
+      // The (?<!...) negative lookbehind assertion is not supported in Safari as of the current ECMAScript (JavaScript) standard.
+      // return correctedTime.split(/,\s|\t|(?<!\d)(?=\d{2}:)/) || []
     }
 
     return []
