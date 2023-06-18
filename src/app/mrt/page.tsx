@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 import { IMRTStation, IOfficialMRTStation } from '../types'
 import MRTRouteForm from './MRTRouteForm'
-import { MRT_STATIONS_OFFICIAL_URL } from '../constants'
+import { CORS_MRT_STATIONS_OFFICIAL_URL } from '../constants'
 
 const headers = new Headers()
 headers.set('Content-Type', 'application/json')
@@ -31,7 +31,7 @@ async function getData(): Promise<IMRTStation[]> {
 }
 
 async function getDataOfficial(): Promise<IOfficialMRTStation[]> {
-  const res = await fetch(MRT_STATIONS_OFFICIAL_URL)
+  const res = await fetch(CORS_MRT_STATIONS_OFFICIAL_URL)
   if (!res.ok) {
     throw new Error('Failed to fetch data')
   }
