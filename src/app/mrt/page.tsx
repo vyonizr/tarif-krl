@@ -1,6 +1,7 @@
 import { IMRTStation, IOfficialMRTStation } from '../types'
 import MRTRouteForm from './MRTRouteForm'
 import { MRT_STATIONS_OFFICIAL_URL } from '../constants'
+import Link from 'next/link'
 
 const headers = new Headers()
 headers.set('Content-Type', 'application/json')
@@ -61,6 +62,9 @@ export default async function Home() {
 
   return (
     <main className='max-w-[380px] p-4 w-full'>
+      <Link href='/' className='text-center block text-sm mb-4'>
+        <span>← Kembali ke halaman utama</span>
+      </Link>
       <h1 className='text-3xl font-bold text-center'>
         Tarif & Jadwal MRT Jakarta
       </h1>

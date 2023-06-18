@@ -1,55 +1,32 @@
-import { IKRLStationsResponse, IStationState } from './types'
-import TrainRouteForm from './TrainRouteForm'
+import Link from 'next/link'
+import Image from 'next/image'
+import KRLLogo from './assets/images/krl_logo.png'
+import MRTLogo from './assets/images/mrt_logo.svg'
 
-async function getData(): Promise<IKRLStationsResponse> {
-  // cannot use internal "/api" because this is React server component
-  const res = await fetch('https://api-partner.krl.co.id/krlweb/v1/krl-station')
-  if (!res.ok) {
-    throw new Error('Failed to fetch data')
-  }
-
-  return res.json()
-}
+const NAVIGATIONS = [
+  { name: 'Kereta Rel Listrik (KRL)', href: '/krl', logo: KRLLogo },
+  { name: 'Mass Rapid Transit (MRT)', href: '/mrt', logo: MRTLogo },
+]
 
 export default async function Home() {
-  const data = await getData()
-
-  let stations: IStationState = {
-    Jabodetabek: [],
-    Yogyakarta: [],
-  }
-
-  function regionParser(regionId: number) {
-    switch (regionId) {
-      case 0:
-        return 'Jabodetabek'
-      case 6:
-        return 'Yogyakarta'
-      default:
-        return ''
-    }
-  }
-
-  const updatedStations = { ...stations }
-  if (data.data.length > 0) {
-    data.data.forEach((station) => {
-      if (/^(?!wil\d+$).*/i.test(station.sta_id)) {
-        const region = regionParser(station.group_wil)
-        if (region.length > 0) {
-          updatedStations[region].push(station)
-        }
-      }
-    })
-  }
-
-  stations = updatedStations
-
   return (
     <main className='max-w-[380px] p-4 w-full'>
       <h1 className='text-3xl font-bold text-center'>
-        Tarif & Jadwal KRL Jabodetabek
+        Pilih Moda Transportasi
       </h1>
-      <TrainRouteForm stations={stations}></TrainRouteForm>
+      <div className='mt-4'>
+        {NAVIGATIONS.map((nav) => (
+          <Link href={nav.href} key={nav.name} className='no-underline'>
+            <button
+              key={nav.name}
+              className='mt-2 w-full flex flex-wrap gap-x-4 items-center justify-center bg-slate-200 rounded h-[3rem]'
+            >
+              <Image src={nav.logo} alt={nav.name} className='w-8 h-8 inline' />
+              <p>{nav.name}</p>
+            </button>
+          </Link>
+        ))}
+      </div>
     </main>
   )
 }
