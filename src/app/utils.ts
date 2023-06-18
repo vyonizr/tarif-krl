@@ -63,6 +63,33 @@ function getCurrentTimeInHHMM() {
   return `${hours}:${minutes}`
 }
 
+function calculateMRTETA(inputTime: string, elapsedMinutes: string) {
+  const [hours, minutes] = inputTime.split(':')
+  if (hours === undefined || minutes === undefined) {
+    throw new Error('Invalid input time')
+  }
+
+  const totalMinutes =
+    parseInt(hours) * 60 + parseInt(minutes) + parseInt(elapsedMinutes)
+  const elapsedHours = Math.floor(totalMinutes / 60) % 24
+  const elapsedMins = totalMinutes % 60
+  const formattedHours = elapsedHours.toString().padStart(2, '0')
+  const formattedMins = elapsedMins.toString().padStart(2, '0')
+  return `${formattedHours}:${formattedMins}`
+}
+
+function isTodayWeekend() {
+  const today = new Date()
+  const day = today.getDay()
+  return day === 0 || day === 6
+}
+
+function getTypeOfDay() {
+  const today = new Date()
+  const day = today.getDay()
+  return day === 0 || day === 6 ? 'weekend' : 'weekday'
+}
+
 export {
   getRegionNumber,
   convertToTitleCase,
@@ -70,4 +97,7 @@ export {
   getNearestEarlierHour,
   convertTimeToHHMM,
   getCurrentTimeInHHMM,
+  calculateMRTETA,
+  isTodayWeekend,
+  getTypeOfDay,
 }

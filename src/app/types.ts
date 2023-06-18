@@ -43,3 +43,64 @@ export interface IKRLSchedule {
   color: string
   dest_time: string
 }
+
+export interface IMRTStop {
+  id: number
+  created_at: string
+  order: number
+  station_id: number
+  route_id: number
+}
+
+export interface IMRTStation {
+  id: number
+  name: string
+  is_transit: boolean
+  nid: string
+}
+
+export interface IOfficialMRTStation {
+  nid: string
+  title: string
+  urutan: string
+  isbig: string
+  path: string
+  catatan: any
+  antarmodas: string
+  peta_lokalitas: string
+  jadwal_lb_biasa: any
+  jadwal_lb_libur: any
+  jadwal_hi_biasa: string
+  jadwal_hi_libur: string
+  banner: string
+  retails: MRTStationRetail[]
+  estimasi: MRTEstimation[]
+  fasilitas: MRTFacility[]
+}
+
+export interface MRTStationRetail {
+  nid: string
+  title: string
+  jenis_retail: string
+  cover: string
+  path: string
+}
+
+export interface MRTEstimation {
+  stasiun_nid: string
+  tarif: string
+  waktu: string
+}
+
+export interface MRTFacility {
+  nid: string
+  title: string
+  jenis_fasilitas: string
+  cover: string
+  path: string
+}
+
+export interface IMRTRoute {
+  id: number
+  name: string
+}
