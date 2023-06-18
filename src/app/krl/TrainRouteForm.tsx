@@ -175,13 +175,22 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
           </div>
           <div className='mt-4 flex flex-col items-center'>
             <p className='text-lg'>Tarif:</p>
-            <p className={`text-2xl ${fare !== null ? 'text-red-500' : ''}`}>
-              {isLoadingFare ? (
-                <Spinner />
-              ) : (
-                <strong>{fare !== null ? formatToRupiah(fare) : '-'}</strong>
-              )}
-            </p>
+            {isLoadingFare ? (
+              <Spinner />
+            ) : (
+              <>
+                <p
+                  className={`text-2xl ${fare !== null ? 'text-red-500' : ''}`}
+                >
+                  <strong>{fare !== null ? formatToRupiah(fare) : '-'}</strong>
+                </p>
+                {originStation.sta_name === destinationStation?.sta_name ? (
+                  <small className='text-red-500'>
+                    (Denda masuk dan keluar di stasiun yang sama)
+                  </small>
+                ) : null}
+              </>
+            )}
           </div>
           {originStation ? (
             <>

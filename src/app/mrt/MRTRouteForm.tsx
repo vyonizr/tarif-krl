@@ -169,6 +169,11 @@ export default function MRTRouteForm({
                   <strong>{fare !== null ? formatToRupiah(fare) : '-'}</strong>
                 )}
               </p>
+              {originStation.name === destinationStation?.name ? (
+                <small className='text-red-500'>
+                  (Denda masuk dan keluar di stasiun yang sama)
+                </small>
+              ) : null}
             </div>
             <hr className='mt-4 border-t-2 border-gray-200 rounded' />
             <h2 className='mt-2 mb-4 text-xl text-center font-medium'>
@@ -185,6 +190,7 @@ export default function MRTRouteForm({
                 }}
                 className='w-full py-2 px-4 bg-slate-100 rounded'
                 value={selectedLastStation || ''}
+                disabled={routeOptions.length <= 1}
               >
                 {routeOptions.map((route) => (
                   <option key={route.id} value={route.name}>
