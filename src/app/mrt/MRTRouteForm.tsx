@@ -1,6 +1,8 @@
 'use client'
 import { useState, useEffect, useMemo, Fragment } from 'react'
 
+import PenaltyNotification from '@/components/PenaltyNotification'
+
 import { IMRTStation, IOfficialMRTStation, IMRTRoute, IMRTStop } from '../types'
 import Spinner from '../Spinner'
 import { formatToRupiah, getCurrentTimeInHHMM, getTypeOfDay } from '../utils'
@@ -158,7 +160,7 @@ export default function MRTRouteForm({
         {originStation !== null ? (
           <>
             <div className='mt-2'>
-              <label htmlFor='originStation' className='block'>
+              <label htmlFor='destinationStation' className='block'>
                 Stasiun Tujuan
               </label>
               <select
@@ -218,9 +220,7 @@ export default function MRTRouteForm({
                 </>
               )}
               {originStation.name === destinationStation?.name ? (
-                <small className='text-red-500'>
-                  (Denda masuk dan keluar di stasiun yang sama)
-                </small>
+                <PenaltyNotification />
               ) : null}
             </div>
             <hr className='mt-4 border-t-2 border-gray-200 rounded' />

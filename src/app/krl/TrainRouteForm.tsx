@@ -2,6 +2,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 
+import PenaltyNotification from '@/components/PenaltyNotification'
+
 import { HOURS } from '../constants'
 import {
   IStationState,
@@ -185,9 +187,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                   <strong>{fare !== null ? formatToRupiah(fare) : '-'}</strong>
                 </p>
                 {originStation.sta_name === destinationStation?.sta_name ? (
-                  <small className='text-red-500'>
-                    (Denda masuk dan keluar di stasiun yang sama)
-                  </small>
+                  <PenaltyNotification />
                 ) : null}
               </>
             )}
