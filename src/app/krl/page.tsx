@@ -4,6 +4,11 @@ import { IKRLStationsResponse, IStationState } from '../types'
 import TrainRouteForm from './TrainRouteForm'
 import Link from 'next/link'
 
+const REGION = {
+  JABODETABEK: 'Jabodetabek',
+  YOGYAKARTA: 'Yogyakarta',
+}
+
 async function getData(): Promise<IKRLStationsResponse> {
   // cannot use internal "/api" because this is React server component
   const res = await fetch('https://api-partner.krl.co.id/krlweb/v1/krl-station')
@@ -25,9 +30,9 @@ export default async function Home() {
   function regionParser(regionId: number) {
     switch (regionId) {
       case 0:
-        return 'Jabodetabek'
+        return REGION.JABODETABEK
       case 6:
-        return 'Yogyakarta'
+        return REGION.YOGYAKARTA
       default:
         return ''
     }
@@ -53,7 +58,7 @@ export default async function Home() {
         <span>← Kembali ke halaman utama</span>
       </Link>
       <h1 className="text-center text-3xl font-bold">
-        <Balancer>Tarif & Jadwal KRL Jabodetabek</Balancer>
+        <Balancer>Tarif & Jadwal KRL {REGION.JABODETABEK}</Balancer>
       </h1>
       <TrainRouteForm stations={stations}></TrainRouteForm>
     </main>
