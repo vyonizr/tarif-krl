@@ -195,7 +195,7 @@ export default function MRTRouteForm({
             <div className="mt-4 flex flex-col items-center">
               <p className="text-lg">Tarif:</p>
               {isLoadingFare ? (
-                <Spinner className="mt-4" />
+                <Spinner className="mt-2" />
               ) : (
                 <>
                   <p
