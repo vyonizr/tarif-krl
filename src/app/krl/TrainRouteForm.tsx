@@ -156,7 +156,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
   }
 
   return (
-    <div className="w-full mt-4">
+    <div className="mt-4 w-full">
       <div className="mt-4">
         <label htmlFor="region" className="block">
           Area
@@ -164,7 +164,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
         <select
           name="region"
           onChange={(e) => setRegion(e.target.value)}
-          className="w-full py-2 px-4 bg-slate-100 rounded"
+          className="w-full rounded bg-slate-100 px-4 py-2"
           value={region || 'Pilih Wilayah'}
         >
           {Object.keys(stations).map((region, index) => (
@@ -187,7 +187,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
               ) || null
             )
           }}
-          className="w-full py-2 px-4 bg-slate-100 rounded"
+          className="w-full rounded bg-slate-100 px-4 py-2"
           value={originStation?.sta_id || 'Pilih Stasiun Asal'}
         >
           <option disabled className="py-2">
@@ -219,7 +219,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                   ) || null
                 )
               }}
-              className="w-full py-2 px-4 bg-slate-100 rounded"
+              className="w-full rounded bg-slate-100 px-4 py-2"
               value={destinationStation?.sta_id || 'Pilih Stasiun Tujuan'}
             >
               <option disabled>Pilih Stasiun Tujuan</option>
@@ -249,9 +249,9 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
           </div>
           {originStation ? (
             <>
-              <hr className="mt-4 border-t-2 border-gray-200 rounded" />
-              <div className="flex flex-col items-center w-full">
-                <h2 className="mt-2 text-xl text-center font-medium">
+              <hr className="mt-4 rounded border-t-2 border-gray-200" />
+              <div className="flex w-full flex-col items-center">
+                <h2 className="mt-2 text-center text-xl font-medium">
                   Jadwal KRL{' '}
                   <strong>{convertToTitleCase(originStation?.sta_name)}</strong>
                 </h2>
@@ -271,7 +271,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                     onChange={(e) => {
                       setSelectedLastStation(e.target.value)
                     }}
-                    className="w-full py-2 px-4 bg-slate-100 rounded"
+                    className="w-full rounded bg-slate-100 px-4 py-2"
                     value={selectedLastStation}
                   >
                     <option value={ALL_STATIONS}>Semua Jurusan</option>
@@ -282,7 +282,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                     ))}
                   </select>
                 </div>
-                <div className="w-full mt-2">
+                <div className="mt-2 w-full">
                   <label htmlFor="time" className="block">
                     Waktu Keberangkatan dari
                   </label>
@@ -291,7 +291,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                     onChange={(e) => {
                       setTime(e.target.value)
                     }}
-                    className="w-full py-2 px-4 bg-slate-100 rounded"
+                    className="w-full rounded bg-slate-100 px-4 py-2"
                     value={time}
                   >
                     <option value={FROM_NOW}>{FROM_NOW}</option>
@@ -307,30 +307,35 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                 ) : filteredSchedule.length === 0 ? (
                   <p className="mt-4">Tidak ada jadwal</p>
                 ) : (
-                  <table className="mt-4 w-full">
-                    <thead>
-                      <tr>
-                        <th className="text-left py-1">Jurusan</th>
-                        <th className="py-1">Berangkat</th>
-                        <th className="py-1">Tiba</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredSchedule.map((schedule) => (
-                        <tr key={schedule.train_id}>
-                          <td className="text-left py-1">
-                            {convertToTitleCase(schedule.dest)}
-                          </td>
-                          <td className="text-center py-1">
-                            {convertTimeToHHMM(schedule.time_est)}
-                          </td>
-                          <td className="text-center py-1">
-                            {convertTimeToHHMM(schedule.dest_time)}
-                          </td>
+                  <>
+                    <small className="mt-4 self-start text-sm">
+                      *Estimasi tiba di <strong>stasiun akhir</strong>
+                    </small>
+                    <table className="w-full">
+                      <thead>
+                        <tr>
+                          <th className="py-1 text-left">Jurusan</th>
+                          <th className="py-1">Berangkat</th>
+                          <th className="py-1">Tiba*</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {filteredSchedule.map((schedule) => (
+                          <tr key={schedule.train_id}>
+                            <td className="py-1 text-left">
+                              {convertToTitleCase(schedule.dest)}
+                            </td>
+                            <td className="py-1 text-center">
+                              {convertTimeToHHMM(schedule.time_est)}
+                            </td>
+                            <td className="py-1 text-center">
+                              {convertTimeToHHMM(schedule.dest_time)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </>
                 )}
               </div>
             </>
