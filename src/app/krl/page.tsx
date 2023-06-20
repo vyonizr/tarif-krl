@@ -1,8 +1,8 @@
 import Balancer from 'react-wrap-balancer'
+import Link from 'next/link'
 
 import { IKRLStationsResponse, IStationState } from '../types'
 import TrainRouteForm from './TrainRouteForm'
-import Link from 'next/link'
 
 const REGION = {
   JABODETABEK: 'Jabodetabek',
@@ -51,6 +51,21 @@ export default async function Home() {
   }
 
   stations = updatedStations
+
+  for (let region in stations) {
+    stations[region].sort((a, b) => {
+      const nameA = a.sta_name.toLowerCase()
+      const nameB = b.sta_name.toLowerCase()
+
+      if (nameA < nameB) {
+        return -1
+      }
+      if (nameA > nameB) {
+        return 1
+      }
+      return 0
+    })
+  }
 
   return (
     <main className="w-full max-w-[380px] p-4">

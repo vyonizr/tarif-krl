@@ -91,7 +91,20 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
           const lastStationsResponse = resJSON.data.map(
             (schedule) => schedule.dest
           )
-          const noDuplicateStations = [...new Set(lastStationsResponse)].sort()
+          const noDuplicateStations = [...new Set(lastStationsResponse)].sort(
+            (a, b) => {
+              const nameA = a.toLowerCase()
+              const nameB = b.toLowerCase()
+
+              if (nameA < nameB) {
+                return -1
+              }
+              if (nameA > nameB) {
+                return 1
+              }
+              return 0
+            }
+          )
           setSchedule(resJSON.data)
           setLastStationOptions(noDuplicateStations)
         }
