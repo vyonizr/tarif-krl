@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, Fragment } from 'react'
 import PenaltyNotification from '@/components/PenaltyNotification'
 
 import { IMRTStation, IOfficialMRTStation, IMRTRoute, IMRTStop } from '../types'
-import Spinner from '../Spinner'
+import Spinner from '../../components/Spinner'
 import { formatToRupiah, getCurrentTimeInHHMM, getTypeOfDay } from '../utils'
 import { SAME_STATION_PENALTY_FARE, HOURS } from '../constants'
 
@@ -186,7 +186,7 @@ export default function MRTRouteForm({
             <div className='mt-4 flex flex-col items-center'>
               <p className='text-lg'>Tarif:</p>
               {isLoadingFare ? (
-                <Spinner />
+                <Spinner className='mt-4' />
               ) : (
                 <>
                   <p

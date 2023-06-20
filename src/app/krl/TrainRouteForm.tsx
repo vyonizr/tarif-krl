@@ -18,7 +18,7 @@ import {
   getCurrentTimeInHHMM,
   convertTimeToHHMM,
 } from '../utils'
-import Spinner from '../Spinner'
+import Spinner from '../../components/Spinner'
 
 interface ITrainRouteFormProps {
   stations: IStationState
@@ -178,7 +178,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
           <div className='mt-4 flex flex-col items-center'>
             <p className='text-lg'>Tarif:</p>
             {isLoadingFare ? (
-              <Spinner />
+              <Spinner className='mt-2' />
             ) : (
               <>
                 <p
@@ -248,7 +248,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                   </select>
                 </div>
                 {isLoadingSchedule ? (
-                  <Spinner />
+                  <Spinner className='mt-2' />
                 ) : filteredSchedule.length === 0 ? (
                   <p className='mt-4'>Tidak ada jadwal</p>
                 ) : (
