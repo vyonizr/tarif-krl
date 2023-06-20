@@ -5,7 +5,7 @@ import Link from 'next/link'
 import PenaltyNotification from '@/components/PenaltyNotification'
 import Spinner from '@/components/Spinner'
 
-import { HOURS } from '../constants'
+import { HOURS, KRL_REGION } from '../constants'
 import {
   IStationState,
   KRLStation,
@@ -28,7 +28,9 @@ const ALL_STATIONS = 'Semua Jurusan'
 const FROM_NOW = 'Sekarang'
 
 function TrainRouteForm({ stations }: ITrainRouteFormProps) {
-  const [region, _] = useState<keyof IStationState>(Object.keys(stations)[0])
+  const [region, setRegion] = useState<keyof IStationState>(
+    Object.keys(stations)[0]
+  )
   const [originStation, setOriginStation] = useState<KRLStation | null>(null)
   const [destinationStation, setDestinationStation] =
     useState<KRLStation | null>(null)
@@ -43,8 +45,21 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
   const [selectedLastStation, setSelectedLastStation] = useState(ALL_STATIONS)
 
   const stationList: KRLStation[] = useMemo(() => {
-    return stations[region] || []
+    if (region !== null) {
+      return stations[region]
+    }
+
+    return []
   }, [region, stations])
+
+  useEffect(() => {
+    setOriginStation(null)
+    setDestinationStation(null)
+    setFare(null)
+    setSchedule([])
+    setLastStationOptions([])
+    setSelectedLastStation(ALL_STATIONS)
+  }, [region])
 
   useEffect(() => {
     async function getFare(
@@ -130,9 +145,36 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
     setTime(FROM_NOW)
   }, [originStation])
 
+  function getTrainRoutePicture(region: keyof IStationState) {
+    switch (region) {
+      case KRL_REGION.YOGYAKARTA:
+        return '/rute_krl_yogyakarta.png'
+      case KRL_REGION.JABODETABEK:
+      default:
+        return '/rute_krl_jabodetabek.png'
+    }
+  }
+
   return (
     <div className="w-full mt-4">
-      <div>
+      <div className="mt-4">
+        <label htmlFor="region" className="block">
+          Area
+        </label>
+        <select
+          name="region"
+          onChange={(e) => setRegion(e.target.value)}
+          className="w-full py-2 px-4 bg-slate-100 rounded"
+          value={region || 'Pilih Wilayah'}
+        >
+          {Object.keys(stations).map((region, index) => (
+            <option key={index} value={region} className="py-2">
+              {convertToTitleCase(region)}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="mt-2">
         <label htmlFor="originStation" className="block">
           Stasiun Asal
         </label>
@@ -214,7 +256,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                   <strong>{convertToTitleCase(originStation?.sta_name)}</strong>
                 </h2>
                 <Link
-                  href="/rute-krl.png"
+                  href={getTrainRoutePicture(region)}
                   target="_blank"
                   className="mb-4 text-blue-500"
                 >

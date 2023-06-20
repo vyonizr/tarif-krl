@@ -2,12 +2,9 @@ import Balancer from 'react-wrap-balancer'
 import Link from 'next/link'
 
 import { IKRLStationsResponse, IStationState } from '../types'
-import TrainRouteForm from './TrainRouteForm'
 
-const REGION = {
-  JABODETABEK: 'Jabodetabek',
-  YOGYAKARTA: 'Yogyakarta',
-}
+import TrainRouteForm from './TrainRouteForm'
+import { KRL_REGION } from '../constants'
 
 async function getData(): Promise<IKRLStationsResponse> {
   // cannot use internal "/api" because this is React server component
@@ -30,9 +27,9 @@ export default async function Home() {
   function regionParser(regionId: number) {
     switch (regionId) {
       case 0:
-        return REGION.JABODETABEK
+        return KRL_REGION.JABODETABEK
       case 6:
-        return REGION.YOGYAKARTA
+        return KRL_REGION.YOGYAKARTA
       default:
         return ''
     }
@@ -73,7 +70,7 @@ export default async function Home() {
         <span>← Kembali ke halaman utama</span>
       </Link>
       <h1 className="text-center text-3xl font-bold">
-        <Balancer>Tarif & Jadwal KRL {REGION.JABODETABEK}</Balancer>
+        <Balancer>Tarif & Jadwal KRL</Balancer>
       </h1>
       <TrainRouteForm stations={stations}></TrainRouteForm>
     </main>
