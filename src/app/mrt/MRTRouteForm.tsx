@@ -2,9 +2,9 @@
 import { useState, useEffect, useMemo, Fragment } from 'react'
 
 import PenaltyNotification from '@/components/PenaltyNotification'
+import Spinner from '@/components/Spinner'
 
 import { IMRTStation, IOfficialMRTStation, IMRTRoute, IMRTStop } from '../types'
-import Spinner from '../../components/Spinner'
 import { formatToRupiah, getCurrentTimeInHHMM, getTypeOfDay } from '../utils'
 import { SAME_STATION_PENALTY_FARE, HOURS } from '../constants'
 
@@ -22,6 +22,15 @@ const TYPE_OF_DAY = {
 const STATIONS = {
   LEBAK_BULUS_GRAB: 'Lebak Bulus Grab',
 }
+
+const TYPE_OF_DAY_OPTIONS = [
+  { id: 'weekday-radio', value: TYPE_OF_DAY.WEEKDAY, label: '💼 Senin-Jumat' },
+  {
+    id: 'weekend-radio',
+    value: TYPE_OF_DAY.WEEKEND,
+    label: '🌴 Akhir Pekan/Libur',
+  },
+]
 
 export default function MRTRouteForm({
   stations,
@@ -268,42 +277,26 @@ export default function MRTRouteForm({
               </select>
             </div>
             <div className='mt-4 flex justify-between flex-wrap gap-x-2'>
-              <div>
-                <input
-                  type='radio'
-                  id='weekday-radio'
-                  name='typeOfDay'
-                  value={TYPE_OF_DAY.WEEKDAY}
-                  checked={typeOfDay === TYPE_OF_DAY.WEEKDAY}
-                  onChange={(e) => {
-                    setTypeOfDay(e.target.value)
-                  }}
-                />
-                <label
-                  htmlFor='weekday-radio'
-                  className='lg:hover:underline cursor-pointer'
-                >
-                  💼 Senin-Jumat
-                </label>
-              </div>
-              <div>
-                <input
-                  type='radio'
-                  id='weekend-radio'
-                  name='typeOfDay'
-                  value={TYPE_OF_DAY.WEEKEND}
-                  checked={typeOfDay === TYPE_OF_DAY.WEEKEND}
-                  onChange={(e) => {
-                    setTypeOfDay(e.target.value)
-                  }}
-                />
-                <label
-                  htmlFor='weekend-radio'
-                  className='lg:hover:underline cursor-pointer'
-                >
-                  🌴 Akhir Pekan/Libur
-                </label>
-              </div>
+              {TYPE_OF_DAY_OPTIONS.map((typeOfDayOption) => (
+                <div key={typeOfDayOption.id}>
+                  <input
+                    type='radio'
+                    id={typeOfDayOption.id}
+                    name='typeOfDay'
+                    value={typeOfDayOption.value}
+                    checked={typeOfDay === typeOfDayOption.value}
+                    onChange={(e) => {
+                      setTypeOfDay(e.target.value)
+                    }}
+                  />
+                  <label
+                    htmlFor={typeOfDayOption.id}
+                    className='lg:hover:underline cursor-pointer'
+                  >
+                    {typeOfDayOption.label}
+                  </label>
+                </div>
+              ))}
             </div>
             <table className='mt-4 w-full'>
               <thead>

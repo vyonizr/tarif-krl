@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 
 import PenaltyNotification from '@/components/PenaltyNotification'
+import Spinner from '@/components/Spinner'
 
 import { HOURS } from '../constants'
 import {
@@ -18,7 +19,6 @@ import {
   getCurrentTimeInHHMM,
   convertTimeToHHMM,
 } from '../utils'
-import Spinner from '../../components/Spinner'
 
 interface ITrainRouteFormProps {
   stations: IStationState
