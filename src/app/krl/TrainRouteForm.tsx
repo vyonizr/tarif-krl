@@ -118,13 +118,13 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
   }, [originStation])
 
   return (
-    <div className='w-full mt-4'>
+    <div className="w-full mt-4">
       <div>
-        <label htmlFor='originStation' className='block'>
+        <label htmlFor="originStation" className="block">
           Stasiun Asal
         </label>
         <select
-          name='originStation'
+          name="originStation"
           onChange={(e) => {
             setOriginStation(
               stationList.find(
@@ -132,17 +132,17 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
               ) || null
             )
           }}
-          className='w-full py-2 px-4 bg-slate-100 rounded'
+          className="w-full py-2 px-4 bg-slate-100 rounded"
           value={originStation?.sta_id || 'Pilih Stasiun Asal'}
         >
-          <option disabled className='py-2'>
+          <option disabled className="py-2">
             Pilih Stasiun Asal
           </option>
           {stationList.map((station) => (
             <option
               key={station.sta_id}
               value={station.sta_id}
-              className='py-2'
+              className="py-2"
             >
               {convertToTitleCase(station.sta_name)}
             </option>
@@ -151,12 +151,12 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
       </div>
       {originStation !== null ? (
         <>
-          <div className='mt-2'>
-            <label htmlFor='originStation' className='block'>
+          <div className="mt-2">
+            <label htmlFor="originStation" className="block">
               Stasiun Tujuan
             </label>
             <select
-              name='destinationStation'
+              name="destinationStation"
               onChange={(e) => {
                 setDestinationStation(
                   stationList.find(
@@ -164,7 +164,7 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                   ) || null
                 )
               }}
-              className='w-full py-2 px-4 bg-slate-100 rounded'
+              className="w-full py-2 px-4 bg-slate-100 rounded"
               value={destinationStation?.sta_id || 'Pilih Stasiun Tujuan'}
             >
               <option disabled>Pilih Stasiun Tujuan</option>
@@ -175,10 +175,10 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
               ))}
             </select>
           </div>
-          <div className='mt-4 flex flex-col items-center'>
-            <p className='text-lg'>Tarif:</p>
+          <div className="mt-4 flex flex-col items-center">
+            <p className="text-lg">Tarif:</p>
             {isLoadingFare ? (
-              <Spinner className='mt-2' />
+              <Spinner className="mt-2" />
             ) : (
               <>
                 <p
@@ -194,29 +194,29 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
           </div>
           {originStation ? (
             <>
-              <hr className='mt-4 border-t-2 border-gray-200 rounded' />
-              <div className='flex flex-col items-center w-full'>
-                <h2 className='mt-2 text-xl text-center font-medium'>
+              <hr className="mt-4 border-t-2 border-gray-200 rounded" />
+              <div className="flex flex-col items-center w-full">
+                <h2 className="mt-2 text-xl text-center font-medium">
                   Jadwal KRL{' '}
                   <strong>{convertToTitleCase(originStation?.sta_name)}</strong>
                 </h2>
                 <Link
-                  href='/rute-krl.png'
-                  target='_blank'
-                  className='mb-4 text-blue-500'
+                  href="/rute-krl.png"
+                  target="_blank"
+                  className="mb-4 text-blue-500"
                 >
                   Lihat peta rute
                 </Link>
-                <div className='w-full'>
-                  <label htmlFor='time' className='block'>
+                <div className="w-full">
+                  <label htmlFor="time" className="block">
                     Jurusan KRL
                   </label>
                   <select
-                    name='lastStation'
+                    name="lastStation"
                     onChange={(e) => {
                       setSelectedLastStation(e.target.value)
                     }}
-                    className='w-full py-2 px-4 bg-slate-100 rounded'
+                    className="w-full py-2 px-4 bg-slate-100 rounded"
                     value={selectedLastStation}
                   >
                     <option value={ALL_STATIONS}>Semua Jurusan</option>
@@ -227,16 +227,16 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                     ))}
                   </select>
                 </div>
-                <div className='w-full mt-2'>
-                  <label htmlFor='time' className='block'>
+                <div className="w-full mt-2">
+                  <label htmlFor="time" className="block">
                     Waktu Keberangkatan dari
                   </label>
                   <select
-                    name='time'
+                    name="time"
                     onChange={(e) => {
                       setTime(e.target.value)
                     }}
-                    className='w-full py-2 px-4 bg-slate-100 rounded'
+                    className="w-full py-2 px-4 bg-slate-100 rounded"
                     value={time}
                   >
                     <option value={FROM_NOW}>{FROM_NOW}</option>
@@ -248,28 +248,28 @@ function TrainRouteForm({ stations }: ITrainRouteFormProps) {
                   </select>
                 </div>
                 {isLoadingSchedule ? (
-                  <Spinner className='mt-2' />
+                  <Spinner className="mt-2" />
                 ) : filteredSchedule.length === 0 ? (
-                  <p className='mt-4'>Tidak ada jadwal</p>
+                  <p className="mt-4">Tidak ada jadwal</p>
                 ) : (
-                  <table className='mt-4 w-full'>
+                  <table className="mt-4 w-full">
                     <thead>
                       <tr>
-                        <th className='text-left py-1'>Jurusan</th>
-                        <th className='py-1'>Berangkat</th>
-                        <th className='py-1'>Tiba</th>
+                        <th className="text-left py-1">Jurusan</th>
+                        <th className="py-1">Berangkat</th>
+                        <th className="py-1">Tiba</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredSchedule.map((schedule) => (
                         <tr key={schedule.train_id}>
-                          <td className='text-left py-1'>
+                          <td className="text-left py-1">
                             {convertToTitleCase(schedule.dest)}
                           </td>
-                          <td className='text-center py-1'>
+                          <td className="text-center py-1">
                             {convertTimeToHHMM(schedule.time_est)}
                           </td>
-                          <td className='text-center py-1'>
+                          <td className="text-center py-1">
                             {convertTimeToHHMM(schedule.dest_time)}
                           </td>
                         </tr>

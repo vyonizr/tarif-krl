@@ -16,32 +16,34 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang='en'>
+    <html lang="en">
       <body
         className={
-          lexendDeca.className + ' justify-between min-h-screen flex flex-col'
+          lexendDeca.className +
+          ' ' +
+          'flex min-h-screen flex-col justify-between'
         }
       >
         {children}
         <footer>
           © {new Date().getFullYear()}{' '}
           <Link
-            href='https://linktr.ee/vyonizr/'
-            target='_blank'
-            rel='noopener noreferrer'
+            href="https://linktr.ee/vyonizr/"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             vyonizr
           </Link>
           {' | '}
           <Link
-            href='https://github.com/vyonizr/tarif-krl'
-            target='_blank'
-            rel='noopener noreferrer'
+            href="https://github.com/vyonizr/tarif-krl"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             GitHub
           </Link>
         </footer>
-        <Script src='/fixVH.js' />
+        <Script src="/fixVH.js" />
       </body>
     </html>
   )

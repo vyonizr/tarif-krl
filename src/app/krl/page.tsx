@@ -48,11 +48,11 @@ export default async function Home() {
   stations = updatedStations
 
   return (
-    <main className='max-w-[380px] p-4 w-full'>
-      <Link href='/' className='text-center block text-sm mb-4'>
+    <main className="w-full max-w-[380px] p-4">
+      <Link href="/" className="mb-4 block text-center text-sm">
         <span>← Kembali ke halaman utama</span>
       </Link>
-      <h1 className='text-3xl font-bold text-center'>
+      <h1 className="text-center text-3xl font-bold">
         <Balancer>Tarif & Jadwal KRL Jabodetabek</Balancer>
       </h1>
       <TrainRouteForm stations={stations}></TrainRouteForm>

@@ -140,13 +140,13 @@ export default function MRTRouteForm({
   }
 
   return (
-    <div className='w-full mt-4'>
+    <div className="w-full mt-4">
       <div>
-        <label htmlFor='originStation' className='block'>
+        <label htmlFor="originStation" className="block">
           Stasiun Asal
         </label>
         <select
-          name='originStation'
+          name="originStation"
           onChange={(e) => {
             setOriginStation(
               stations.find(
@@ -154,26 +154,26 @@ export default function MRTRouteForm({
               ) || null
             )
           }}
-          className='w-full py-2 px-4 bg-slate-100 rounded'
+          className="w-full py-2 px-4 bg-slate-100 rounded"
           value={originStation?.id || 'Pilih Stasiun Asal'}
         >
-          <option disabled className='py-2'>
+          <option disabled className="py-2">
             Pilih Stasiun Asal
           </option>
           {stations.map((station) => (
-            <option key={station.id} value={station.id} className='py-2'>
+            <option key={station.id} value={station.id} className="py-2">
               {station.name}
             </option>
           ))}
         </select>
         {originStation !== null ? (
           <>
-            <div className='mt-2'>
-              <label htmlFor='destinationStation' className='block'>
+            <div className="mt-2">
+              <label htmlFor="destinationStation" className="block">
                 Stasiun Tujuan
               </label>
               <select
-                name='destinationStation'
+                name="destinationStation"
                 onChange={(e) => {
                   setDestinationStation(
                     stations.find(
@@ -181,7 +181,7 @@ export default function MRTRouteForm({
                     ) || null
                   )
                 }}
-                className='w-full py-2 px-4 bg-slate-100 rounded'
+                className="w-full py-2 px-4 bg-slate-100 rounded"
                 value={destinationStation?.id || 'Pilih Stasiun Tujuan'}
               >
                 <option disabled>Pilih Stasiun Tujuan</option>
@@ -192,10 +192,10 @@ export default function MRTRouteForm({
                 ))}
               </select>
             </div>
-            <div className='mt-4 flex flex-col items-center'>
-              <p className='text-lg'>Tarif:</p>
+            <div className="mt-4 flex flex-col items-center">
+              <p className="text-lg">Tarif:</p>
               {isLoadingFare ? (
-                <Spinner className='mt-4' />
+                <Spinner className="mt-4" />
               ) : (
                 <>
                   <p
@@ -207,7 +207,7 @@ export default function MRTRouteForm({
                       {fare !== null ? formatToRupiah(fare) : '-'}
                     </strong>
                   </p>
-                  <p className='text-gray-500 text-center'>
+                  <p className="text-gray-500 text-center">
                     {passedStations.length > 0 &&
                     originStation.name !== destinationStation?.name ? (
                       <>
@@ -232,20 +232,20 @@ export default function MRTRouteForm({
                 <PenaltyNotification />
               ) : null}
             </div>
-            <hr className='mt-4 border-t-2 border-gray-200 rounded' />
-            <h2 className='mt-2 mb-4 text-xl text-center font-medium'>
+            <hr className="mt-4 border-t-2 border-gray-200 rounded" />
+            <h2 className="mt-2 mb-4 text-xl text-center font-medium">
               Jadwal MRT <strong>{originStation.name}</strong>
             </h2>
-            <div className='w-full'>
-              <label htmlFor='time' className='block'>
+            <div className="w-full">
+              <label htmlFor="time" className="block">
                 Jurusan MRT
               </label>
               <select
-                name='lastStation'
+                name="lastStation"
                 onChange={(e) => {
                   setSelectedLastStation(e.target.value)
                 }}
-                className='w-full py-2 px-4 bg-slate-100 rounded'
+                className="w-full py-2 px-4 bg-slate-100 rounded"
                 value={selectedLastStation || ''}
                 disabled={routeOptions.length <= 1}
               >
@@ -256,16 +256,16 @@ export default function MRTRouteForm({
                 ))}
               </select>
             </div>
-            <div className='w-full mt-2'>
-              <label htmlFor='time' className='block'>
+            <div className="w-full mt-2">
+              <label htmlFor="time" className="block">
                 Waktu Keberangkatan dari
               </label>
               <select
-                name='time'
+                name="time"
                 onChange={(e) => {
                   setTime(e.target.value)
                 }}
-                className='w-full py-2 px-4 bg-slate-100 rounded'
+                className="w-full py-2 px-4 bg-slate-100 rounded"
                 value={time}
               >
                 <option value={FROM_NOW}>{FROM_NOW}</option>
@@ -276,13 +276,13 @@ export default function MRTRouteForm({
                 ))}
               </select>
             </div>
-            <div className='mt-4 flex justify-between flex-wrap gap-x-2'>
+            <div className="mt-4 flex justify-between flex-wrap gap-x-2">
               {TYPE_OF_DAY_OPTIONS.map((typeOfDayOption) => (
                 <div key={typeOfDayOption.id}>
                   <input
-                    type='radio'
+                    type="radio"
                     id={typeOfDayOption.id}
-                    name='typeOfDay'
+                    name="typeOfDay"
                     value={typeOfDayOption.value}
                     checked={typeOfDay === typeOfDayOption.value}
                     onChange={(e) => {
@@ -291,25 +291,25 @@ export default function MRTRouteForm({
                   />
                   <label
                     htmlFor={typeOfDayOption.id}
-                    className='lg:hover:underline cursor-pointer'
+                    className="lg:hover:underline cursor-pointer"
                   >
                     {typeOfDayOption.label}
                   </label>
                 </div>
               ))}
             </div>
-            <table className='mt-4 w-full'>
+            <table className="mt-4 w-full">
               <thead>
                 <tr>
-                  <th className='text-left py-1'>Jurusan</th>
-                  <th className='py-1'>Berangkat</th>
+                  <th className="text-left py-1">Jurusan</th>
+                  <th className="py-1">Berangkat</th>
                 </tr>
               </thead>
               <tbody>
                 {MRTSchedule.map((schedule, index) => (
                   <tr key={index}>
-                    <td className='text-left py-1'>{selectedLastStation}</td>
-                    <td className='text-center py-1'>{schedule}</td>
+                    <td className="text-left py-1">{selectedLastStation}</td>
+                    <td className="text-center py-1">{schedule}</td>
                   </tr>
                 ))}
               </tbody>
