@@ -88,6 +88,16 @@ function markSource(meta: FetchMeta | undefined, source: DataSource, capturedAt?
   }
 }
 
+// Structured, greppable timing/outcome log per upstream call — not wired to
+// any metrics backend on purpose, this is raw material for deciding real
+// per-endpoint timeout values (see constants.ts) instead of guessing them.
+// Dev-only: Vercel bills/limits on log volume, and this fires on every
+// upstream call, so it never runs in production.
+function logUpstream(fields: Record<string, unknown>): void {
+  if (process.env.NODE_ENV === 'production') return
+  console.log(JSON.stringify({ tag: 'upstream-fetch', ...fields }))
+}
+
 async function fetchWithRetry(
   path: string,
   revalidate: number,
@@ -108,6 +118,7 @@ async function fetchWithRetry(
 
   if (isBreakerOpen(key)) {
     const stale = serveStale()
+    logUpstream({ key, outcome: 'breaker-open', servedStale: Boolean(stale) })
     if (stale) return stale
     throw new UpstreamError(502, 'Upstream KRL API unavailable')
   }
@@ -125,6 +136,7 @@ async function fetchWithRetry(
       const timeoutMs = attemptIndex === 0 ? UPSTREAM_TIMEOUT_MS : UPSTREAM_RETRY_TIMEOUT_MS
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+      const startedAt = Date.now()
 
       try {
         const response = await fetch(url, {
@@ -134,6 +146,10 @@ async function fetchWithRetry(
         clearTimeout(timeoutId)
 
         if (!response.ok) {
+          logUpstream({
+            key, attempt: attemptIndex, timeoutMs, ms: Date.now() - startedAt,
+            outcome: 'http-error', status: response.status,
+          })
           if (response.status >= 500 || response.status === 429) {
             throw new Error('retryable upstream error')
           }
@@ -144,6 +160,10 @@ async function fetchWithRetry(
           )
         }
 
+        logUpstream({
+          key, attempt: attemptIndex, timeoutMs, ms: Date.now() - startedAt,
+          outcome: 'success',
+        })
         recordSuccess(key)
         const cloned = response.clone()
         const body = await cloned.text()
@@ -160,7 +180,14 @@ async function fetchWithRetry(
           throw error
         }
 
-        if (attemptIndex === maxAttempts - 1) {
+        const willRetry = attemptIndex !== maxAttempts - 1
+        logUpstream({
+          key, attempt: attemptIndex, timeoutMs, ms: Date.now() - startedAt,
+          outcome: controller.signal.aborted ? 'timeout' : 'network-error',
+          willRetry,
+        })
+
+        if (!willRetry) {
           recordFailure(key)
           const stale = serveStale()
           if (stale) return stale
