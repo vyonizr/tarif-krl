@@ -10,7 +10,7 @@ import { SNAPSHOT_FETCH_CONCURRENCY, KCI_BASE_URL } from '@/lib/krl/constants'
 import { KciScheduleRow, KciTrainScheduleRow } from '@/lib/krl/types'
 
 export const dynamic = 'force-dynamic'
-export const maxDuration = 300
+export const maxDuration = 60
 
 async function fetchFromKci(path: string, timeoutMs = 10_000): Promise<Response> {
   const url = `${KCI_BASE_URL}/${path}`
