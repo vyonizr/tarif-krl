@@ -5,11 +5,6 @@ const REVALIDATE_STATIONS = 86400
 const REVALIDATE_FARE = 3600
 const REVALIDATE_SCHEDULES = 60
 
-// The first request to kci.id in a process's lifetime pays for DNS + TLS
-// handshake with no warm keep-alive connection to reuse — observed taking
-// noticeably longer than a already-connected request's ~500ms round trip.
-// GET_ROUTE_CONCURRENCY fires several of these at once on a cold start, so
-// the timeout needs enough headroom to survive that one-time cost.
 const UPSTREAM_TIMEOUT_MS = 4000
 const UPSTREAM_RETRY_TIMEOUT_MS = 3000
 const UPSTREAM_RETRY_COUNT = 1
@@ -17,7 +12,15 @@ const UPSTREAM_RETRY_COUNT = 1
 const REVALIDATE_TRAIN_SCHEDULE = 60
 const ROUTE_SEARCH_WINDOW_HOURS = 3
 const MAX_TRANSIT_LEGS = 3
-const GET_ROUTE_CONCURRENCY = 5
+
+// Measured against a genuinely cold cache: whole batches of concurrent
+// candidate-train lookups would either all succeed together or all time out
+// together (never a mix within one batch), interleaved with real HTTP 429s
+// from kci.id — evidence it throttles bursts of concurrent connections from
+// one client, not that individual requests are slow. A bigger timeout can't
+// fix this (the retry attempt fails in lockstep with the rest of the same
+// batch); a smaller burst size is less likely to trip it in the first place.
+const GET_ROUTE_CONCURRENCY = 3
 
 // Stop scanning candidate trains for a hop once one departs within this many
 // minutes of the requested time — no need to exhaustively check every train

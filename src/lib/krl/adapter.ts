@@ -37,6 +37,10 @@ import { getScheduleSnapshot, getRepoScheduleSnapshot } from './snapshotStore'
 const staleCache = new Map<string, { body: string; ts: number }>()
 const inFlight = new Map<string, Promise<Response>>()
 
+// Marks a 5xx/429 response so it retries like a network failure without
+// being logged twice (see fetchWithRetry's catch block).
+class RetryableHttpError extends Error {}
+
 interface BreakerState {
   failures: number
   windowStart: number
@@ -151,7 +155,7 @@ async function fetchWithRetry(
             outcome: 'http-error', status: response.status,
           })
           if (response.status >= 500 || response.status === 429) {
-            throw new Error('retryable upstream error')
+            throw new RetryableHttpError()
           }
           recordFailure(key)
           throw new UpstreamError(
@@ -181,11 +185,17 @@ async function fetchWithRetry(
         }
 
         const willRetry = attemptIndex !== maxAttempts - 1
-        logUpstream({
-          key, attempt: attemptIndex, timeoutMs, ms: Date.now() - startedAt,
-          outcome: controller.signal.aborted ? 'timeout' : 'network-error',
-          willRetry,
-        })
+
+        // Already logged as 'http-error' above — this catch only exists to
+        // let a retryable status code fall through the same retry path as a
+        // genuine network failure, not to report a second distinct failure.
+        if (!(error instanceof RetryableHttpError)) {
+          logUpstream({
+            key, attempt: attemptIndex, timeoutMs, ms: Date.now() - startedAt,
+            outcome: controller.signal.aborted ? 'timeout' : 'network-error',
+            willRetry,
+          })
+        }
 
         if (!willRetry) {
           recordFailure(key)
