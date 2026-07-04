@@ -1,6 +1,7 @@
 "use client"
 import { Star, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { IStationState, KRLStation, IFavoriteRoute } from "../types"
 import { convertToTitleCase } from "../utils"
 
@@ -39,9 +40,9 @@ export default function FavoriteRoutesBar({
           {isDemo ? "Contoh Favorit" : "Favorit"}
         </p>
         {isDemo && (
-          <span className="inline-block rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+          <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-700 text-[10px]">
             Contoh
-          </span>
+          </Badge>
         )}
       </div>
       <div className="flex gap-2 overflow-x-auto py-1">

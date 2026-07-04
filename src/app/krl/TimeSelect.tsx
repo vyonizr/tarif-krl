@@ -18,7 +18,7 @@ interface TimeSelectProps {
 export default function TimeSelect({ value, onChange }: TimeSelectProps) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="h-[44px] w-full">
+      <SelectTrigger className="h-11 w-full">
         <SelectValue placeholder="Pilih Waktu" />
       </SelectTrigger>
       <SelectContent>

@@ -3,6 +3,13 @@ import { useState, useEffect, useMemo, Fragment } from 'react'
 
 import PenaltyNotification from '@/components/PenaltyNotification'
 import Spinner from '@/components/Spinner'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
 
 import { IMRTStation, IOfficialMRTStation, IMRTRoute, IMRTStop } from '../types'
 import { formatToRupiah, getCurrentTimeInHHMM, getTypeOfDay } from '../utils'
@@ -132,8 +139,6 @@ export default function MRTRouteForm({
     if (time) {
       const correctedTime = time.replace(/:\s/g, ', ')
       return correctedTime.split(/,\s|\t|(?:^|[^0-9])(?=[0-9]{2}:)/) || []
-      // The (?<!...) negative lookbehind assertion is not supported in Safari as of the current ECMAScript (JavaScript) standard.
-      // return correctedTime.split(/,\s|\t|(?<!\d)(?=\d{2}:)/) || []
     }
 
     return []
@@ -142,55 +147,53 @@ export default function MRTRouteForm({
   return (
     <div className="w-full mt-4">
       <div>
-        <label htmlFor="originStation" className="block">
+        <label htmlFor="originStation" className="mb-1 block text-sm">
           Stasiun Asal
         </label>
-        <select
-          name="originStation"
-          onChange={(e) => {
+        <Select
+          value={originStation ? String(originStation.id) : undefined}
+          onValueChange={(value) => {
             setOriginStation(
-              stations.find(
-                (station) => String(station.id) === e.target.value
-              ) || null
+              stations.find((s) => String(s.id) === value) || null
             )
           }}
-          className="w-full py-2 px-4 bg-slate-100 rounded"
-          value={originStation?.id || 'Pilih Stasiun Asal'}
         >
-          <option disabled className="py-2">
-            Pilih Stasiun Asal
-          </option>
-          {stations.map((station) => (
-            <option key={station.id} value={station.id} className="py-2">
-              {station.name}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Pilih Stasiun Asal" />
+          </SelectTrigger>
+          <SelectContent>
+            {stations.map((station) => (
+              <SelectItem key={station.id} value={String(station.id)}>
+                {station.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         {originStation !== null ? (
           <>
-            <div className="mt-2">
-              <label htmlFor="destinationStation" className="block">
+            <div className="mt-3">
+              <label htmlFor="destinationStation" className="mb-1 block text-sm">
                 Stasiun Tujuan
               </label>
-              <select
-                name="destinationStation"
-                onChange={(e) => {
+              <Select
+                value={destinationStation ? String(destinationStation.id) : undefined}
+                onValueChange={(value) => {
                   setDestinationStation(
-                    stations.find(
-                      (station) => String(station.id) === e.target.value
-                    ) || null
+                    stations.find((s) => String(s.id) === value) || null
                   )
                 }}
-                className="w-full py-2 px-4 bg-slate-100 rounded"
-                value={destinationStation?.id || 'Pilih Stasiun Tujuan'}
               >
-                <option disabled>Pilih Stasiun Tujuan</option>
-                {stations.map((station) => (
-                  <option key={station.id} value={station.id}>
-                    {station.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Pilih Stasiun Tujuan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {stations.map((station) => (
+                    <SelectItem key={station.id} value={String(station.id)}>
+                      {station.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="mt-4 flex flex-col items-center">
               <p className="text-lg">Tarif:</p>
@@ -199,15 +202,13 @@ export default function MRTRouteForm({
               ) : (
                 <>
                   <p
-                    className={`text-2xl ${
-                      fare !== null ? 'text-red-500' : ''
+                    className={`text-2xl font-bold ${
+                      fare !== null ? 'text-amber-600' : ''
                     }`}
                   >
-                    <strong>
-                      {fare !== null ? formatToRupiah(fare) : '-'}
-                    </strong>
+                    {fare !== null ? formatToRupiah(fare) : '-'}
                   </p>
-                  <p className="text-gray-500 text-center">
+                  <p className="text-slate-500 text-center">
                     {passedStations.length > 0 &&
                     originStation.name !== destinationStation?.name ? (
                       <>
@@ -232,49 +233,48 @@ export default function MRTRouteForm({
                 <PenaltyNotification />
               ) : null}
             </div>
-            <hr className="mt-4 border-t-2 border-gray-200 rounded" />
+            <hr className="mt-4 border-t-2 border-slate-200 rounded-control" />
             <h2 className="mt-2 mb-4 text-xl text-center font-medium">
               Jadwal MRT <strong>{originStation.name}</strong>
             </h2>
             <div className="w-full">
-              <label htmlFor="time" className="block">
+              <label htmlFor="lastStation" className="mb-1 block text-sm">
                 Jurusan MRT
               </label>
-              <select
-                name="lastStation"
-                onChange={(e) => {
-                  setSelectedLastStation(e.target.value)
-                }}
-                className="w-full py-2 px-4 bg-slate-100 rounded"
-                value={selectedLastStation || ''}
+              <Select
+                value={selectedLastStation || undefined}
+                onValueChange={setSelectedLastStation}
                 disabled={routeOptions.length <= 1}
               >
-                {routeOptions.map((route) => (
-                  <option key={route.id} value={route.name}>
-                    {route.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {routeOptions.map((route) => (
+                    <SelectItem key={route.id} value={route.name}>
+                      {route.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="w-full mt-2">
-              <label htmlFor="time" className="block">
+            <div className="w-full mt-3">
+              <label htmlFor="time" className="mb-1 block text-sm">
                 Waktu Keberangkatan dari
               </label>
-              <select
-                name="time"
-                onChange={(e) => {
-                  setTime(e.target.value)
-                }}
-                className="w-full py-2 px-4 bg-slate-100 rounded"
-                value={time}
-              >
-                <option value={FROM_NOW}>{FROM_NOW}</option>
-                {HOURS.map((hour, index) => (
-                  <option key={index} value={hour}>
-                    {hour}
-                  </option>
-                ))}
-              </select>
+              <Select value={time} onValueChange={setTime}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={FROM_NOW}>{FROM_NOW}</SelectItem>
+                  {HOURS.map((hour) => (
+                    <SelectItem key={hour} value={hour}>
+                      {hour}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="mt-4 flex justify-between flex-wrap gap-x-2">
               {TYPE_OF_DAY_OPTIONS.map((typeOfDayOption) => (

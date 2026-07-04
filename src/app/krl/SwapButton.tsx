@@ -20,7 +20,7 @@ export default function SwapButton({
         size="icon"
         onClick={onSwap}
         disabled={disabled}
-        className="h-[44px] w-[44px] rounded-full bg-white"
+        className="h-11 w-11 rounded-pill bg-white"
         aria-label="Tukar stasiun asal dan tujuan"
       >
         <ArrowUpDown className="h-4 w-4" />

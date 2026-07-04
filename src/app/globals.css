@@ -8,7 +8,7 @@
   }
 
   tbody tr:nth-child(even) {
-    @apply bg-blue-100;
+    @apply bg-slate-50;
   }
 
   body {

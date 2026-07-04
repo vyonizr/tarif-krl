@@ -8,7 +8,7 @@ function Spinner({ className: extraClassName }: SpinnerProps) {
       <svg
         aria-hidden="true"
         className={
-          'h-6 w-6 animate-spin fill-white text-blue-500' +
+          'h-6 w-6 animate-spin fill-white text-slate-400' +
           (extraClassName ? ' ' + extraClassName : '')
         }
         viewBox="0 0 100 101"

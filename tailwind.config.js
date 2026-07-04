@@ -1,3 +1,5 @@
+const colors = require('tailwindcss/colors')
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -6,7 +8,24 @@ module.exports = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        brand: {
+          text: colors.slate['800'],
+          muted: colors.slate['500'],
+          surface: {
+            DEFAULT: colors.white,
+            muted: colors.slate['100'],
+          },
+          accent: colors.amber,
+          danger: colors.red['500'],
+        },
+      },
+      borderRadius: {
+        control: '0.375rem',
+        pill: '9999px',
+      },
+    },
     height: theme => ({
       ...theme,
       screen: 'calc(var(--vh) * 100)',

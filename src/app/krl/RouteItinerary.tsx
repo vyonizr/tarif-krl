@@ -10,6 +10,7 @@ import {
   formatMinutesToDuration,
 } from "@/app/utils"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
 
 interface RouteItineraryProps {
   legs: IKRLRouteResult[]
@@ -91,7 +92,7 @@ function ExpandableStops({
         </div>
         <button
           onClick={() => setExpanded(!expanded)}
-          className="flex min-h-[44px] items-center gap-1 text-left text-sm text-slate-500"
+          className="flex min-h-11 items-center gap-1 text-left text-sm text-slate-500"
         >
           {expanded ? (
             <ChevronDown className="h-4 w-4 shrink-0" />
@@ -159,9 +160,9 @@ export default function RouteItinerary({
     <div className="mt-6">
       {isDemo && (
         <div className="mb-3 flex justify-center">
-          <span className="inline-block rounded-full border border-amber-300 bg-amber-100 px-3 py-0.5 text-xs font-medium text-amber-700">
+          <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-700">
             Contoh
-          </span>
+          </Badge>
         </div>
       )}
       <div className="mb-4 space-y-1 rounded-lg border border-amber-200/60 bg-amber-50 px-4 py-3 text-amber-900">

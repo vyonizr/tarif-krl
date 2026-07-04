@@ -5,6 +5,13 @@ import { Star, HelpCircle } from "lucide-react"
 import PenaltyNotification from "@/components/PenaltyNotification"
 import Spinner from "@/components/Spinner"
 import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select"
 
 import { IStationState, KRLStation, IFareResponse, IFavoriteRoute } from "../types"
 import { IKRLRouteResult } from "@/lib/krl/types"
@@ -558,18 +565,18 @@ export default function TrainRouteForm({
 
         <div className="mt-4" id="krl-region-select">
           <label htmlFor="region" className="mb-1 block text-sm">Area</label>
-          <select
-            name="region"
-            onChange={(e) => handleRegionChange(e.target.value)}
-            className="h-[44px] w-full rounded-md border border-slate-200 bg-white px-4 py-2 text-sm"
-            value={region}
-          >
-            {regionKeys.map((r) => (
-              <option key={r} value={r}>
-                {convertToTitleCase(r)}
-              </option>
-            ))}
-          </select>
+          <Select value={region} onValueChange={handleRegionChange}>
+            <SelectTrigger className="h-11 w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {regionKeys.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {convertToTitleCase(r)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="mt-3" id="krl-origin-combobox">
@@ -595,7 +602,7 @@ export default function TrainRouteForm({
                   size="icon"
                   id="krl-favorite-toggle"
                   onClick={handleToggleFavorite}
-                  className="h-[44px] w-[44px] rounded-full bg-white"
+                  className="h-11 w-11 rounded-pill bg-white"
                   aria-label={
                     isFavorited ? "Hapus dari favorit" : "Simpan ke favorit"
                   }
@@ -661,8 +668,7 @@ export default function TrainRouteForm({
                 originStation?.id !== destinationStation?.id && (
                   <Button
                     onClick={fetchRoute}
-                    variant="default"
-                    size="sm"
+                    variant="outline"
                     className="mt-3"
                   >
                     Coba Lagi

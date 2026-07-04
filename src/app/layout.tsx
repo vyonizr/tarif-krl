@@ -7,8 +7,8 @@ import pkg from '../../package.json'
 const lexendDeca = Lexend_Deca({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Tarif dan Jadwal KRL Jabodetabek',
-  description: 'Tarif dan Jadwal KRL Jabodetabek',
+  title: 'Jadwal dan Tarif KRL',
+  description: 'Jadwal dan Tarif KRL',
 }
 
 export default function RootLayout({
