@@ -1,4 +1,4 @@
-# Tarif KRL
+# Jadwal KRL (Formerly Tarif KRL)
 
 A web app for calculating commuter line fares and schedules for Jabodetabek/Yogyakarta KRL, plus fares and routes for the Jakarta MRT.
 
