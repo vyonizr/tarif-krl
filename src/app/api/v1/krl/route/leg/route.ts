@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { tryRouteWithSameLineSplit } from '@/lib/krl/adapter'
 import { getLineGraph } from '@/lib/krl/topology'
-import { ok, fail } from '@/lib/krl/response'
-import { UpstreamError, NoRouteFoundError } from '@/lib/krl/types'
+import { ok, fail, dataSourceHeaders } from '@/lib/krl/response'
+import { UpstreamError, NoRouteFoundError, FetchMeta } from '@/lib/krl/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,8 +40,9 @@ export async function GET(req: Request) {
   }
 
   try {
-    const legs = await tryRouteWithSameLineSplit(from, to, time)
-    return NextResponse.json(ok({ legs }))
+    const meta: FetchMeta = { source: 'live' }
+    const legs = await tryRouteWithSameLineSplit(from, to, time, meta)
+    return NextResponse.json(ok({ legs }), { headers: dataSourceHeaders(meta) })
   } catch (error) {
     if (error instanceof NoRouteFoundError) {
       return NextResponse.json(fail(404, error.message), { status: 404 })

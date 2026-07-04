@@ -1,15 +1,23 @@
 import { GET } from './route'
 import { staleCache } from '@/lib/krl/adapter'
 
-function createFetchResponse(data: unknown, ok = true, status = 200) {
-  return {
+interface MockResponse {
+  ok: boolean
+  status: number
+  json: () => Promise<unknown>
+  text: () => Promise<string>
+  clone: () => MockResponse
+}
+
+function createFetchResponse(data: unknown, ok = true, status = 200): MockResponse {
+  const response: MockResponse = {
     ok,
     status,
     json: () => Promise.resolve(data),
-    clone() {
-      return { text: () => Promise.resolve(JSON.stringify(data)) }
-    },
+    text: () => Promise.resolve(JSON.stringify(data)),
+    clone: () => response,
   }
+  return response
 }
 
 function makeRequest(url: string): Request {

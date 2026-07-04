@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSchedules } from '@/lib/krl/adapter'
-import { ok, fail } from '@/lib/krl/response'
-import { UpstreamError } from '@/lib/krl/types'
+import { ok, fail, dataSourceHeaders } from '@/lib/krl/response'
+import { UpstreamError, FetchMeta } from '@/lib/krl/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,8 +19,9 @@ export async function GET(req: Request) {
       )
     }
 
-    const data = await getSchedules(stationId, timeFrom, timeTo)
-    return NextResponse.json(ok(data))
+    const meta: FetchMeta = { source: 'live' }
+    const data = await getSchedules(stationId, timeFrom, timeTo, meta)
+    return NextResponse.json(ok(data), { headers: dataSourceHeaders(meta) })
   } catch (error) {
     if (error instanceof UpstreamError) {
       return NextResponse.json(fail(error.status, error.message), {
