@@ -47,6 +47,8 @@ function getNearestEarlierHour() {
 }
 
 function convertTimeToHHMM(timeString: string) {
+  if (!timeString) return ''
+
   const parts = timeString.split(':')
 
   if (parts.length === 3) {
@@ -78,6 +80,45 @@ function calculateMRTETA(inputTime: string, elapsedMinutes: string) {
   return `${formattedHours}:${formattedMins}`
 }
 
+function calculateMinutesBetween(timeStart: string, timeEnd: string) {
+  if (!timeStart || !timeEnd) return 0
+
+  const [startHours, startMinutes] = timeStart.split(':')
+  const [endHours, endMinutes] = timeEnd.split(':')
+
+  if (startHours === undefined || startMinutes === undefined || endHours === undefined || endMinutes === undefined) {
+    return 0
+  }
+
+  const startTotal = parseInt(startHours) * 60 + parseInt(startMinutes)
+  let endTotal = parseInt(endHours) * 60 + parseInt(endMinutes)
+
+  if (isNaN(startTotal) || isNaN(endTotal)) return 0
+
+  if (endTotal <= startTotal) {
+    endTotal += 24 * 60
+  }
+
+  return endTotal - startTotal
+}
+
+function formatMinutesToDuration(minutes: number) {
+  if (!isFinite(minutes) || minutes < 0) return ''
+
+  if (minutes < 60) {
+    return `${minutes} menit`
+  }
+
+  const hours = Math.floor(minutes / 60)
+  const remaining = minutes % 60
+
+  if (remaining === 0) {
+    return `${hours} jam`
+  }
+
+  return `${hours} jam ${remaining} menit`
+}
+
 function isTodayWeekend() {
   const today = new Date()
   const day = today.getDay()
@@ -98,6 +139,8 @@ export {
   convertTimeToHHMM,
   getCurrentTimeInHHMM,
   calculateMRTETA,
+  calculateMinutesBetween,
+  formatMinutesToDuration,
   isTodayWeekend,
   getTypeOfDay,
 }

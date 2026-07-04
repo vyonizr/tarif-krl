@@ -1,14 +1,6 @@
-export interface IKRLStationsResponse {
-  status: number
-  message: string
-  data: KRLStation[]
-}
-
 export interface KRLStation {
-  sta_id: string
-  sta_name: string
-  group_wil: number
-  fg_enable: number
+  id: string
+  name: string
 }
 
 export interface IStationState {
@@ -16,22 +8,13 @@ export interface IStationState {
 }
 
 export interface IFareResponse {
-  status: number
-  data: IFare[]
-}
-
-export interface IFare {
-  sta_code_from: string
-  sta_name_from: string
-  sta_code_to: string
-  sta_name_to: string
-  fare: number
-  distance: string
+  data: { from: string; to: string; fare: number; distance: string }[] | null
+  error: { status: number; message: string } | null
 }
 
 export interface IKRLScheduleResponse {
-  status: number
-  data: IKRLSchedule[]
+  data: IKRLSchedule[] | null
+  error: { status: number; message: string } | null
 }
 
 export interface IKRLSchedule {
@@ -107,4 +90,11 @@ export interface MRTFacility {
 export interface IMRTRoute {
   id: number
   name: string
+}
+
+export interface IFavoriteRoute {
+  originStationId: string
+  destinationStationId: string
+  region: string
+  savedAt: number
 }

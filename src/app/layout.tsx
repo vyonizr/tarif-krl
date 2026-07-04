@@ -26,9 +26,9 @@ export default function RootLayout({
       >
         {children}
         <footer>
-          © {new Date().getFullYear()}{' '}
+          &copy; 2023-{new Date().getFullYear()}{' '}
           <Link
-            href="https://linktr.ee/vyonizr/"
+            href="https://vyonizr.com"
             target="_blank"
             rel="noopener noreferrer"
           >

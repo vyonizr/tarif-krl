@@ -1,0 +1,308 @@
+openapi: '3.0.3'
+info:
+  title: Tarif KRL API
+  version: '1.0.0'
+  description: >-
+    API for KRL commuter line fares, schedules, and stations, used by this
+    app's own frontend. Requests are only accepted from this site's origin —
+    direct external access (curl, Postman, another site's frontend) is
+    blocked. To call this API from your own project, clone the repository
+    and run your own instance against your own upstream quota.
+
+servers:
+  - url: /api/v1
+    description: Same-origin
+
+paths:
+  /krl/stations:
+    get:
+      summary: List stations grouped by region
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StationsEnvelope'
+        '502':
+          description: Upstream unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /krl/fare:
+    get:
+      summary: Get fare between two stations
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Origin station code
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Destination station code
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FareEnvelope'
+        '400':
+          description: Missing required parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '502':
+          description: Upstream unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /krl/route:
+    get:
+      summary: Get transit route between two stations
+      description: |
+        Finds a route from origin to destination across 1–3 KRL lines.
+        Same-line trips return a single leg. Multi-line trips chain legs
+        through transfer stations (Manggarai, Tanah Abang, Duri, Kampung Bandan,
+        Jakarta Kota) using live train schedule data for each leg.
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Origin station code
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Destination station code
+        - name: time
+          in: query
+          required: false
+          schema:
+            type: string
+            format: 'HH:MM'
+          description: 'Departure time. Defaults to current server time (Asia/Jakarta).'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteEnvelope'
+        '400':
+          description: Missing required parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: No route found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '502':
+          description: Upstream unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /krl/schedules:
+    get:
+      summary: Get departure schedules for a station
+      parameters:
+        - name: station_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Station code
+        - name: time_from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: 'HH:MM'
+          description: Start of time window
+        - name: time_to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: 'HH:MM'
+            default: '23:00'
+          description: End of time window
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchedulesEnvelope'
+        '400':
+          description: Missing required parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '502':
+          description: Upstream unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+components:
+  schemas:
+    Station:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required: [id, name]
+
+    StationsData:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          $ref: '#/components/schemas/Station'
+
+    StationsEnvelope:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/StationsData'
+        error:
+          type: 'null'
+      required: [data, error]
+
+    FareItem:
+      type: object
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+        fare:
+          type: integer
+        distance:
+          type: string
+      required: [from, to, fare, distance]
+
+    FareEnvelope:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/FareItem'
+        error:
+          type: 'null'
+      required: [data, error]
+
+    ScheduleItem:
+      type: object
+      properties:
+        train_id:
+          type: string
+        ka_name:
+          type: string
+        dest:
+          type: string
+        time_est:
+          type: string
+        dest_time:
+          type: string
+        color:
+          type: string
+      required: [train_id, ka_name, dest, time_est, dest_time]
+
+    SchedulesEnvelope:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduleItem'
+        error:
+          type: 'null'
+      required: [data, error]
+
+    RouteStop:
+      type: object
+      properties:
+        station_id:
+          type: string
+        station_name:
+          type: string
+        time_est:
+          type: string
+      required: [station_id, station_name, time_est]
+
+    RouteLeg:
+      type: object
+      properties:
+        train_id:
+          type: string
+        train_name:
+          type: string
+        color:
+          type: string
+        stops:
+          type: array
+          items:
+            $ref: '#/components/schemas/RouteStop'
+      required: [train_id, train_name, color, stops]
+
+    RouteData:
+      type: object
+      properties:
+        legs:
+          type: array
+          items:
+            $ref: '#/components/schemas/RouteLeg'
+      required: [legs]
+
+    RouteEnvelope:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/RouteData'
+        error:
+          type: 'null'
+      required: [data, error]
+
+    ErrorBody:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+      required: [status, message]
+
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ErrorBody'
+      required: [data, error]
