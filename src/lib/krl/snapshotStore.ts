@@ -1,8 +1,26 @@
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import { KciScheduleRow } from './types'
 
 interface Snapshot {
   data: KciScheduleRow[]
   capturedAt: string
+}
+
+// Bottom-of-the-stack fallback: a snapshot committed straight into the repo
+// (see scripts/refresh-terminus-snapshots.mjs) and shipped with the deploy
+// itself, so it works even if BLOB_READ_WRITE_TOKEN was never configured or
+// Blob is down. next.config.js's outputFileTracingIncludes makes sure these
+// files are actually bundled into the deployed function.
+async function getRepoScheduleSnapshot(stationId: string): Promise<Snapshot | null> {
+  const filePath = path.join(process.cwd(), 'data', 'schedule-snapshots', `${stationId}.json`)
+  try {
+    const raw = await readFile(filePath, 'utf8')
+    const parsed = JSON.parse(raw) as { data: KciScheduleRow[]; capturedAt: string }
+    return parsed
+  } catch {
+    return null
+  }
 }
 
 // ponytail: in-memory fallback only persists for this process's lifetime —
@@ -58,5 +76,5 @@ async function setScheduleSnapshot(
   })
 }
 
-export { getScheduleSnapshot, setScheduleSnapshot }
+export { getScheduleSnapshot, setScheduleSnapshot, getRepoScheduleSnapshot }
 export type { Snapshot }

@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "snapshot:refresh": "node scripts/refresh-terminus-snapshots.mjs"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.3.2",

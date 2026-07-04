@@ -178,8 +178,11 @@ describe('GET /api/v1/krl/route/leg', () => {
       createFetchResponse({}, false, 500)
     )
 
+    // Uses non-terminus stations deliberately: TERMINUS_STATIONS have a
+    // committed repo-snapshot fallback (data/schedule-snapshots/*.json) that
+    // would mask this upstream failure, per src/lib/krl/snapshotStore.ts.
     const req = makeRequest(
-      'http://localhost/api/v1/krl/route/leg?from=JAKK&to=MRI&time=04:00'
+      'http://localhost/api/v1/krl/route/leg?from=MRI&to=GDD&time=04:00'
     )
     const response = await GET(req)
     const body = await response.json()

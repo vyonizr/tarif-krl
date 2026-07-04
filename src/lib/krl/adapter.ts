@@ -32,7 +32,7 @@ import {
 } from './types'
 import { getLineGraph, findTransferStations, getForkPoint, LINES } from './topology'
 import { convertToTitleCase, convertTimeToHHMM } from '@/app/utils'
-import { getScheduleSnapshot } from './snapshotStore'
+import { getScheduleSnapshot, getRepoScheduleSnapshot } from './snapshotStore'
 
 const staleCache = new Map<string, { body: string; ts: number }>()
 const inFlight = new Map<string, Promise<Response>>()
@@ -77,6 +77,7 @@ const SOURCE_RANK: Record<DataSource, number> = {
   live: 0,
   'stale-cache': 1,
   'blob-snapshot': 2,
+  'repo-snapshot': 3,
 }
 
 function markSource(meta: FetchMeta | undefined, source: DataSource, capturedAt?: string): void {
@@ -298,6 +299,12 @@ async function getSchedules(
       if (snapshot) {
         markSource(meta, 'blob-snapshot', snapshot.capturedAt)
         return filterSchedules(snapshot.data, timeFrom, timeTo)
+      }
+
+      const repoSnapshot = await getRepoScheduleSnapshot(stationId)
+      if (repoSnapshot) {
+        markSource(meta, 'repo-snapshot', repoSnapshot.capturedAt)
+        return filterSchedules(repoSnapshot.data, timeFrom, timeTo)
       }
     }
     throw error

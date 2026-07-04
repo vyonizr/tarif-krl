@@ -38,3 +38,6 @@ next-env.d.ts
 
 # spec/design docs
 *-sdd.md
+
+# leftover from an interrupted scripts/refresh-terminus-snapshots.mjs run
+/.snapshot-refresh-worktree

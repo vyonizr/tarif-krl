@@ -73,7 +73,7 @@ export interface IKRLRouteResult {
   stops: IKRLRouteStop[]
 }
 
-export type DataSource = 'live' | 'stale-cache' | 'blob-snapshot'
+export type DataSource = 'live' | 'stale-cache' | 'blob-snapshot' | 'repo-snapshot'
 
 export interface FetchMeta {
   source: DataSource
