@@ -31,7 +31,7 @@ import {
   FetchMeta,
   DataSource,
 } from './types'
-import { getLineGraph, findTransferStations, getForkPoint, LINES } from './topology'
+import { getLineGraph, findTransferStations, getForkPoint, hasSharedLine, LINES } from './topology'
 import { convertToTitleCase, convertTimeToHHMM } from '@/app/utils'
 import {
   getScheduleSnapshot,
@@ -606,17 +606,26 @@ async function getTransitRoute(
     meta.deadlineAt = Date.now() + ROUTE_SEARCH_BUDGET_MS
   }
 
-  try {
-    const legs = await tryRouteWithSameLineSplit(from, to, timeFrom, meta)
-    onHop?.({ index: 0, total: 1, from, to, time: timeFrom }, { ok: true, legs })
-    return legs
-  } catch (error) {
-    if (!(error instanceof NoRouteFoundError)) {
-      throw error
+  const forkPoint = getForkPoint(from, to)
+  const graph = getLineGraph()
+
+  // Only worth attempting a direct/same-line route when one could actually
+  // exist — otherwise this is a guaranteed-to-fail network round trip
+  // (getRoute always fetches getSchedules(from) before it can tell the
+  // stations share no line) that can burn most of ROUTE_SEARCH_BUDGET_MS on
+  // a doomed probe, starving the real multi-hop search that follows.
+  if (forkPoint || hasSharedLine(from, to, graph)) {
+    try {
+      const legs = await tryRouteWithSameLineSplit(from, to, timeFrom, meta)
+      onHop?.({ index: 0, total: 1, from, to, time: timeFrom }, { ok: true, legs })
+      return legs
+    } catch (error) {
+      if (!(error instanceof NoRouteFoundError)) {
+        throw error
+      }
     }
   }
 
-  const forkPoint = getForkPoint(from, to)
   let waypoints: string[]
   let useSplit: boolean
 
@@ -624,7 +633,6 @@ async function getTransitRoute(
     waypoints = [from, forkPoint, to]
     useSplit = false
   } else {
-    const graph = getLineGraph()
     const transferStations = findTransferStations(
       from,
       to,

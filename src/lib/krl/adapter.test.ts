@@ -1293,6 +1293,53 @@ describe('getTransitRoute', () => {
     expect(legs[0].stops.map((s) => s.station_id)).toEqual(['JAKK', 'THB', 'MRI'])
   })
 
+  test('skips the doomed direct-route probe when origin and destination share no line', async () => {
+    // AK (blue only) and JUA (red only) share no line — only connected via
+    // the MRI junction. Before the fix, getTransitRoute always tried a
+    // direct route first, which still fetches getSchedules(AK) even though
+    // it's topologically guaranteed to fail, wasting part of the shared
+    // ROUTE_SEARCH_BUDGET_MS. Assert /schedules?stationid=AK is only ever
+    // fetched once (from the real AK->MRI hop), not twice.
+    schedulesByStation = {
+      AK: [
+        createScheduleRow({
+          train_id: '5500A',
+          ka_name: 'COMMUTER LINE CIKARANG',
+          color: '#0084D8',
+        }),
+      ],
+      MRI: [
+        createScheduleRow({
+          train_id: '1151',
+          ka_name: 'COMMUTER LINE BOGOR',
+          color: '#E30A16',
+          time_est: '04:35:00',
+        }),
+      ],
+    }
+    trainSchedules = {
+      '5500A': createVirtualTrainRow('5500A', 'COMMUTER LINE CIKARANG', '#0084D8', [
+        { station_id: 'AK', station_name: 'Angke', time_est: '04:10:00' },
+        { station_id: 'MRI', station_name: 'Manggarai', time_est: '04:30:00' },
+      ]),
+      '1151': createVirtualTrainRow('1151', 'COMMUTER LINE BOGOR', '#E30A16', [
+        { station_id: 'MRI', station_name: 'Manggarai', time_est: '04:35:00' },
+        { station_id: 'JUA', station_name: 'Juanda', time_est: '04:45:00' },
+      ]),
+    }
+
+    const legs = await getTransitRoute('AK', 'JUA', '04:00')
+
+    expect(legs).toHaveLength(2)
+    expect(legs[0].stops.map((s) => s.station_id)).toEqual(['AK', 'MRI'])
+    expect(legs[1].stops.map((s) => s.station_id)).toEqual(['MRI', 'JUA'])
+
+    const akScheduleCalls = (global.fetch as jest.Mock).mock.calls.filter(
+      (c: [string]) => c[0].includes('/schedules') && c[0].includes('stationid=AK')
+    )
+    expect(akScheduleCalls).toHaveLength(1)
+  })
+
   describe('with onHop (progressive/partial-failure mode)', () => {
     test('reports each successful hop and returns all legs on full success', async () => {
       schedulesByStation = {
