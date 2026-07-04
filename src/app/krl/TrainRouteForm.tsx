@@ -1,6 +1,6 @@
 "use client"
 import { useState, useMemo, useEffect, useCallback, useRef } from "react"
-import { Star } from "lucide-react"
+import { Star, HelpCircle } from "lucide-react"
 
 import PenaltyNotification from "@/components/PenaltyNotification"
 import Spinner from "@/components/Spinner"
@@ -15,6 +15,14 @@ import SwapButton from "./SwapButton"
 import TimeSelect from "./TimeSelect"
 import RouteItinerary from "./RouteItinerary"
 import FavoriteRoutesBar from "./FavoriteRoutesBar"
+import KRLOnboardingTour from "./KRLOnboardingTour"
+import {
+  MOCK_ORIGIN_STATION_ID,
+  MOCK_DEST_STATION_ID,
+  MOCK_ROUTE_LEGS,
+  MOCK_FARE,
+  createMockFavorites,
+} from "./onboarding-data"
 
 interface ITrainRouteFormProps {
   stations: IStationState
@@ -22,8 +30,21 @@ interface ITrainRouteFormProps {
   initialTo?: string
 }
 
+interface FormSnapshot {
+  region: string
+  originStation: KRLStation | null
+  destinationStation: KRLStation | null
+  routeLegs: IKRLRouteResult[] | null
+  routeError: { status: number; message: string } | null
+  fare: number | null
+  fareError: boolean
+  favorites: IFavoriteRoute[]
+  time: string
+}
+
 const STORAGE_KEY = "krl-prefs"
 const FAVORITES_STORAGE_KEY = "krl-favorites"
+const ONBOARDING_STORAGE_KEY = "krl-onboarding-seen"
 const FROM_NOW = "Sekarang"
 
 function findStationById(
@@ -86,6 +107,24 @@ function saveFavorites(favorites: IFavoriteRoute[]) {
   }
 }
 
+function getOnboardingSeen(): boolean {
+  if (typeof window === "undefined") return true
+  try {
+    return localStorage.getItem(ONBOARDING_STORAGE_KEY) === "true"
+  } catch {
+    return true
+  }
+}
+
+function setOnboardingSeen() {
+  if (typeof window === "undefined") return
+  try {
+    localStorage.setItem(ONBOARDING_STORAGE_KEY, "true")
+  } catch {
+    /* empty */
+  }
+}
+
 export default function TrainRouteForm({
   stations,
   initialFrom,
@@ -124,6 +163,10 @@ export default function TrainRouteForm({
 
   const [favorites, setFavorites] = useState<IFavoriteRoute[]>([])
   const favoritesMounted = useRef(false)
+
+  const [isOnboardingDemo, setIsOnboardingDemo] = useState(false)
+  const [onboardingTourOpen, setOnboardingTourOpen] = useState(false)
+  const formSnapshotRef = useRef<FormSnapshot | null>(null)
 
   const isFavorited = useMemo(() => {
     if (!originStation || !destinationStation) return false
@@ -237,6 +280,77 @@ export default function TrainRouteForm({
     []
   )
 
+  const handleInjectMockData = useCallback(() => {
+    formSnapshotRef.current = {
+      region,
+      originStation,
+      destinationStation,
+      routeLegs,
+      routeError,
+      fare,
+      fareError,
+      favorites,
+      time,
+    }
+
+    setIsOnboardingDemo(true)
+
+    const mockOrigin = findStationById(stations, MOCK_ORIGIN_STATION_ID)
+    const mockDest = findStationById(stations, MOCK_DEST_STATION_ID)
+
+    if (mockOrigin) {
+      setRegion(mockOrigin.region)
+      setOriginStation(mockOrigin.station)
+    }
+    if (mockDest) {
+      if (!mockOrigin) setRegion(mockDest.region)
+      setDestinationStation(mockDest.station)
+    }
+    setRouteLegs(MOCK_ROUTE_LEGS)
+    setRouteError(null)
+    setFare(MOCK_FARE)
+    setFareError(false)
+    setFavorites(createMockFavorites())
+  }, [
+    region,
+    originStation,
+    destinationStation,
+    routeLegs,
+    routeError,
+    fare,
+    fareError,
+    favorites,
+    time,
+    stations,
+  ])
+
+  const handleTourEnd = useCallback(() => {
+    const snap = formSnapshotRef.current
+
+    if (snap) {
+      setRegion(snap.region)
+      setOriginStation(snap.originStation)
+      setDestinationStation(snap.destinationStation)
+      setRouteLegs(snap.routeLegs)
+      setRouteError(snap.routeError)
+      setFare(snap.fare)
+      setFareError(snap.fareError)
+      setFavorites(snap.favorites)
+      setTime(snap.time)
+    }
+
+    setIsOnboardingDemo(false)
+    setOnboardingTourOpen(false)
+    setOnboardingSeen()
+  }, [])
+
+  useEffect(() => {
+    const seen = getOnboardingSeen()
+    if (!seen && !initialFrom && !initialTo) {
+      setOnboardingTourOpen(true)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (initialFrom || initialTo) return
 
@@ -276,14 +390,16 @@ export default function TrainRouteForm({
   }, [])
 
   useEffect(() => {
+    if (isOnboardingDemo) return
     if (favoritesMounted.current) {
       saveFavorites(favorites)
     } else {
       favoritesMounted.current = true
     }
-  }, [favorites])
+  }, [favorites, isOnboardingDemo])
 
   useEffect(() => {
+    if (isOnboardingDemo) return
     const params = new URLSearchParams()
     if (originStation) params.set("from", originStation.id)
     if (destinationStation) params.set("to", destinationStation.id)
@@ -292,15 +408,16 @@ export default function TrainRouteForm({
       ? `${window.location.pathname}?${qs}`
       : window.location.pathname
     window.history.replaceState(null, "", newUrl)
-  }, [originStation, destinationStation])
+  }, [originStation, destinationStation, isOnboardingDemo])
 
   useEffect(() => {
+    if (isOnboardingDemo) return
     savePrefs({
       region,
       originStationId: originStation?.id ?? null,
       destinationStationId: destinationStation?.id ?? null,
     })
-  }, [region, originStation, destinationStation])
+  }, [region, originStation, destinationStation, isOnboardingDemo])
 
   const routeRequestId = useRef(0)
 
@@ -337,13 +454,14 @@ export default function TrainRouteForm({
   }, [originStation, destinationStation, time])
 
   useEffect(() => {
+    if (isOnboardingDemo) return
     if (!originStation || !destinationStation) {
       setRouteLegs(null)
       setRouteError(null)
       return
     }
     fetchRoute()
-  }, [fetchRoute, originStation, destinationStation])
+  }, [fetchRoute, originStation, destinationStation, isOnboardingDemo])
 
   const fareRequestId = useRef(0)
 
@@ -379,13 +497,14 @@ export default function TrainRouteForm({
   }, [originStation, destinationStation])
 
   useEffect(() => {
+    if (isOnboardingDemo) return
     if (!originStation || !destinationStation) {
       setFare(null)
       setFareError(false)
       return
     }
     fetchFare()
-  }, [fetchFare, originStation, destinationStation])
+  }, [fetchFare, originStation, destinationStation, isOnboardingDemo])
 
   const showRouteItinerary =
     originStation && destinationStation && routeLegs && !routeError
@@ -397,7 +516,7 @@ export default function TrainRouteForm({
     !isLoadingRoute
 
   const showLoading =
-    originStation && destinationStation && isLoadingRoute
+    originStation && destinationStation && isLoadingRoute && !isOnboardingDemo
 
   const showDestinationPrompt =
     originStation && !destinationStation
@@ -406,143 +525,173 @@ export default function TrainRouteForm({
     !originStation
 
   return (
-    <div className="mt-4 w-full">
-      <FavoriteRoutesBar
-        favorites={favorites}
-        stations={stations}
-        onSelect={handleSelectFavorite}
-        onRemove={handleRemoveFavorite}
+    <>
+      <KRLOnboardingTour
+        run={onboardingTourOpen}
+        onInjectMockData={handleInjectMockData}
+        onTourEnd={handleTourEnd}
       />
 
-      <div className="mt-4">
-        <label htmlFor="region" className="mb-1 block text-sm">Area</label>
-        <select
-          name="region"
-          onChange={(e) => handleRegionChange(e.target.value)}
-          className="h-[44px] w-full rounded-md border border-slate-200 bg-white px-4 py-2 text-sm"
-          value={region}
-        >
-          {regionKeys.map((r) => (
-            <option key={r} value={r}>
-              {convertToTitleCase(r)}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="mt-3">
-        <label className="mb-1 block text-sm">Stasiun Asal</label>
-        <StationCombobox
-          stations={stationList}
-          selectedStation={originStation}
-          onSelect={handleOriginSelect}
-          placeholder="Pilih Stasiun Asal"
-        />
-      </div>
-
-      <SwapButton
-        onSwap={handleSwap}
-        disabled={!originStation && !destinationStation}
-      >
-        {originStation &&
-          destinationStation &&
-          originStation.id !== destinationStation.id && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleToggleFavorite}
-              className="h-[44px] w-[44px] rounded-full bg-white"
-              aria-label={
-                isFavorited ? "Hapus dari favorit" : "Simpan ke favorit"
-              }
-            >
-              <Star
-                className="h-4 w-4"
-                fill={isFavorited ? "currentColor" : "none"}
-              />
-            </Button>
-          )}
-      </SwapButton>
-
-      <div>
-        <label className="mb-1 block text-sm">Stasiun Tujuan</label>
-        <StationCombobox
-          stations={stationList}
-          selectedStation={destinationStation}
-          onSelect={handleDestinationSelect}
-          placeholder="Pilih Stasiun Tujuan"
-        />
-      </div>
-
-      <div className="mt-3">
-        <label className="mb-1 block text-sm">Waktu Keberangkatan</label>
-        <TimeSelect value={time} onChange={setTime} />
-      </div>
-
-      {originStation?.id === destinationStation?.id && (
-        <div className="mt-3 flex justify-center">
-          <PenaltyNotification />
+      <div className="mt-4 w-full">
+        <div className="flex items-center justify-between">
+          <div />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setOnboardingTourOpen(true)}
+            className="gap-1.5 text-xs text-slate-400 hover:text-slate-600"
+          >
+            <HelpCircle className="h-3.5 w-3.5" />
+            Bantuan
+          </Button>
         </div>
-      )}
 
-      {showInitialPrompt && (
-        <div className="mt-8 text-center text-sm text-slate-500">
-          Pilih stasiun asal dan tujuan untuk melihat rute
+        <div id="krl-favorites-bar">
+          <FavoriteRoutesBar
+            favorites={favorites}
+            stations={stations}
+            onSelect={handleSelectFavorite}
+            onRemove={handleRemoveFavorite}
+            isDemo={isOnboardingDemo}
+          />
         </div>
-      )}
 
-      {showDestinationPrompt && (
-        <div className="mt-8 text-center text-sm text-slate-500">
-          Pilih stasiun tujuan untuk melihat rute
+        <div className="mt-4" id="krl-region-select">
+          <label htmlFor="region" className="mb-1 block text-sm">Area</label>
+          <select
+            name="region"
+            onChange={(e) => handleRegionChange(e.target.value)}
+            className="h-[44px] w-full rounded-md border border-slate-200 bg-white px-4 py-2 text-sm"
+            value={region}
+          >
+            {regionKeys.map((r) => (
+              <option key={r} value={r}>
+                {convertToTitleCase(r)}
+              </option>
+            ))}
+          </select>
         </div>
-      )}
 
-      {showLoading && (
-        <div className="mt-8 flex flex-col items-center gap-2">
-          <Spinner />
-          <p className="text-xs text-slate-400">Menunggu respons server KRL...</p>
+        <div className="mt-3" id="krl-origin-combobox">
+          <label className="mb-1 block text-sm">Stasiun Asal</label>
+          <StationCombobox
+            stations={stationList}
+            selectedStation={originStation}
+            onSelect={handleOriginSelect}
+            placeholder="Pilih Stasiun Asal"
+          />
         </div>
-      )}
 
-      {showNoRouteError && (
-        <div className="mt-8">
-          <div className="rounded-lg bg-red-50 p-4 text-center">
-            <p className="text-sm text-red-600">
-              {routeError.status === 404
-                ? "Tidak ada rute ditemukan antara kedua stasiun ini."
-                : "Gagal memuat rute, coba lagi"}
-            </p>
-            {routeError.status !== 404 &&
-              originStation?.id !== destinationStation?.id && (
+        <div id="krl-swap-button">
+          <SwapButton
+            onSwap={handleSwap}
+            disabled={!originStation && !destinationStation}
+          >
+            {originStation &&
+              destinationStation &&
+              originStation.id !== destinationStation.id && (
                 <Button
-                  onClick={fetchRoute}
-                  variant="default"
-                  size="sm"
-                  className="mt-3"
+                  variant="outline"
+                  size="icon"
+                  id="krl-favorite-toggle"
+                  onClick={handleToggleFavorite}
+                  className="h-[44px] w-[44px] rounded-full bg-white"
+                  aria-label={
+                    isFavorited ? "Hapus dari favorit" : "Simpan ke favorit"
+                  }
                 >
-                  Coba Lagi
+                  <Star
+                    className="h-4 w-4"
+                    fill={isFavorited ? "currentColor" : "none"}
+                  />
                 </Button>
               )}
-          </div>
-          {originStation?.id === destinationStation?.id ? null : (
-            <RouteItinerary
-              legs={[]}
-              fare={null}
-              isFareLoading={false}
-              fareError
-            />
-          )}
+          </SwapButton>
         </div>
-      )}
 
-      {showRouteItinerary && (
-        <RouteItinerary
-          legs={routeLegs}
-          fare={fare}
-          isFareLoading={isLoadingFare}
-          fareError={fareError}
-        />
-      )}
-    </div>
+        <div id="krl-destination-combobox">
+          <label className="mb-1 block text-sm">Stasiun Tujuan</label>
+          <StationCombobox
+            stations={stationList}
+            selectedStation={destinationStation}
+            onSelect={handleDestinationSelect}
+            placeholder="Pilih Stasiun Tujuan"
+          />
+        </div>
+
+        <div className="mt-3" id="krl-time-select">
+          <label className="mb-1 block text-sm">Waktu Keberangkatan</label>
+          <TimeSelect value={time} onChange={setTime} />
+        </div>
+
+        {originStation?.id === destinationStation?.id && (
+          <div className="mt-3 flex justify-center">
+            <PenaltyNotification />
+          </div>
+        )}
+
+        {showInitialPrompt && (
+          <div className="mt-8 text-center text-sm text-slate-500">
+            Pilih stasiun asal dan tujuan untuk melihat rute
+          </div>
+        )}
+
+        {showDestinationPrompt && (
+          <div className="mt-8 text-center text-sm text-slate-500">
+            Pilih stasiun tujuan untuk melihat rute
+          </div>
+        )}
+
+        {showLoading && (
+          <div className="mt-8 flex flex-col items-center gap-2">
+            <Spinner />
+            <p className="text-xs text-slate-400">Menunggu respons server KRL...</p>
+          </div>
+        )}
+
+        {showNoRouteError && (
+          <div className="mt-8">
+            <div className="rounded-lg bg-red-50 p-4 text-center">
+              <p className="text-sm text-red-600">
+                {routeError.status === 404
+                  ? "Tidak ada rute ditemukan antara kedua stasiun ini."
+                  : "Gagal memuat rute, coba lagi"}
+              </p>
+              {routeError.status !== 404 &&
+                originStation?.id !== destinationStation?.id && (
+                  <Button
+                    onClick={fetchRoute}
+                    variant="default"
+                    size="sm"
+                    className="mt-3"
+                  >
+                    Coba Lagi
+                  </Button>
+                )}
+            </div>
+            {originStation?.id === destinationStation?.id ? null : (
+              <RouteItinerary
+                legs={[]}
+                fare={null}
+                isFareLoading={false}
+                fareError
+              />
+            )}
+          </div>
+        )}
+
+        {showRouteItinerary && (
+          <div id="krl-route-result">
+            <RouteItinerary
+              legs={routeLegs}
+              fare={fare}
+              isFareLoading={isLoadingFare}
+              fareError={fareError}
+              isDemo={isOnboardingDemo}
+            />
+          </div>
+        )}
+      </div>
+    </>
   )
 }

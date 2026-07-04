@@ -9,6 +9,7 @@ interface FavoriteRoutesBarProps {
   stations: IStationState
   onSelect: (favorite: IFavoriteRoute) => void
   onRemove: (originStationId: string, destinationStationId: string) => void
+  isDemo?: boolean
 }
 
 function findStationById(
@@ -27,12 +28,22 @@ export default function FavoriteRoutesBar({
   stations,
   onSelect,
   onRemove,
+  isDemo = false,
 }: FavoriteRoutesBarProps) {
   if (favorites.length === 0) return null
 
   return (
     <div>
-      <p className="mb-1.5 text-xs font-medium text-slate-400">Favorit</p>
+      <div className="mb-1.5 flex items-center gap-2">
+        <p className="text-xs font-medium text-slate-400">
+          {isDemo ? "Contoh Favorit" : "Favorit"}
+        </p>
+        {isDemo && (
+          <span className="inline-block rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+            Contoh
+          </span>
+        )}
+      </div>
       <div className="flex gap-2 overflow-x-auto py-1">
         {favorites.map((fav) => {
           const origin = findStationById(stations, fav.originStationId)

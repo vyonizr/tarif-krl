@@ -17,7 +17,7 @@ export default async function Home({
       <Link href="/" className="mb-4 block text-center text-sm">
         <span>← Kembali ke halaman utama</span>
       </Link>
-      <h1 className="text-center text-3xl font-bold">
+      <h1 id="krl-page-header" className="text-center text-3xl font-bold">
         <Balancer>Jadwal KRL</Balancer>
       </h1>
       <TrainRouteForm

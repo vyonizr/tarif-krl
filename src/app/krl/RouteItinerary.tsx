@@ -16,6 +16,7 @@ interface RouteItineraryProps {
   fare: number | null
   isFareLoading: boolean
   fareError: boolean
+  isDemo?: boolean
 }
 
 function StopRow({
@@ -125,6 +126,7 @@ export default function RouteItinerary({
   fare,
   isFareLoading,
   fareError,
+  isDemo = false,
 }: RouteItineraryProps) {
   if (!legs || legs.length === 0) return null
 
@@ -155,6 +157,13 @@ export default function RouteItinerary({
 
   return (
     <div className="mt-6">
+      {isDemo && (
+        <div className="mb-3 flex justify-center">
+          <span className="inline-block rounded-full border border-amber-300 bg-amber-100 px-3 py-0.5 text-xs font-medium text-amber-700">
+            Contoh
+          </span>
+        </div>
+      )}
       <div className="mb-4 space-y-1 rounded-lg border border-amber-200/60 bg-amber-50 px-4 py-3 text-amber-900">
         <div className="grid grid-cols-[20px_1fr] items-center gap-x-3">
           <Clock className="h-4 w-4" />
