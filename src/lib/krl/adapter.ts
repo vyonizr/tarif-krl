@@ -655,6 +655,17 @@ async function getTransitRoute(
   }
 
   const total = waypoints.length - 1
+
+  // The deadline set above sizes for a single hop's worst case. Each hop
+  // here does real, unavoidable sequential work (hop N+1 can't start until
+  // hop N's arrival time is known), so sharing that same tight budget
+  // across every hop starves later hops even when every earlier hop
+  // succeeded normally — surfacing as "blocked" on a hop that was never
+  // actually attempted. Scale the budget to the hop count instead.
+  if (meta) {
+    meta.deadlineAt = Date.now() + ROUTE_SEARCH_BUDGET_MS * total
+  }
+
   const legs: IKRLRouteResult[] = []
   let currentTime = timeFrom
   let blocked = false

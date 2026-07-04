@@ -3,7 +3,7 @@
 import { getStations, getFare, getSchedules, getRoute, getTransitRoute, staleCache, breakers } from './adapter'
 import { UpstreamError, NoRouteFoundError, KciStationRow, FetchMeta } from './types'
 import { getLineGraph, getForkPoint } from './topology'
-import { BREAKER_FAILURE_THRESHOLD } from './constants'
+import { BREAKER_FAILURE_THRESHOLD, ROUTE_SEARCH_BUDGET_MS } from './constants'
 
 interface MockResponse {
   ok: boolean
@@ -1338,6 +1338,51 @@ describe('getTransitRoute', () => {
       (c: [string]) => c[0].includes('/schedules') && c[0].includes('stationid=AK')
     )
     expect(akScheduleCalls).toHaveLength(1)
+  })
+
+  test('scales the search budget by hop count instead of sharing one single-hop budget', async () => {
+    // Same AK->JUA fixture as above (2 real hops via the MRI junction). The
+    // budget is set once, before waypoints/hop count are known, sized for a
+    // single hop's worst case (see ROUTE_SEARCH_BUDGET_MS's comment). If it
+    // were never rescaled, a slow-but-successful hop 1 could leave hop 2
+    // with none of that budget left even though hop 1 never failed. Assert
+    // the deadline actually grows with the hop count once it's known.
+    schedulesByStation = {
+      AK: [
+        createScheduleRow({
+          train_id: '5500A',
+          ka_name: 'COMMUTER LINE CIKARANG',
+          color: '#0084D8',
+        }),
+      ],
+      MRI: [
+        createScheduleRow({
+          train_id: '1151',
+          ka_name: 'COMMUTER LINE BOGOR',
+          color: '#E30A16',
+          time_est: '04:35:00',
+        }),
+      ],
+    }
+    trainSchedules = {
+      '5500A': createVirtualTrainRow('5500A', 'COMMUTER LINE CIKARANG', '#0084D8', [
+        { station_id: 'AK', station_name: 'Angke', time_est: '04:10:00' },
+        { station_id: 'MRI', station_name: 'Manggarai', time_est: '04:30:00' },
+      ]),
+      '1151': createVirtualTrainRow('1151', 'COMMUTER LINE BOGOR', '#E30A16', [
+        { station_id: 'MRI', station_name: 'Manggarai', time_est: '04:35:00' },
+        { station_id: 'JUA', station_name: 'Juanda', time_est: '04:45:00' },
+      ]),
+    }
+
+    const meta: FetchMeta = { source: 'live' }
+    const before = Date.now()
+    await getTransitRoute('AK', 'JUA', '04:00', undefined, meta)
+
+    expect(meta.deadlineAt).toBeDefined()
+    expect(meta.deadlineAt as number).toBeGreaterThanOrEqual(
+      before + ROUTE_SEARCH_BUDGET_MS * 2
+    )
   })
 
   describe('with onHop (progressive/partial-failure mode)', () => {
