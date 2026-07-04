@@ -1,4 +1,5 @@
-const KCI_BASE_URL = 'https://kci.id/api/krl'
+const KCI_BASE_URL =
+  process.env.KCI_BASE_URL ?? 'https://kci.id/api/krl'
 
 const REVALIDATE_STATIONS = 86400
 const REVALIDATE_FARE = 3600

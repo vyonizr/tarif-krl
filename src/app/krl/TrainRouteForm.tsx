@@ -102,7 +102,7 @@ function savePrefs(prefs: {
   }
 }
 
-function getStoredFavorites(): IFavoriteRoute[] {
+export function getStoredFavorites(): IFavoriteRoute[] {
   if (typeof window === "undefined") return []
   try {
     const stored = localStorage.getItem(FAVORITES_STORAGE_KEY)
@@ -113,7 +113,7 @@ function getStoredFavorites(): IFavoriteRoute[] {
   return []
 }
 
-function saveFavorites(favorites: IFavoriteRoute[]) {
+export function saveFavorites(favorites: IFavoriteRoute[]) {
   if (typeof window === "undefined") return
   try {
     localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites))

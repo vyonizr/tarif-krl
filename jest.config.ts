@@ -5,6 +5,7 @@ const createJestConfig = nextJest({ dir: './' })
 
 const config: Config = {
   testEnvironment: 'jest-environment-node',
+  testPathIgnorePatterns: ['<rootDir>/e2e/'],
 }
 
 export default createJestConfig(config)

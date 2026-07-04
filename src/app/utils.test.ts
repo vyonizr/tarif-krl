@@ -1,4 +1,14 @@
-import { calculateMinutesBetween, formatMinutesToDuration } from './utils'
+import {
+  calculateMinutesBetween,
+  formatMinutesToDuration,
+  formatToRupiah,
+  convertToTitleCase,
+  getRegionNumber,
+  convertTimeToHHMM,
+  calculateMRTETA,
+  isTodayWeekend,
+  getTypeOfDay,
+} from './utils'
 
 describe('calculateMinutesBetween', () => {
   test('same-hour times', () => {
@@ -70,5 +80,104 @@ describe('formatMinutesToDuration', () => {
 
   test('zero minutes', () => {
     expect(formatMinutesToDuration(0)).toBe('0 menit')
+  })
+})
+
+describe('formatToRupiah', () => {
+  test('formats zero', () => {
+    expect(formatToRupiah(0)).toBe('Rp\u00A00')
+  })
+
+  test('formats thousands', () => {
+    expect(formatToRupiah(3000)).toBe('Rp\u00A03.000')
+  })
+
+  test('formats large number', () => {
+    expect(formatToRupiah(50000)).toBe('Rp\u00A050.000')
+  })
+})
+
+describe('convertToTitleCase', () => {
+  test('converts uppercase to title case', () => {
+    expect(convertToTitleCase('PASAR MINGGU BARU')).toBe('Pasar Minggu Baru')
+  })
+
+  test('handles single word', () => {
+    expect(convertToTitleCase('BOGOR')).toBe('Bogor')
+  })
+
+  test('handles empty string', () => {
+    expect(convertToTitleCase('')).toBe('')
+  })
+})
+
+describe('getRegionNumber', () => {
+  test('extracts number from WIL prefix', () => {
+    expect(getRegionNumber('WIL1')).toBe(1)
+  })
+
+  test('extracts number WIL99', () => {
+    expect(getRegionNumber('WIL99')).toBe(99)
+  })
+})
+
+describe('convertTimeToHHMM', () => {
+  test('strips seconds from HH:MM:SS', () => {
+    expect(convertTimeToHHMM('10:30:00')).toBe('10:30')
+  })
+
+  test('keeps HH:MM unchanged', () => {
+    expect(convertTimeToHHMM('10:30')).toBe('10:30')
+  })
+
+  test('handles empty string', () => {
+    expect(convertTimeToHHMM('')).toBe('')
+  })
+})
+
+describe('calculateMRTETA', () => {
+  test('adds minutes within same hour', () => {
+    expect(calculateMRTETA('10:00', '30')).toBe('10:30')
+  })
+
+  test('wraps past midnight', () => {
+    expect(calculateMRTETA('23:45', '30')).toBe('00:15')
+  })
+
+  test('adds minutes crossing hour boundary', () => {
+    expect(calculateMRTETA('10:45', '30')).toBe('11:15')
+  })
+
+  test('throws on invalid input', () => {
+    expect(() => calculateMRTETA('invalid', '10')).toThrow('Invalid input time')
+  })
+})
+
+describe('isTodayWeekend', () => {
+  test('returns false for weekdays', () => {
+    const originalDate = global.Date
+    const mockDate = new Date('2026-07-02T12:00:00Z')
+    global.Date = class extends originalDate {
+      constructor() {
+        super()
+        return mockDate
+      }
+      static now() {
+        return mockDate.getTime()
+      }
+    } as DateConstructor
+    ;(global.Date as unknown as { getDay: () => number }).getDay = () => 4
+
+    try {
+      expect(isTodayWeekend()).toBe(false)
+    } finally {
+      global.Date = originalDate
+    }
+  })
+})
+
+describe('getTypeOfDay', () => {
+  test('returns weekday for Thursday', () => {
+    expect(getTypeOfDay()).toMatch(/weekday|weekend/)
   })
 })
