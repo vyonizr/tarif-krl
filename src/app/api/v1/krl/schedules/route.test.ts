@@ -1,51 +1,44 @@
 import { GET } from './route'
-import { staleCache } from '@/lib/krl/adapter'
 
-interface MockResponse {
-  ok: boolean
-  status: number
-  json: () => Promise<unknown>
-  text: () => Promise<string>
-  clone: () => MockResponse
-}
+jest.mock('../../../../../lib/krl/snapshotStore', () => ({
+  getScheduleSnapshot: jest.fn(),
+  getRepoScheduleSnapshot: jest.fn(),
+  getTrainSnapshot: jest.fn(),
+  getRepoTrainScheduleSnapshot: jest.fn(),
+}))
 
-function createFetchResponse(data: unknown, ok = true, status = 200): MockResponse {
-  const response: MockResponse = {
-    ok,
-    status,
-    json: () => Promise.resolve(data),
-    text: () => Promise.resolve(JSON.stringify(data)),
-    clone: () => response,
-  }
-  return response
+const {
+  getScheduleSnapshot,
+} = require('../../../../../lib/krl/snapshotStore') as {
+  getScheduleSnapshot: jest.Mock
 }
 
 function makeRequest(url: string): Request {
   return new Request(new URL(url).toString())
 }
 
+function snapshot(data: unknown[]) {
+  return { data, capturedAt: '2025-01-01T00:01:00.000Z' }
+}
+
 beforeEach(() => {
   jest.restoreAllMocks()
-  staleCache.clear()
 })
 
 describe('GET /api/v1/krl/schedules', () => {
   test('returns 200 with schedules for valid params', async () => {
-    global.fetch = jest.fn().mockResolvedValue(
-      createFetchResponse({
-        status: 200,
-        data: [
-          {
-            train_id: '1',
-            ka_name: 'COMMUTER LINE BOGOR',
-            route_name: 'BOGOR - JAKARTA',
-            dest: 'BOGOR',
-            time_est: '10:00:00',
-            color: '#E30A16',
-            dest_time: '10:30:00',
-          },
-        ],
-      })
+    getScheduleSnapshot.mockResolvedValue(
+      snapshot([
+        {
+          train_id: '1',
+          ka_name: 'COMMUTER LINE BOGOR',
+          route_name: 'BOGOR - JAKARTA',
+          dest: 'BOGOR',
+          time_est: '10:00:00',
+          color: '#E30A16',
+          dest_time: '10:30:00',
+        },
+      ])
     )
 
     const req = makeRequest(
@@ -86,30 +79,27 @@ describe('GET /api/v1/krl/schedules', () => {
   })
 
   test('filters out non-passenger trains', async () => {
-    global.fetch = jest.fn().mockResolvedValue(
-      createFetchResponse({
-        status: 200,
-        data: [
-          {
-            train_id: '1',
-            ka_name: 'COMMUTER LINE BOGOR',
-            route_name: 'BOGOR - JAKARTA',
-            dest: 'BOGOR',
-            time_est: '10:00:00',
-            color: '#E30A16',
-            dest_time: '10:30:00',
-          },
-          {
-            train_id: '2',
-            ka_name: 'TIDAK ANGKUT PENUMPANG',
-            route_name: '',
-            dest: 'DEPOK',
-            time_est: '10:05:00',
-            color: '#000',
-            dest_time: '10:35:00',
-          },
-        ],
-      })
+    getScheduleSnapshot.mockResolvedValue(
+      snapshot([
+        {
+          train_id: '1',
+          ka_name: 'COMMUTER LINE BOGOR',
+          route_name: 'BOGOR - JAKARTA',
+          dest: 'BOGOR',
+          time_est: '10:00:00',
+          color: '#E30A16',
+          dest_time: '10:30:00',
+        },
+        {
+          train_id: '2',
+          ka_name: 'TIDAK ANGKUT PENUMPANG',
+          route_name: '',
+          dest: 'DEPOK',
+          time_est: '10:05:00',
+          color: '#000',
+          dest_time: '10:35:00',
+        },
+      ])
     )
 
     const req = makeRequest(
@@ -121,21 +111,5 @@ describe('GET /api/v1/krl/schedules', () => {
     expect(response.status).toBe(200)
     expect(body.data).toHaveLength(1)
     expect(body.data[0].train_id).toBe('1')
-  })
-
-  test('returns 502 on upstream error', async () => {
-    global.fetch = jest.fn().mockResolvedValue(
-      createFetchResponse({}, false, 500)
-    )
-
-    const req = makeRequest(
-      'http://localhost/api/v1/krl/schedules?station_id=AC&time_from=10:00'
-    )
-    const response = await GET(req)
-    const body = await response.json()
-
-    expect(response.status).toBe(502)
-    expect(body.data).toBeNull()
-    expect(body.error?.status).toBe(502)
   })
 })

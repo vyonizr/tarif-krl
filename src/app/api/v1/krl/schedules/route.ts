@@ -19,7 +19,7 @@ export async function GET(req: Request) {
       )
     }
 
-    const meta: FetchMeta = { source: 'live' }
+    const meta: FetchMeta = { source: 'blob-snapshot' }
     const data = await getSchedules(stationId, timeFrom, timeTo, meta)
     return NextResponse.json(ok(data), { headers: dataSourceHeaders(meta) })
   } catch (error) {

@@ -1,5 +1,4 @@
 import { GET } from './route'
-import { staleCache } from '@/lib/krl/adapter'
 
 interface MockResponse {
   ok: boolean
@@ -26,7 +25,6 @@ function makeRequest(url: string): Request {
 
 beforeEach(() => {
   jest.restoreAllMocks()
-  staleCache.clear()
 })
 
 describe('GET /api/v1/krl/fare', () => {

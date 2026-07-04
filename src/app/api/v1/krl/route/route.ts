@@ -55,7 +55,7 @@ export async function GET(req: Request) {
     async start(controller) {
       let legsFound = 0
       let legsFailed = 0
-      const meta: FetchMeta = { source: 'live' }
+      const meta: FetchMeta = { source: 'blob-snapshot' }
 
       const onHop = (hop: HopInfo, outcome: LegOutcome) => {
         if (outcome.ok) {

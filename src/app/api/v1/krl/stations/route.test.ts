@@ -1,5 +1,4 @@
 import { GET } from './route'
-import { staleCache } from '@/lib/krl/adapter'
 import { KciStationRow } from '@/lib/krl/types'
 
 interface MockResponse {
@@ -42,7 +41,6 @@ function createRegionHeader(name: string): KciStationRow {
 
 beforeEach(() => {
   jest.restoreAllMocks()
-  staleCache.clear()
 })
 
 describe('GET /api/v1/krl/stations', () => {

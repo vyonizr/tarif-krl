@@ -43,13 +43,15 @@ async function getRepoTrainScheduleSnapshot(trainId: string): Promise<TrainSnaps
   }
 }
 
-// ponytail: in-memory fallback only persists for this process's lifetime —
-// fine for local dev/tests; production relies on BLOB_READ_WRITE_TOKEN being
-// set so snapshots actually survive across deploys/cold starts.
 const memorySnapshots = new Map<string, Snapshot>()
+const memoryTrainSnapshots = new Map<string, TrainSnapshot>()
 
 function blobPath(stationId: string): string {
   return `schedule-snapshot/${stationId}.json`
+}
+
+function trainBlobPath(trainId: string): string {
+  return `train-snapshot/${trainId}.json`
 }
 
 function blobConfigured(): boolean {
@@ -96,10 +98,52 @@ async function setScheduleSnapshot(
   })
 }
 
+async function getTrainSnapshot(trainId: string): Promise<TrainSnapshot | null> {
+  if (!blobConfigured()) {
+    return memoryTrainSnapshots.get(trainId) ?? null
+  }
+
+  try {
+    const { list } = await import('@vercel/blob')
+    const { blobs } = await list({ prefix: trainBlobPath(trainId), limit: 1 })
+    const blob = blobs[0]
+    if (!blob) return null
+
+    const response = await fetch(blob.url, { cache: 'no-store' })
+    if (!response.ok) return null
+
+    const data: KciTrainScheduleRow[] = await response.json()
+    return { data, capturedAt: new Date(blob.uploadedAt).toISOString() }
+  } catch (error) {
+    console.error('[snapshotStore] train blob read failed', error)
+    return null
+  }
+}
+
+async function setTrainSnapshot(
+  trainId: string,
+  data: KciTrainScheduleRow[]
+): Promise<void> {
+  if (!blobConfigured()) {
+    memoryTrainSnapshots.set(trainId, { data, capturedAt: new Date().toISOString() })
+    return
+  }
+
+  const { put } = await import('@vercel/blob')
+  await put(trainBlobPath(trainId), JSON.stringify(data), {
+    access: 'public',
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    contentType: 'application/json',
+  })
+}
+
 export {
   getScheduleSnapshot,
   setScheduleSnapshot,
   getRepoScheduleSnapshot,
   getRepoTrainScheduleSnapshot,
+  getTrainSnapshot,
+  setTrainSnapshot,
 }
 export type { Snapshot, TrainSnapshot }

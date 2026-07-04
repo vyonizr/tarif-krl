@@ -54,9 +54,8 @@ interface DataSourceNotice {
 }
 
 const DATA_SOURCE_RANK: Record<string, number> = {
-  live: 0,
-  "stale-cache": 1,
-  "blob-snapshot": 2,
+  "blob-snapshot": 0,
+  "repo-snapshot": 1,
 }
 
 function parseDataSourceHeader(value: string | null): DataSourceNotice | null {
@@ -73,6 +72,19 @@ function formatCapturedAt(capturedAt?: string): string {
   const date = new Date(capturedAt)
   if (isNaN(date.getTime())) return "sebelumnya"
   return date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+}
+
+function formatSnapshotDate(capturedAt?: string): string {
+  if (!capturedAt) return "sebelumnya"
+  const date = new Date(capturedAt)
+  if (isNaN(date.getTime())) return "sebelumnya"
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
 }
 
 function legsToSlots(legs: IKRLRouteResult[]): LegSlot[] {
@@ -849,7 +861,7 @@ export default function TrainRouteForm({
         {showLoading && (
           <div className="mt-8 flex flex-col items-center gap-2">
             <Spinner />
-            <p className="text-xs text-slate-400">Mengambil data dari KCI...</p>
+            <p className="text-xs text-slate-400">Mencari rute...</p>
           </div>
         )}
 
@@ -875,10 +887,10 @@ export default function TrainRouteForm({
         )}
 
         {dataSourceNotice && (showRouteItinerary || showNoRouteError) && (
-          <div className="mt-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-700">
+          <div className="mt-4 rounded-lg bg-blue-50 p-3 text-xs text-blue-700">
             {dataSourceNotice.source === "blob-snapshot"
-              ? `Layanan jadwal KCI sedang tidak tersedia — menampilkan jadwal yang diambil pada ${formatCapturedAt(dataSourceNotice.capturedAt)}. Mungkin tidak mencerminkan perubahan terbaru, tapi lebih baik daripada tidak ada sama sekali.`
-              : `Menampilkan data cache dari ${formatCapturedAt(dataSourceNotice.capturedAt)} — layanan KCI sedang terganggu.`}
+              ? `Jadwal berdasarkan data yang diperbarui setiap hari (terakhir: ${formatSnapshotDate(dataSourceNotice.capturedAt)}) — bukan jadwal real-time.`
+              : `Menampilkan jadwal bawaan aplikasi (terakhir berubah: ${formatSnapshotDate(dataSourceNotice.capturedAt)}) — mungkin tidak mencerminkan perubahan terbaru.`}
           </div>
         )}
 
