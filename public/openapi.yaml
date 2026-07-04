@@ -3,18 +3,19 @@ info:
   title: Jadwal KRL (formerly Tarif KRL) API
   version: '1.0.0'
   description: >-
-    API for KRL commuter line fares, schedules, and stations, used by this
-    app's own frontend. Requests are only accepted from this site's origin —
-    direct external access (curl, Postman, another site's frontend) is
-    blocked. To call this API from your own project, clone the repository
-    and run your own instance against your own upstream quota.
+    API for KRL commuter line fares, schedules, and stations, and Jakarta MRT
+    fares and routes, used by this app's own frontend. Requests are only
+    accepted from this site's origin, direct external access (curl, Postman,
+    another site's frontend) is blocked. To call this API from your own project,
+    clone the repository and run your own instance against your own upstream
+    quota.
 
 servers:
-  - url: /api/v1
+  - url: /api
     description: Same-origin
 
 paths:
-  /krl/stations:
+  /v1/krl/stations:
     get:
       summary: List stations grouped by region
       responses:
@@ -30,8 +31,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
 
-  /krl/fare:
+  /v1/krl/fare:
     get:
       summary: Get fare between two stations
       parameters:
@@ -66,8 +73,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
 
-  /krl/route:
+  /v1/krl/route:
     get:
       summary: Get transit route between two stations (streamed)
       description: |
@@ -92,7 +105,7 @@ paths:
           connected by any KRL line at all — no hops exist to report.
         - `done` — always the final event. `data`: `{ legsFound, legsFailed }`.
 
-        A failed hop can be retried individually via `GET /krl/route/leg`,
+        A failed hop can be retried individually via `GET /v1/krl/route/leg`,
         using the `from`/`to`/`time` from its `leg-error` event.
       parameters:
         - name: from
@@ -113,7 +126,7 @@ paths:
           schema:
             type: string
             format: 'HH:MM'
-          description: 'Departure time. Defaults to current server time (Asia/Jakarta).'
+          description: 'Departure time (Asia/Jakarta). Defaults to current server time.'
       responses:
         '200':
           description: >-
@@ -131,13 +144,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
 
-  /krl/route/leg:
+  /v1/krl/route/leg:
     get:
       summary: Retry a single hop of a multi-transit route
       description: |
         Resolves exactly one hop (same `from`/`to`/`time` shape as the main
         route search) — used to retry a hop reported via `leg-error` on
-        `GET /krl/route`, without re-running the whole multi-leg search.
+        `GET /v1/krl/route`, without re-running the whole multi-leg search.
       parameters:
         - name: from
           in: query
@@ -183,8 +196,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
 
-  /krl/schedules:
+  /v1/krl/schedules:
     get:
       summary: Get departure schedules for a station
       parameters:
@@ -228,9 +247,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
 
 components:
   schemas:
+    # ── KRL Station ──────────────────────────────────────
     Station:
       type: object
       properties:
@@ -256,6 +282,7 @@ components:
           type: 'null'
       required: [data, error]
 
+    # ── KRL Fare ─────────────────────────────────────────
     FareItem:
       type: object
       properties:
@@ -280,6 +307,7 @@ components:
           type: 'null'
       required: [data, error]
 
+    # ── KRL Schedule ──────────────────────────────────────
     ScheduleItem:
       type: object
       properties:
@@ -287,15 +315,17 @@ components:
           type: string
         ka_name:
           type: string
+        route_name:
+          type: string
         dest:
           type: string
         time_est:
           type: string
-        dest_time:
-          type: string
         color:
           type: string
-      required: [train_id, ka_name, dest, time_est, dest_time]
+        dest_time:
+          type: string
+      required: [train_id, ka_name, route_name, dest, time_est, color, dest_time]
 
     SchedulesEnvelope:
       type: object
@@ -308,6 +338,7 @@ components:
           type: 'null'
       required: [data, error]
 
+    # ── KRL Route ────────────────────────────────────────
     RouteStop:
       type: object
       properties:
@@ -352,6 +383,7 @@ components:
           type: 'null'
       required: [data, error]
 
+    # ── Error envelope (KRL) ─────────────────────────────
     ErrorBody:
       type: object
       properties:
@@ -369,3 +401,5 @@ components:
         error:
           $ref: '#/components/schemas/ErrorBody'
       required: [data, error]
+
+
