@@ -1,0 +1,14 @@
+#!/bin/sh
+# Blocks merging into main if package.json version is unchanged.
+# Enable with: git config core.hooksPath .githooks
+
+branch=$(git symbolic-ref --short HEAD)
+[ "$branch" = "main" ] || exit 0
+
+head_version=$(git show HEAD:package.json | node -e "process.stdout.write(JSON.parse(require('fs').readFileSync(0,'utf8')).version)")
+merge_version=$(git show MERGE_HEAD:package.json | node -e "process.stdout.write(JSON.parse(require('fs').readFileSync(0,'utf8')).version)")
+
+if [ "$head_version" = "$merge_version" ]; then
+  echo "error: package.json version ($head_version) is unchanged from main. Bump it before merging." >&2
+  exit 1
+fi
