@@ -15,17 +15,20 @@ async function selectStation(page, buttonLabel, searchText) {
 }
 
 test.describe('KRL golden-path flows', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('krl-onboarding-seen', 'true')
+    })
+  })
+
   test('pick origin and destination, see fare and schedule results', async ({
     page,
   }) => {
     await page.goto('/krl')
     await page.waitForSelector('text=Jadwal KRL', { timeout: 30000 })
 
-    await selectStation(page, 'Stasiun Asal', 'Jakarta Kota')
-    await selectStation(page, 'Stasiun Tujuan', 'Manggarai')
-
-    const cariButton = page.locator('button').filter({ hasText: 'Cari' })
-    await cariButton.click()
+    await selectStation(page, 'Pilih Stasiun Asal', 'Jakarta Kota')
+    await selectStation(page, 'Pilih Stasiun Tujuan', 'Manggarai')
 
     await expect(page.locator('text=Rp').first()).toBeVisible({ timeout: 15000 })
   })
@@ -36,11 +39,8 @@ test.describe('KRL golden-path flows', () => {
     await page.goto('/krl')
     await page.waitForSelector('text=Jadwal KRL', { timeout: 30000 })
 
-    await selectStation(page, 'Stasiun Asal', 'Jakarta Kota')
-    await selectStation(page, 'Stasiun Tujuan', 'Jakarta Kota')
-
-    const cariButton = page.locator('button').filter({ hasText: 'Cari' })
-    await cariButton.click()
+    await selectStation(page, 'Pilih Stasiun Asal', 'Jakarta Kota')
+    await selectStation(page, 'Pilih Stasiun Tujuan', 'Jakarta Kota')
 
     await page.waitForTimeout(2000)
 
@@ -60,11 +60,8 @@ test.describe('KRL golden-path flows', () => {
     await page.goto('/krl')
     await page.waitForSelector('text=Jadwal KRL', { timeout: 30000 })
 
-    await selectStation(page, 'Stasiun Asal', 'Jakarta Kota')
-    await selectStation(page, 'Stasiun Tujuan', 'Manggarai')
-
-    const cariButton = page.locator('button').filter({ hasText: 'Cari' })
-    await cariButton.click()
+    await selectStation(page, 'Pilih Stasiun Asal', 'Jakarta Kota')
+    await selectStation(page, 'Pilih Stasiun Tujuan', 'Manggarai')
 
     await expect(page.locator('text=Rp').first()).toBeVisible({ timeout: 15000 })
 
@@ -97,11 +94,8 @@ test.describe('KRL golden-path flows', () => {
     await page.goto('/krl')
     await page.waitForSelector('text=Jadwal KRL', { timeout: 30000 })
 
-    await selectStation(page, 'Stasiun Asal', 'Pasar Minggu Baru')
-    await selectStation(page, 'Stasiun Tujuan', 'Tanah Abang')
-
-    const cariButton = page.locator('button').filter({ hasText: 'Cari' })
-    await cariButton.click()
+    await selectStation(page, 'Pilih Stasiun Asal', 'Pasar Minggu Baru')
+    await selectStation(page, 'Pilih Stasiun Tujuan', 'Tanah Abang')
 
     await expect(page.locator('text=Rp').first()).toBeVisible({ timeout: 15000 })
 

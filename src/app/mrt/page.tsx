@@ -14,6 +14,8 @@ headers.set(
 )
 
 async function getData(): Promise<IMRTStation[]> {
+  if (!process.env.SUPABASE_URL) return []
+
   const res = await fetch(
     process.env.SUPABASE_URL +
       '/stations?' +
@@ -31,15 +33,20 @@ async function getData(): Promise<IMRTStation[]> {
 }
 
 async function getDataOfficial(): Promise<IOfficialMRTStation[]> {
-  const res = await fetch(CORS_MRT_STATIONS_OFFICIAL_URL)
-  if (!res.ok) {
-    throw new Error('Failed to fetch data')
+  try {
+    const res = await fetch(CORS_MRT_STATIONS_OFFICIAL_URL)
+    if (!res.ok) {
+      return []
+    }
+    return res.json()
+  } catch {
+    return []
   }
-
-  return res.json()
 }
 
 async function getRoutesData() {
+  if (!process.env.SUPABASE_URL) return []
+
   const res = await fetch(
     process.env.SUPABASE_URL +
       '/routes?' +
