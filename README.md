@@ -16,13 +16,14 @@ Not officially affiliated with KRL or MRT. KRL data comes from the KRL partner A
 ## Getting started
 
 ```bash
-npm run dev      # start dev server
-npm run build    # production build
-npm run lint     # run ESLint
-npm test         # run tests
+npm run dev           # start dev server
+npm run build         # production build
+npm run lint          # run ESLint
+npm test              # run Jest unit tests
+npm run test:e2e      # run Playwright end-to-end tests
 ```
 
-Requires `SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KEY` in your environment, used for the MRT data. There's no `.env.example` checked in yet, so create a `.env.local` with those two keys.
+Requires `SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KEY` in your environment, used for the MRT data — copy `.env.example` to `.env.local` and fill those in.
 
 ## API docs
 
