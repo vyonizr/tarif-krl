@@ -45,7 +45,12 @@ const BREAKER_WINDOW_MS = 30_000
 const BREAKER_COOLDOWN_MS = 60_000
 
 // Line-terminus stations warmed by the daily snapshot cron (see
-// docs/krl-upstream-reliability-sdd.md, Strategy §6).
+// docs/krl-upstream-reliability-sdd.md, Strategy §6). Also includes the
+// cross-line junction stations from topology.ts's LINE_EDGE_OVERRIDES /
+// shared-station edges (MRI, KPB) that aren't termini themselves but are
+// where most multi-leg transit routes start their 2nd+ hop — without a
+// snapshot for them, an upstream outage blocks every hop after the first
+// even though the origin hop had a fallback.
 const TERMINUS_STATIONS = [
   'JAKK', 'NMO', 'BOO', // red (incl. Bogor/Nambo fork)
   'THB', 'RK', // green
@@ -53,6 +58,8 @@ const TERMINUS_STATIONS = [
   'TPK', // pink (JAKK already listed)
   'MER', // merak (RK already listed)
   'TNG', 'DU', // brown
+  'MRI', // red/blue junction (Manggarai)
+  'KPB', // blue/pink junction (Kampung Bandan)
 ] as const
 
 export {

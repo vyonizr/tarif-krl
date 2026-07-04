@@ -182,7 +182,7 @@ describe('GET /api/v1/krl/route/leg', () => {
     // committed repo-snapshot fallback (data/schedule-snapshots/*.json) that
     // would mask this upstream failure, per src/lib/krl/snapshotStore.ts.
     const req = makeRequest(
-      'http://localhost/api/v1/krl/route/leg?from=MRI&to=GDD&time=04:00'
+      'http://localhost/api/v1/krl/route/leg?from=GDD&to=CKI&time=04:00'
     )
     const response = await GET(req)
     const body = await response.json()
