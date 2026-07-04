@@ -4,13 +4,26 @@ import Link from 'next/link'
 import { IStationState } from '../types'
 import TrainRouteForm from './TrainRouteForm'
 import { getStations } from '@/lib/krl/adapter'
+import { UpstreamError } from '@/lib/krl/types'
 
 export default async function Home({
   searchParams,
 }: {
   searchParams: { from?: string; to?: string }
 }) {
-  const stations: IStationState = await getStations()
+  let stations: IStationState
+  let loadError: string | null = null
+
+  try {
+    stations = await getStations()
+  } catch (error) {
+    if (error instanceof UpstreamError) {
+      loadError = error.message
+    } else {
+      loadError = 'An unexpected error occurred'
+    }
+    stations = {}
+  }
 
   return (
     <main className="w-full max-w-[380px] p-4">
@@ -20,6 +33,11 @@ export default async function Home({
       <h1 id="krl-page-header" className="text-center text-3xl font-bold">
         <Balancer>Jadwal KRL</Balancer>
       </h1>
+      {loadError && (
+        <p className="mb-4 rounded-md bg-red-50 p-3 text-center text-sm text-red-700">
+          {loadError}. Silakan coba lagi nanti.
+        </p>
+      )}
       <TrainRouteForm
         stations={stations}
         initialFrom={searchParams.from}

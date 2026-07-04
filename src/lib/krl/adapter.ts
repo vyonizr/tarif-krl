@@ -10,7 +10,7 @@ import {
   ROUTE_SEARCH_WINDOW_HOURS,
   MAX_TRANSIT_LEGS,
   GET_ROUTE_CONCURRENCY,
-  ROUTE_RETRY_COUNT,
+  ROUTE_EARLY_EXIT_MINUTES,
   BREAKER_FAILURE_THRESHOLD,
   BREAKER_WINDOW_MS,
   BREAKER_COOLDOWN_MS,
@@ -438,6 +438,8 @@ async function getRoute(
         }
       }
     }
+
+    if (bestMatch && bestMatch.diffMinutes <= ROUTE_EARLY_EXIT_MINUTES) break
   }
 
   if (!bestMatch) {
@@ -500,22 +502,6 @@ async function tryRouteWithSameLineSplit(
   )
 }
 
-async function withRouteRetry<T>(fn: () => Promise<T>): Promise<T> {
-  let lastError: UpstreamError | null = null
-  for (let attempt = 0; attempt <= ROUTE_RETRY_COUNT; attempt++) {
-    try {
-      return await fn()
-    } catch (error) {
-      if (error instanceof UpstreamError) {
-        lastError = error
-        continue
-      }
-      throw error
-    }
-  }
-  throw lastError
-}
-
 async function runHop(
   hopFrom: string,
   hopTo: string,
@@ -549,9 +535,7 @@ async function getTransitRoute(
   }
 
   try {
-    const legs = await withRouteRetry(() =>
-      tryRouteWithSameLineSplit(from, to, timeFrom, meta)
-    )
+    const legs = await tryRouteWithSameLineSplit(from, to, timeFrom, meta)
     onHop?.({ index: 0, total: 1, from, to, time: timeFrom }, { ok: true, legs })
     return legs
   } catch (error) {
@@ -611,9 +595,7 @@ async function getTransitRoute(
     }
 
     try {
-      const hopLegs = await withRouteRetry(() =>
-        runHop(waypoints[i], waypoints[i + 1], currentTime, useSplit, meta)
-      )
+      const hopLegs = await runHop(waypoints[i], waypoints[i + 1], currentTime, useSplit, meta)
       legs.push(...hopLegs)
       const lastLeg = hopLegs[hopLegs.length - 1]
       currentTime = lastLeg.stops[lastLeg.stops.length - 1].time_est

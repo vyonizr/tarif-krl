@@ -548,11 +548,15 @@ export default function TrainRouteForm({
     })
 
     es.onerror = () => {
+      // A dropped/stalled connection leaves readyState CONNECTING — the
+      // browser is already retrying on its own, so let it. Only a fatal
+      // condition (bad status/content-type) closes it for good, and that's
+      // when we should actually surface a failure.
+      if (es.readyState !== EventSource.CLOSED) return
       if (requestId === routeRequestId.current) {
         setIsLoadingRoute(false)
         setRouteError((prev) => prev ?? { status: 502, message: "Gagal memuat rute, coba lagi" })
       }
-      es.close()
     }
   }, [originStation, destinationStation, time])
 

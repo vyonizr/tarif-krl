@@ -3,6 +3,7 @@
 import { getStations, getFare, getSchedules, getRoute, getTransitRoute, staleCache, breakers } from './adapter'
 import { UpstreamError, NoRouteFoundError, KciStationRow, FetchMeta } from './types'
 import { getLineGraph, getForkPoint } from './topology'
+import { BREAKER_FAILURE_THRESHOLD } from './constants'
 
 interface MockResponse {
   ok: boolean
@@ -694,18 +695,18 @@ describe('getRoute', () => {
 })
 
 describe('circuit breaker', () => {
-  test('opens after 3 exhausted-retry failures and skips the network call', async () => {
+  test('opens after BREAKER_FAILURE_THRESHOLD exhausted-retry failures and skips the network call', async () => {
     global.fetch = jest.fn().mockRejectedValue(new Error('Network error'))
 
-    await expect(getStations()).rejects.toThrow(UpstreamError)
-    await expect(getStations()).rejects.toThrow(UpstreamError)
-    await expect(getStations()).rejects.toThrow(UpstreamError)
-    // 3 calls * 2 attempts each (1 retry) = 6 fetches, breaker now open
-    expect(global.fetch).toHaveBeenCalledTimes(6)
+    for (let i = 0; i < BREAKER_FAILURE_THRESHOLD; i++) {
+      await expect(getStations()).rejects.toThrow(UpstreamError)
+    }
+    // BREAKER_FAILURE_THRESHOLD calls * 2 attempts each (1 retry), breaker now open
+    expect(global.fetch).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD * 2)
 
     await expect(getStations()).rejects.toThrow(UpstreamError)
     // breaker open — no additional network attempt made
-    expect(global.fetch).toHaveBeenCalledTimes(6)
+    expect(global.fetch).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD * 2)
   })
 
   test('serves stale cache on failure even once the breaker is open, without hitting the network', async () => {
@@ -721,15 +722,15 @@ describe('circuit breaker', () => {
     await getStations()
 
     global.fetch = jest.fn().mockRejectedValue(new Error('Network error'))
-    // 3 failures opens the breaker; stale cache still resolves each time.
-    for (let i = 0; i < 4; i++) {
+    // BREAKER_FAILURE_THRESHOLD failures opens the breaker; stale cache still resolves each time.
+    for (let i = 0; i < BREAKER_FAILURE_THRESHOLD + 1; i++) {
       const result = await getStations()
       expect(result.Jabodetabek).toHaveLength(1)
     }
 
     // Once open, the breaker skips the network call entirely (2 attempts
-    // per call for the first 3 failing calls = 6, then 0 more).
-    expect(global.fetch).toHaveBeenCalledTimes(6)
+    // per call for the failing calls up to the threshold, then 0 more).
+    expect(global.fetch).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD * 2)
   })
 })
 
