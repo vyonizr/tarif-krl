@@ -25,15 +25,13 @@ module.exports = {
         control: '0.375rem',
         pill: '9999px',
       },
+      height: {
+        screen: 'calc(var(--vh) * 100)',
+      },
+      minHeight: {
+        screen: 'calc(var(--vh) * 100)',
+      },
     },
-    height: theme => ({
-      ...theme,
-      screen: 'calc(var(--vh) * 100)',
-    }),
-    minHeight: theme => ({
-      ...theme,
-      screen: 'calc(var(--vh) * 100)',
-    }),
   },
   plugins: [],
 }
