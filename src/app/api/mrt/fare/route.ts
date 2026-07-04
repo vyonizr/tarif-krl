@@ -3,6 +3,8 @@ import { IMRTStop } from '../../../types'
 
 import { MRT_BASE_FARE, MRT_NEXT_STATION_FARE } from '../../../constants'
 
+export const dynamic = 'force-dynamic'
+
 function getNumberOfStops(
   departingStopOrder: number,
   destinationStopOrder: number

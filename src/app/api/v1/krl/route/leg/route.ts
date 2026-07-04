@@ -4,6 +4,8 @@ import { getLineGraph } from '@/lib/krl/topology'
 import { ok, fail } from '@/lib/krl/response'
 import { UpstreamError, NoRouteFoundError } from '@/lib/krl/types'
 
+export const dynamic = 'force-dynamic'
+
 function isKnownStation(code: string): boolean {
   return getLineGraph().stations.has(code)
 }

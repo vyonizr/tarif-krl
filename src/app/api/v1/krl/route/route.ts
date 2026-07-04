@@ -4,6 +4,8 @@ import { fail } from '@/lib/krl/response'
 import { HopInfo, LegOutcome } from '@/lib/krl/types'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 function defaultTime(): string {
   const now = new Date()
   const wib = new Date(now.getTime() + 7 * 60 * 60 * 1000)
