@@ -4,12 +4,16 @@ import {
   REVALIDATE_FARE,
   REVALIDATE_SCHEDULES,
   UPSTREAM_TIMEOUT_MS,
+  UPSTREAM_RETRY_TIMEOUT_MS,
   UPSTREAM_RETRY_COUNT,
   REVALIDATE_TRAIN_SCHEDULE,
   ROUTE_SEARCH_WINDOW_HOURS,
   MAX_TRANSIT_LEGS,
   GET_ROUTE_CONCURRENCY,
   ROUTE_RETRY_COUNT,
+  BREAKER_FAILURE_THRESHOLD,
+  BREAKER_WINDOW_MS,
+  BREAKER_COOLDOWN_MS,
 } from './constants'
 import {
   KciStationResponse,
@@ -23,84 +27,158 @@ import {
   UpstreamError,
   NoRouteFoundError,
   OnHop,
+  FetchMeta,
+  DataSource,
 } from './types'
 import { getLineGraph, findTransferStations, getForkPoint, LINES } from './topology'
 import { convertToTitleCase, convertTimeToHHMM } from '@/app/utils'
+import { getScheduleSnapshot } from './snapshotStore'
 
 const staleCache = new Map<string, { body: string; ts: number }>()
+const inFlight = new Map<string, Promise<Response>>()
+
+interface BreakerState {
+  failures: number
+  windowStart: number
+  openUntil: number
+}
+const breakers = new Map<string, BreakerState>()
+
+// One breaker per upstream endpoint class (path prefix before the query
+// string), not per exact URL — a down `schedules` endpoint should trip for
+// every station, not just the one that happened to fail first.
+function breakerKey(path: string): string {
+  return path.split('?')[0]
+}
+
+function isBreakerOpen(key: string): boolean {
+  const breaker = breakers.get(key)
+  return breaker ? Date.now() < breaker.openUntil : false
+}
+
+function recordFailure(key: string): void {
+  const now = Date.now()
+  const breaker = breakers.get(key)
+  if (!breaker || now - breaker.windowStart > BREAKER_WINDOW_MS) {
+    breakers.set(key, { failures: 1, windowStart: now, openUntil: 0 })
+    return
+  }
+  breaker.failures += 1
+  if (breaker.failures >= BREAKER_FAILURE_THRESHOLD) {
+    breaker.openUntil = now + BREAKER_COOLDOWN_MS
+  }
+}
+
+function recordSuccess(key: string): void {
+  breakers.delete(key)
+}
+
+const SOURCE_RANK: Record<DataSource, number> = {
+  live: 0,
+  'stale-cache': 1,
+  'blob-snapshot': 2,
+}
+
+function markSource(meta: FetchMeta | undefined, source: DataSource, capturedAt?: string): void {
+  if (!meta) return
+  if (SOURCE_RANK[source] > SOURCE_RANK[meta.source]) {
+    meta.source = source
+    meta.capturedAt = capturedAt
+  }
+}
 
 async function fetchWithRetry(
   path: string,
-  revalidate: number
+  revalidate: number,
+  meta?: FetchMeta
 ): Promise<Response> {
-  const maxAttempts = UPSTREAM_RETRY_COUNT + 1
   const url = `${KCI_BASE_URL}/${path}`
+  const key = breakerKey(path)
 
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      UPSTREAM_TIMEOUT_MS
-    )
-
-    try {
-      const response = await fetch(url, {
-        signal: controller.signal,
-        next: { revalidate },
-      })
-      clearTimeout(timeoutId)
-
-      if (!response.ok) {
-        if (response.status >= 500 || response.status === 429) {
-          throw new Error('retryable upstream error')
-        }
-        throw new UpstreamError(
-          502,
-          `Upstream returned HTTP ${response.status}`
-        )
-      }
-
-      const cloned = response.clone()
-      const body = await cloned.text()
-      staleCache.set(url, { body, ts: Date.now() })
-
-      return response
-    } catch (error) {
-      clearTimeout(timeoutId)
-
-      if (error instanceof UpstreamError) {
-        const stale = staleCache.get(url)
-        if (stale) {
-          return new Response(stale.body, {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          })
-        }
-        throw error
-      }
-
-      if (attempt === maxAttempts - 1) {
-        const stale = staleCache.get(url)
-        if (stale) {
-          return new Response(stale.body, {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          })
-        }
-        throw new UpstreamError(502, 'Upstream KRL API unavailable')
-      }
-    }
-  }
-
-  const stale = staleCache.get(url)
-  if (stale) {
+  function serveStale(): Response | null {
+    const stale = staleCache.get(url)
+    if (!stale) return null
+    markSource(meta, 'stale-cache', new Date(stale.ts).toISOString())
     return new Response(stale.body, {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     })
   }
 
-  throw new UpstreamError(502, 'Upstream KRL API unavailable')
+  if (isBreakerOpen(key)) {
+    const stale = serveStale()
+    if (stale) return stale
+    throw new UpstreamError(502, 'Upstream KRL API unavailable')
+  }
+
+  // Concurrent callers for the same URL share one upstream fetch, but a
+  // Response body can only be consumed once — hand each caller its own
+  // clone rather than the shared instance.
+  const existing = inFlight.get(url)
+  if (existing) return (await existing).clone()
+
+  const attempt = (async (): Promise<Response> => {
+    const maxAttempts = UPSTREAM_RETRY_COUNT + 1
+
+    for (let attemptIndex = 0; attemptIndex < maxAttempts; attemptIndex++) {
+      const timeoutMs = attemptIndex === 0 ? UPSTREAM_TIMEOUT_MS : UPSTREAM_RETRY_TIMEOUT_MS
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+
+      try {
+        const response = await fetch(url, {
+          signal: controller.signal,
+          next: { revalidate },
+        })
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          if (response.status >= 500 || response.status === 429) {
+            throw new Error('retryable upstream error')
+          }
+          recordFailure(key)
+          throw new UpstreamError(
+            502,
+            `Upstream returned HTTP ${response.status}`
+          )
+        }
+
+        recordSuccess(key)
+        const cloned = response.clone()
+        const body = await cloned.text()
+        staleCache.set(url, { body, ts: Date.now() })
+        markSource(meta, 'live')
+
+        return response
+      } catch (error) {
+        clearTimeout(timeoutId)
+
+        if (error instanceof UpstreamError) {
+          const stale = serveStale()
+          if (stale) return stale
+          throw error
+        }
+
+        if (attemptIndex === maxAttempts - 1) {
+          recordFailure(key)
+          const stale = serveStale()
+          if (stale) return stale
+          throw new UpstreamError(502, 'Upstream KRL API unavailable')
+        }
+      }
+    }
+
+    const stale = serveStale()
+    if (stale) return stale
+    throw new UpstreamError(502, 'Upstream KRL API unavailable')
+  })()
+
+  inFlight.set(url, attempt)
+  try {
+    return (await attempt).clone()
+  } finally {
+    inFlight.delete(url)
+  }
 }
 
 const REGION_OVERRIDES: Record<string, string> = {
@@ -145,21 +223,23 @@ function parseRegionHeaders(
   return result
 }
 
-async function getStations(): Promise<
-  Record<string, { id: string; name: string }[]>
-> {
-  const response = await fetchWithRetry('stations', REVALIDATE_STATIONS)
+async function getStations(
+  meta?: FetchMeta
+): Promise<Record<string, { id: string; name: string }[]>> {
+  const response = await fetchWithRetry('stations', REVALIDATE_STATIONS, meta)
   const json: KciStationResponse = await response.json()
   return parseRegionHeaders(json.data)
 }
 
 async function getFare(
   from: string,
-  to: string
+  to: string,
+  meta?: FetchMeta
 ): Promise<{ from: string; to: string; fare: number; distance: string }[]> {
   const response = await fetchWithRetry(
     `fare?${new URLSearchParams({ stationfrom: from, stationto: to })}`,
-    REVALIDATE_FARE
+    REVALIDATE_FARE,
+    meta
   )
   const json: KciFareResponse = await response.json()
   return json.data.map((row) => ({
@@ -170,16 +250,41 @@ async function getFare(
   }))
 }
 
+function parseMinutes(time: string): number {
+  const [h, m] = time.split(':').map(Number)
+  return h * 60 + (m || 0)
+}
+
+function filterSchedules(
+  rows: KciScheduleRow[],
+  timeFrom: string,
+  timeTo: string
+): KciScheduleRow[] {
+  const fromMinutes = parseMinutes(timeFrom)
+  const toMinutes = parseMinutes(timeTo)
+  return rows.filter((row) => {
+    if (/TIDAK ANGKUT PENUMPANG/i.test(row.ka_name)) return false
+    const minutes = parseMinutes(row.time_est)
+    return minutes >= fromMinutes && minutes <= toMinutes
+  })
+}
+
+// Always fetches the full day for a station (coarse cache key) and filters
+// to the caller's requested window in-process, so two callers asking for the
+// same station a minute apart hit the same Next.js Data Cache entry instead
+// of missing on the exact `timefrom` value.
 async function getSchedules(
   stationId: string,
   timeFrom: string,
-  timeTo: string = '23:59'
+  timeTo: string = '23:59',
+  meta?: FetchMeta
 ): Promise<KciScheduleRow[]> {
   let response: Response
   try {
     response = await fetchWithRetry(
-      `schedules?${new URLSearchParams({ stationid: stationId, timefrom: timeFrom, timeto: timeTo })}`,
-      REVALIDATE_SCHEDULES
+      `schedules?${new URLSearchParams({ stationid: stationId, timefrom: '00:00', timeto: '23:59' })}`,
+      REVALIDATE_SCHEDULES,
+      meta
     )
   } catch (error) {
     if (
@@ -188,22 +293,29 @@ async function getSchedules(
     ) {
       return []
     }
+    if (error instanceof UpstreamError) {
+      const snapshot = await getScheduleSnapshot(stationId)
+      if (snapshot) {
+        markSource(meta, 'blob-snapshot', snapshot.capturedAt)
+        return filterSchedules(snapshot.data, timeFrom, timeTo)
+      }
+    }
     throw error
   }
   const json: KciScheduleResponse = await response.json()
-  return json.data.filter(
-    (schedule) => !/TIDAK ANGKUT PENUMPANG/i.test(schedule.ka_name)
-  )
+  return filterSchedules(json.data, timeFrom, timeTo)
 }
 
 async function getTrainSchedule(
-  trainId: string
+  trainId: string,
+  meta?: FetchMeta
 ): Promise<KciTrainScheduleResponse['data']> {
   let response: Response
   try {
     response = await fetchWithRetry(
       `train-schedule?${new URLSearchParams({ trainid: trainId })}`,
-      REVALIDATE_TRAIN_SCHEDULE
+      REVALIDATE_TRAIN_SCHEDULE,
+      meta
     )
   } catch (error) {
     if (
@@ -246,18 +358,14 @@ function guessLineId(kaName: string): string | null {
   return null
 }
 
-function parseMinutes(time: string): number {
-  const [h, m] = time.split(':').map(Number)
-  return h * 60 + (m || 0)
-}
-
 async function getRoute(
   from: string,
   to: string,
-  timeFrom: string
+  timeFrom: string,
+  meta?: FetchMeta
 ): Promise<IKRLRouteResult> {
   const timeTo = computeTimeTo(timeFrom)
-  const candidates = await getSchedules(from, timeFrom, timeTo)
+  const candidates = await getSchedules(from, timeFrom, timeTo, meta)
 
   const graph = getLineGraph()
   const fromLines = graph.stations.get(from) ?? []
@@ -278,7 +386,7 @@ async function getRoute(
 
         let stops
         try {
-          stops = await getTrainSchedule(train_id)
+          stops = await getTrainSchedule(train_id, meta)
         } catch (error) {
           if (error instanceof NoRouteFoundError) throw error
           return null
@@ -344,10 +452,11 @@ async function getRoute(
 async function tryRouteWithSameLineSplit(
   from: string,
   to: string,
-  timeFrom: string
+  timeFrom: string,
+  meta?: FetchMeta
 ): Promise<IKRLRouteResult[]> {
   try {
-    const leg = await getRoute(from, to, timeFrom)
+    const leg = await getRoute(from, to, timeFrom, meta)
     return [leg]
   } catch (error) {
     if (!(error instanceof NoRouteFoundError)) throw error
@@ -376,9 +485,9 @@ async function tryRouteWithSameLineSplit(
     for (let mid = fromIdx + step; mid !== toIdx; mid += step) {
       const midStation = stations[mid]
       try {
-        const leg1 = await getRoute(from, midStation, timeFrom)
+        const leg1 = await getRoute(from, midStation, timeFrom, meta)
         const arrivalTime = leg1.stops[leg1.stops.length - 1].time_est
-        const leg2 = await getRoute(midStation, to, arrivalTime)
+        const leg2 = await getRoute(midStation, to, arrivalTime, meta)
         return [leg1, leg2]
       } catch {
         continue
@@ -411,12 +520,13 @@ async function runHop(
   hopFrom: string,
   hopTo: string,
   timeFrom: string,
-  useSplit: boolean
+  useSplit: boolean,
+  meta?: FetchMeta
 ): Promise<IKRLRouteResult[]> {
   if (useSplit) {
-    return tryRouteWithSameLineSplit(hopFrom, hopTo, timeFrom)
+    return tryRouteWithSameLineSplit(hopFrom, hopTo, timeFrom, meta)
   }
-  const leg = await getRoute(hopFrom, hopTo, timeFrom)
+  const leg = await getRoute(hopFrom, hopTo, timeFrom, meta)
   return [leg]
 }
 
@@ -429,7 +539,8 @@ async function getTransitRoute(
   from: string,
   to: string,
   timeFrom: string,
-  onHop?: OnHop
+  onHop?: OnHop,
+  meta?: FetchMeta
 ): Promise<IKRLRouteResult[]> {
   if (from === to) {
     throw new NoRouteFoundError(
@@ -439,7 +550,7 @@ async function getTransitRoute(
 
   try {
     const legs = await withRouteRetry(() =>
-      tryRouteWithSameLineSplit(from, to, timeFrom)
+      tryRouteWithSameLineSplit(from, to, timeFrom, meta)
     )
     onHop?.({ index: 0, total: 1, from, to, time: timeFrom }, { ok: true, legs })
     return legs
@@ -501,7 +612,7 @@ async function getTransitRoute(
 
     try {
       const hopLegs = await withRouteRetry(() =>
-        runHop(waypoints[i], waypoints[i + 1], currentTime, useSplit)
+        runHop(waypoints[i], waypoints[i + 1], currentTime, useSplit, meta)
       )
       legs.push(...hopLegs)
       const lastLeg = hopLegs[hopLegs.length - 1]
@@ -550,4 +661,5 @@ export {
   getTransitRoute,
   tryRouteWithSameLineSplit,
   staleCache,
+  breakers,
 }

@@ -48,6 +48,33 @@ interface FormSnapshot {
   time: string
 }
 
+interface DataSourceNotice {
+  source: string
+  capturedAt?: string
+}
+
+const DATA_SOURCE_RANK: Record<string, number> = {
+  live: 0,
+  "stale-cache": 1,
+  "blob-snapshot": 2,
+}
+
+function parseDataSourceHeader(value: string | null): DataSourceNotice | null {
+  if (!value) return null
+  const [source, rest] = value.split(";").map((part) => part.trim())
+  const capturedAt = rest?.startsWith("captured-at=")
+    ? rest.slice("captured-at=".length)
+    : undefined
+  return { source, capturedAt }
+}
+
+function formatCapturedAt(capturedAt?: string): string {
+  if (!capturedAt) return "sebelumnya"
+  const date = new Date(capturedAt)
+  if (isNaN(date.getTime())) return "sebelumnya"
+  return date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+}
+
 function legsToSlots(legs: IKRLRouteResult[]): LegSlot[] {
   return legs.map((leg) => ({
     status: "success",
@@ -178,6 +205,9 @@ export default function TrainRouteForm({
 
   const [fare, setFare] = useState<number | null>(null)
   const [fareError, setFareError] = useState(false)
+
+  const [fareSource, setFareSource] = useState<DataSourceNotice | null>(null)
+  const [routeSource, setRouteSource] = useState<DataSourceNotice | null>(null)
 
   const [favorites, setFavorites] = useState<IFavoriteRoute[]>([])
   const favoritesMounted = useRef(false)
@@ -444,6 +474,7 @@ export default function TrainRouteForm({
     setLegSlots(null)
     setRouteError(null)
     setRetryingHopIndexes(new Set())
+    setRouteSource(null)
 
     eventSourceRef.current?.close()
 
@@ -503,8 +534,16 @@ export default function TrainRouteForm({
       })
     })
 
-    es.addEventListener("done", () => {
-      if (requestId === routeRequestId.current) setIsLoadingRoute(false)
+    es.addEventListener("done", (e: MessageEvent) => {
+      if (requestId === routeRequestId.current) {
+        setIsLoadingRoute(false)
+        try {
+          const data = JSON.parse(e.data)
+          setRouteSource(data.dataSource?.source === "live" ? null : data.dataSource ?? null)
+        } catch {
+          /* empty */
+        }
+      }
       es.close()
     })
 
@@ -617,6 +656,7 @@ export default function TrainRouteForm({
     const requestId = ++fareRequestId.current
     setIsLoadingFare(true)
     setFareError(false)
+    setFareSource(null)
     try {
       const res = await fetch(
         `/api/v1/krl/fare?` +
@@ -627,6 +667,8 @@ export default function TrainRouteForm({
       )
       const resJSON: IFareResponse = await res.json()
       if (requestId !== fareRequestId.current) return
+      const source = parseDataSourceHeader(res.headers.get("X-KRL-Data-Source"))
+      setFareSource(source?.source === "live" ? null : source)
       if (resJSON.data) {
         setFare(resJSON.data[0].fare)
       } else {
@@ -652,6 +694,18 @@ export default function TrainRouteForm({
     }
     fetchFare()
   }, [fetchFare, originStation, destinationStation, isOnboardingDemo])
+
+  const dataSourceNotice = useMemo(() => {
+    const candidates = [fareSource, routeSource].filter(
+      (s): s is DataSourceNotice => Boolean(s)
+    )
+    if (candidates.length === 0) return null
+    return candidates.reduce((worst, current) =>
+      DATA_SOURCE_RANK[current.source] > DATA_SOURCE_RANK[worst.source]
+        ? current
+        : worst
+    )
+  }, [fareSource, routeSource])
 
   const showRouteItinerary =
     originStation && destinationStation && legSlots && legSlots.length > 0
@@ -813,6 +867,14 @@ export default function TrainRouteForm({
                 </Button>
               )}
             </div>
+          </div>
+        )}
+
+        {dataSourceNotice && (showRouteItinerary || showNoRouteError) && (
+          <div className="mt-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-700">
+            {dataSourceNotice.source === "blob-snapshot"
+              ? `Layanan jadwal KCI sedang tidak tersedia — menampilkan jadwal yang diambil pada ${formatCapturedAt(dataSourceNotice.capturedAt)}. Mungkin tidak mencerminkan perubahan terbaru, tapi lebih baik daripada tidak ada sama sekali.`
+              : `Menampilkan data cache dari ${formatCapturedAt(dataSourceNotice.capturedAt)} — layanan KCI sedang terganggu.`}
           </div>
         )}
 

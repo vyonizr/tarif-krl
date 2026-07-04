@@ -1,18 +1,26 @@
 /// <reference types="jest" />
 
-import { getStations, getFare, getSchedules, getRoute, getTransitRoute, staleCache } from './adapter'
-import { UpstreamError, NoRouteFoundError, KciStationRow } from './types'
+import { getStations, getFare, getSchedules, getRoute, getTransitRoute, staleCache, breakers } from './adapter'
+import { UpstreamError, NoRouteFoundError, KciStationRow, FetchMeta } from './types'
 import { getLineGraph, getForkPoint } from './topology'
 
-function createFetchResponse(data: unknown, ok = true, status = 200) {
-  return {
+interface MockResponse {
+  ok: boolean
+  status: number
+  json: () => Promise<unknown>
+  text: () => Promise<string>
+  clone: () => MockResponse
+}
+
+function createFetchResponse(data: unknown, ok = true, status = 200): MockResponse {
+  const response: MockResponse = {
     ok,
     status,
     json: () => Promise.resolve(data),
-    clone() {
-      return { text: () => Promise.resolve(JSON.stringify(data)) }
-    },
+    text: () => Promise.resolve(JSON.stringify(data)),
+    clone: () => response,
   }
+  return response
 }
 
 function createStationRow(overrides: Partial<KciStationRow> = {}): KciStationRow {
@@ -37,6 +45,7 @@ function createRegionHeader(name: string): KciStationRow {
 beforeEach(() => {
   jest.restoreAllMocks()
   staleCache.clear()
+  breakers.clear()
 })
 
 describe('getStations', () => {
@@ -346,7 +355,7 @@ describe('getSchedules', () => {
     expect(result).toHaveLength(1)
   })
 
-  test('passes timeTo parameter when provided', async () => {
+  test('always fetches the full day (coarse cache key) regardless of requested window', async () => {
     global.fetch = jest.fn().mockResolvedValue(
       createFetchResponse({
         status: 200,
@@ -357,7 +366,49 @@ describe('getSchedules', () => {
     await getSchedules('STA1', '10:00', '22:00')
 
     const url = (global.fetch as jest.Mock).mock.calls[0][0] as string
-    expect(url).toContain('timeto=22%3A00')
+    expect(url).toContain('timefrom=00%3A00')
+    expect(url).toContain('timeto=23%3A59')
+  })
+
+  test('filters results to the requested window after the coarse fetch', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      createFetchResponse({
+        status: 200,
+        data: [
+          {
+            train_id: '1',
+            ka_name: 'COMMUTER LINE BOGOR',
+            route_name: 'BOGOR - JAKARTA',
+            dest: 'BOGOR',
+            time_est: '09:00:00',
+            color: '#E30A16',
+            dest_time: '09:30:00',
+          },
+          {
+            train_id: '2',
+            ka_name: 'COMMUTER LINE BOGOR',
+            route_name: 'BOGOR - JAKARTA',
+            dest: 'BOGOR',
+            time_est: '10:30:00',
+            color: '#E30A16',
+            dest_time: '11:00:00',
+          },
+          {
+            train_id: '3',
+            ka_name: 'COMMUTER LINE BOGOR',
+            route_name: 'BOGOR - JAKARTA',
+            dest: 'BOGOR',
+            time_est: '22:30:00',
+            color: '#E30A16',
+            dest_time: '23:00:00',
+          },
+        ],
+      })
+    )
+
+    const result = await getSchedules('STA1', '10:00', '22:00')
+
+    expect(result.map((s) => s.train_id)).toEqual(['2'])
   })
 })
 
@@ -542,21 +593,27 @@ describe('getRoute', () => {
     })
   })
 
-  test('computes timeTo from timeFrom using ROUTE_SEARCH_WINDOW_HOURS', async () => {
+  test('computes timeTo from timeFrom using ROUTE_SEARCH_WINDOW_HOURS to filter candidates', async () => {
     schedulesResponse = [
-      createScheduleRow({ train_id: '1151' }),
+      createScheduleRow({ train_id: '1151', time_est: '10:05:00' }),
+      createScheduleRow({ train_id: '1152', time_est: '13:05:00' }),
     ]
     trainSchedules = {
       '1151': [
-        createTrainScheduleRow('PSMB', 'Pasar Minggu Baru', '04:31:00'),
-        createTrainScheduleRow('CW', 'Cawang', '04:34:00'),
+        createTrainScheduleRow('PSMB', 'Pasar Minggu Baru', '10:31:00'),
+        createTrainScheduleRow('CW', 'Cawang', '10:34:00'),
+      ],
+      '1152': [
+        createTrainScheduleRow('PSMB', 'Pasar Minggu Baru', '13:31:00'),
+        createTrainScheduleRow('CW', 'Cawang', '13:34:00'),
       ],
     }
 
-    await getRoute('PSMB', 'CW', '10:00')
+    const result = await getRoute('PSMB', 'CW', '10:00')
 
-    const url = (global.fetch as jest.Mock).mock.calls[0][0] as string
-    expect(url).toContain('timeto=13%3A00')
+    // 13:05 departure is outside the 3-hour window from 10:00 (cutoff 13:00),
+    // so only the 1151 candidate should have been considered.
+    expect(result.train_id).toBe('1151')
   })
 
   test('picks second occurrence of duplicate station (Manggarai → Jatinegara)', async () => {
@@ -633,6 +690,114 @@ describe('getRoute', () => {
     const result = await getRoute('PSMB', 'CW', '04:00')
 
     expect(result.train_id).toBe('1152')
+  })
+})
+
+describe('circuit breaker', () => {
+  test('opens after 3 exhausted-retry failures and skips the network call', async () => {
+    global.fetch = jest.fn().mockRejectedValue(new Error('Network error'))
+
+    await expect(getStations()).rejects.toThrow(UpstreamError)
+    await expect(getStations()).rejects.toThrow(UpstreamError)
+    await expect(getStations()).rejects.toThrow(UpstreamError)
+    // 3 calls * 2 attempts each (1 retry) = 6 fetches, breaker now open
+    expect(global.fetch).toHaveBeenCalledTimes(6)
+
+    await expect(getStations()).rejects.toThrow(UpstreamError)
+    // breaker open — no additional network attempt made
+    expect(global.fetch).toHaveBeenCalledTimes(6)
+  })
+
+  test('serves stale cache on failure even once the breaker is open, without hitting the network', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce(
+      createFetchResponse({
+        status: 200,
+        data: [
+          createRegionHeader('AREA JABODETABEK'),
+          createStationRow({ sta_id: 'AC', sta_name: 'ANCOL' }),
+        ],
+      })
+    )
+    await getStations()
+
+    global.fetch = jest.fn().mockRejectedValue(new Error('Network error'))
+    // 3 failures opens the breaker; stale cache still resolves each time.
+    for (let i = 0; i < 4; i++) {
+      const result = await getStations()
+      expect(result.Jabodetabek).toHaveLength(1)
+    }
+
+    // Once open, the breaker skips the network call entirely (2 attempts
+    // per call for the first 3 failing calls = 6, then 0 more).
+    expect(global.fetch).toHaveBeenCalledTimes(6)
+  })
+})
+
+describe('request coalescing', () => {
+  test('concurrent calls for the same resource share a single upstream fetch', async () => {
+    let callCount = 0
+    global.fetch = jest.fn().mockImplementation(() => {
+      callCount++
+      return new Promise((resolve) =>
+        setTimeout(
+          () =>
+            resolve(
+              createFetchResponse({
+                status: 200,
+                data: [
+                  createRegionHeader('AREA JABODETABEK'),
+                  createStationRow({ sta_id: 'AC', sta_name: 'ANCOL' }),
+                ],
+              })
+            ),
+          10
+        )
+      )
+    })
+
+    const [a, b] = await Promise.all([getStations(), getStations()])
+
+    expect(callCount).toBe(1)
+    expect(a).toEqual(b)
+  })
+})
+
+describe('data source tracking (FetchMeta)', () => {
+  test('marks meta as live on a healthy fetch', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      createFetchResponse({
+        status: 200,
+        data: [
+          createRegionHeader('AREA JABODETABEK'),
+          createStationRow({ sta_id: 'AC', sta_name: 'ANCOL' }),
+        ],
+      })
+    )
+
+    const meta: FetchMeta = { source: 'live' }
+    await getStations(meta)
+
+    expect(meta.source).toBe('live')
+  })
+
+  test('marks meta as stale-cache when serving from the fallback', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce(
+      createFetchResponse({
+        status: 200,
+        data: [
+          createRegionHeader('AREA JABODETABEK'),
+          createStationRow({ sta_id: 'AC', sta_name: 'ANCOL' }),
+        ],
+      })
+    )
+    await getStations()
+
+    global.fetch = jest.fn().mockRejectedValue(new Error('Network error'))
+    const meta: FetchMeta = { source: 'live' }
+    await getStations(meta)
+
+    expect(meta.source).toBe('stale-cache')
+    expect(meta.capturedAt).toBeDefined()
   })
 })
 
@@ -982,14 +1147,16 @@ describe('getTransitRoute', () => {
       (c: [string]) => c[0]
     )
 
+    // Cache key is now coarse (always the full day) regardless of the
+    // chained arrival time — filtering by the stripped-seconds time happens
+    // in-process instead of being sent upstream as a query param.
     const mriScheduleUrl = callUrls.find(
       (url) =>
         url.includes('/schedules') &&
         url.includes('stationid=MRI')
     )
     expect(mriScheduleUrl).toBeDefined()
-    expect(mriScheduleUrl).toContain('timefrom=04%3A41')
-    expect(mriScheduleUrl).not.toContain('timefrom=04%3A41%3A00')
+    expect(mriScheduleUrl).toContain('timefrom=00%3A00')
 
     const thbScheduleUrl = callUrls.find(
       (url) =>
@@ -997,8 +1164,7 @@ describe('getTransitRoute', () => {
         url.includes('stationid=THB')
     )
     expect(thbScheduleUrl).toBeDefined()
-    expect(thbScheduleUrl).toContain('timefrom=04%3A58')
-    expect(thbScheduleUrl).not.toContain('timefrom=04%3A58%3A00')
+    expect(thbScheduleUrl).toContain('timefrom=00%3A00')
   })
 
   test('rejects same-station request with distinct message', async () => {
@@ -1026,6 +1192,7 @@ describe('getTransitRoute', () => {
           train_id: '1152',
           ka_name: 'COMMUTER LINE NAMBO',
           color: '#E30A16',
+          time_est: '04:15:00',
         }),
       ],
     }

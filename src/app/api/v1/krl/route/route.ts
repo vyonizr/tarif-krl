@@ -1,7 +1,7 @@
 import { getTransitRoute } from '@/lib/krl/adapter'
 import { getLineGraph } from '@/lib/krl/topology'
 import { fail } from '@/lib/krl/response'
-import { HopInfo, LegOutcome } from '@/lib/krl/types'
+import { HopInfo, LegOutcome, FetchMeta } from '@/lib/krl/types'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -55,6 +55,7 @@ export async function GET(req: Request) {
     async start(controller) {
       let legsFound = 0
       let legsFailed = 0
+      const meta: FetchMeta = { source: 'live' }
 
       const onHop = (hop: HopInfo, outcome: LegOutcome) => {
         if (outcome.ok) {
@@ -77,7 +78,7 @@ export async function GET(req: Request) {
       }
 
       try {
-        await getTransitRoute(from, to, time, onHop)
+        await getTransitRoute(from, to, time, onHop, meta)
       } catch (error) {
         legsFailed += 1
         const message =
@@ -94,7 +95,11 @@ export async function GET(req: Request) {
         )
       }
 
-      controller.enqueue(encoder.encode(sseChunk('done', { legsFound, legsFailed })))
+      controller.enqueue(
+        encoder.encode(
+          sseChunk('done', { legsFound, legsFailed, dataSource: meta })
+        )
+      )
       controller.close()
     },
   })

@@ -73,6 +73,13 @@ export interface IKRLRouteResult {
   stops: IKRLRouteStop[]
 }
 
+export type DataSource = 'live' | 'stale-cache' | 'blob-snapshot'
+
+export interface FetchMeta {
+  source: DataSource
+  capturedAt?: string
+}
+
 export class UpstreamError extends Error {
   status: number
 

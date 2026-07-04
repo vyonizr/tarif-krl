@@ -21,6 +21,9 @@ paths:
       responses:
         '200':
           description: OK
+          headers:
+            X-KRL-Data-Source:
+              $ref: '#/components/headers/X-KRL-Data-Source'
           content:
             application/json:
               schema:
@@ -57,6 +60,9 @@ paths:
       responses:
         '200':
           description: OK
+          headers:
+            X-KRL-Data-Source:
+              $ref: '#/components/headers/X-KRL-Data-Source'
           content:
             application/json:
               schema:
@@ -103,7 +109,10 @@ paths:
           earlier hop failed and left no real arrival time to search from
           (rather than guessing one). `total: 0` means the stations aren't
           connected by any KRL line at all — no hops exist to report.
-        - `done` — always the final event. `data`: `{ legsFound, legsFailed }`.
+        - `done` — always the final event. `data`: `{ legsFound, legsFailed, dataSource }`,
+          where `dataSource` is `{ source, capturedAt? }` — see the
+          `X-KRL-Data-Source` header description on the other endpoints for
+          what `source` values mean.
 
         A failed hop can be retried individually via `GET /v1/krl/route/leg`,
         using the `from`/`to`/`time` from its `leg-error` event.
@@ -174,6 +183,9 @@ paths:
       responses:
         '200':
           description: OK
+          headers:
+            X-KRL-Data-Source:
+              $ref: '#/components/headers/X-KRL-Data-Source'
           content:
             application/json:
               schema:
@@ -231,6 +243,9 @@ paths:
       responses:
         '200':
           description: OK
+          headers:
+            X-KRL-Data-Source:
+              $ref: '#/components/headers/X-KRL-Data-Source'
           content:
             application/json:
               schema:
@@ -255,6 +270,17 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
 
 components:
+  headers:
+    X-KRL-Data-Source:
+      description: >-
+        Which tier served this response: `live` (fresh upstream fetch),
+        `stale-cache` (in-memory fallback from a prior successful fetch), or
+        `blob-snapshot` (daily-warmed snapshot for line-terminus stations,
+        used when both live and stale-cache are unavailable). A
+        `; captured-at=<ISO timestamp>` suffix is appended for the latter two.
+      schema:
+        type: string
+
   schemas:
     # ── KRL Station ──────────────────────────────────────
     Station:
