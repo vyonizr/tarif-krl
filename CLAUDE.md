@@ -18,6 +18,8 @@ Jadwal KRL (formerly Tarif KRL) — a Next.js (App Router) web app for calculati
 
 Requires `SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KEY` (see `.env.example`) — used by all MRT-related routes/pages to query Supabase's PostgREST API directly via `fetch`, not a Supabase client SDK.
 
+Git hooks live in `.githooks/` (e.g. `pre-merge-commit`, which blocks merging into `main` if `package.json`'s version wasn't bumped) and require `core.hooksPath` to point there — `npm install`'s `postinstall` script sets this automatically, since `core.hooksPath` is local git config and not tracked by the repo itself.
+
 ## Architecture
 
 Two independent transport modules living side by side under `src/app/`, each following the same pattern: a server component page fetches initial data, passes it to a client form component that drives further lookups through internal API routes.
