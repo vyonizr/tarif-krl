@@ -291,7 +291,7 @@ export default function RouteItinerary({
                 {i > 0 && <TransferConnector label="kereta berikutnya" color="#94a3b8" />}
                 <div className="flex items-center gap-3 py-3 text-slate-500">
                   <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-                  <span className="text-sm">Mencari kereta ke-{i + 1}...</span>
+                  <span className="text-sm">Mengambil data kereta ke-{i + 1} dari KCI...</span>
                 </div>
               </div>
             )

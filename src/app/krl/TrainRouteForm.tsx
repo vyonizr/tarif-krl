@@ -791,7 +791,7 @@ export default function TrainRouteForm({
         {showLoading && (
           <div className="mt-8 flex flex-col items-center gap-2">
             <Spinner />
-            <p className="text-xs text-slate-400">Menunggu respons server KRL...</p>
+            <p className="text-xs text-slate-400">Mengambil data dari KCI...</p>
           </div>
         )}
 
@@ -827,6 +827,9 @@ export default function TrainRouteForm({
               onRetryHop={handleRetryHop}
               retryingHopIndexes={retryingHopIndexes}
             />
+            <p className="mt-3 text-center text-xs text-slate-400">
+              Data jadwal &amp; tarif bersumber dari KCI, bukan real-time dari operator.
+            </p>
           </div>
         )}
       </div>
