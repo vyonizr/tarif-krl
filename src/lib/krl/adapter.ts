@@ -9,6 +9,7 @@ import {
   ROUTE_SEARCH_WINDOW_HOURS,
   MAX_TRANSIT_LEGS,
   GET_ROUTE_CONCURRENCY,
+  ROUTE_RETRY_COUNT,
 } from './constants'
 import {
   KciStationResponse,
@@ -21,6 +22,7 @@ import {
   IKRLRouteResult,
   UpstreamError,
   NoRouteFoundError,
+  OnHop,
 } from './types'
 import { getLineGraph, findTransferStations, getForkPoint, LINES } from './topology'
 import { convertToTitleCase, convertTimeToHHMM } from '@/app/utils'
@@ -389,10 +391,45 @@ async function tryRouteWithSameLineSplit(
   )
 }
 
+async function withRouteRetry<T>(fn: () => Promise<T>): Promise<T> {
+  let lastError: UpstreamError | null = null
+  for (let attempt = 0; attempt <= ROUTE_RETRY_COUNT; attempt++) {
+    try {
+      return await fn()
+    } catch (error) {
+      if (error instanceof UpstreamError) {
+        lastError = error
+        continue
+      }
+      throw error
+    }
+  }
+  throw lastError
+}
+
+async function runHop(
+  hopFrom: string,
+  hopTo: string,
+  timeFrom: string,
+  useSplit: boolean
+): Promise<IKRLRouteResult[]> {
+  if (useSplit) {
+    return tryRouteWithSameLineSplit(hopFrom, hopTo, timeFrom)
+  }
+  const leg = await getRoute(hopFrom, hopTo, timeFrom)
+  return [leg]
+}
+
+// Without `onHop`, behaves exactly as before: any leg failure aborts the
+// whole search. With `onHop`, a failed leg is reported via the callback and
+// the search continues — but only while there's a real arrival time to chain
+// the next leg from; once a leg fails, every leg after it is reported
+// `blocked` rather than searched against a made-up timestamp.
 async function getTransitRoute(
   from: string,
   to: string,
-  timeFrom: string
+  timeFrom: string,
+  onHop?: OnHop
 ): Promise<IKRLRouteResult[]> {
   if (from === to) {
     throw new NoRouteFoundError(
@@ -401,7 +438,11 @@ async function getTransitRoute(
   }
 
   try {
-    return await tryRouteWithSameLineSplit(from, to, timeFrom)
+    const legs = await withRouteRetry(() =>
+      tryRouteWithSameLineSplit(from, to, timeFrom)
+    )
+    onHop?.({ index: 0, total: 1, from, to, time: timeFrom }, { ok: true, legs })
+    return legs
   } catch (error) {
     if (!(error instanceof NoRouteFoundError)) {
       throw error
@@ -409,71 +450,104 @@ async function getTransitRoute(
   }
 
   const forkPoint = getForkPoint(from, to)
+  let waypoints: string[]
+  let useSplit: boolean
+
   if (forkPoint) {
-    const leg1 = await getRoute(from, forkPoint, timeFrom)
-    const arrivalTime = leg1.stops[leg1.stops.length - 1].time_est
-    const leg2 = await getRoute(forkPoint, to, arrivalTime)
-    return [leg1, leg2]
-  }
-
-  const graph = getLineGraph()
-  const transferStations = findTransferStations(
-    from,
-    to,
-    graph,
-    MAX_TRANSIT_LEGS
-  )
-
-  if (!transferStations) {
-    throw new NoRouteFoundError(
-      'These stations are not connected by any KRL line'
-    )
-  }
-
-  const legs: IKRLRouteResult[] = []
-  let previousArrivalTime = timeFrom
-  let previousStation = from
-
-  for (const transferStation of transferStations) {
-    try {
-      const subLegs = await tryRouteWithSameLineSplit(
-        previousStation,
-        transferStation,
-        previousArrivalTime
-      )
-      legs.push(...subLegs)
-
-      const lastLeg = subLegs[subLegs.length - 1]
-      const lastStop = lastLeg.stops[lastLeg.stops.length - 1]
-      previousArrivalTime = lastStop.time_est
-      previousStation = transferStation
-    } catch (error) {
-      if (error instanceof NoRouteFoundError) {
-        throw new NoRouteFoundError(
-          'No trains currently connecting these stations at this time'
-        )
-      }
-      throw error
-    }
-  }
-
-  try {
-    const finalLegs = await tryRouteWithSameLineSplit(
-      previousStation,
+    waypoints = [from, forkPoint, to]
+    useSplit = false
+  } else {
+    const graph = getLineGraph()
+    const transferStations = findTransferStations(
+      from,
       to,
-      previousArrivalTime
+      graph,
+      MAX_TRANSIT_LEGS
     )
-    legs.push(...finalLegs)
-  } catch (error) {
-    if (error instanceof NoRouteFoundError) {
-      throw new NoRouteFoundError(
-        'No trains currently connecting these stations at this time'
+
+    if (!transferStations) {
+      const message = 'These stations are not connected by any KRL line'
+      if (!onHop) throw new NoRouteFoundError(message)
+      onHop(
+        { index: 0, total: 0, from, to, time: timeFrom },
+        { ok: false, error: { status: 404, message } }
       )
+      return []
     }
-    throw error
+
+    waypoints = [from, ...transferStations, to]
+    useSplit = true
+  }
+
+  const total = waypoints.length - 1
+  const legs: IKRLRouteResult[] = []
+  let currentTime = timeFrom
+  let blocked = false
+
+  for (let i = 0; i < total; i++) {
+    const hop = { index: i, total, from: waypoints[i], to: waypoints[i + 1], time: currentTime }
+
+    if (blocked) {
+      onHop!(hop, {
+        ok: false,
+        error: {
+          status: 404,
+          message: 'No trains currently connecting these stations at this time',
+        },
+        blocked: true,
+      })
+      continue
+    }
+
+    try {
+      const hopLegs = await withRouteRetry(() =>
+        runHop(waypoints[i], waypoints[i + 1], currentTime, useSplit)
+      )
+      legs.push(...hopLegs)
+      const lastLeg = hopLegs[hopLegs.length - 1]
+      currentTime = lastLeg.stops[lastLeg.stops.length - 1].time_est
+      onHop?.(hop, { ok: true, legs: hopLegs })
+    } catch (error) {
+      if (!(error instanceof NoRouteFoundError)) {
+        if (!onHop) throw error
+        const upstream = error instanceof UpstreamError
+        onHop(hop, {
+          ok: false,
+          error: {
+            status: upstream ? (error as UpstreamError).status : 500,
+            message: upstream ? error.message : 'Internal server error',
+          },
+        })
+        blocked = true
+        continue
+      }
+
+      const message = useSplit
+        ? 'No trains currently connecting these stations at this time'
+        : error.message
+
+      if (!onHop) throw new NoRouteFoundError(message)
+
+      onHop(hop, { ok: false, error: { status: 404, message } })
+      blocked = true
+    }
+  }
+
+  if (legs.length === 0 && !onHop) {
+    throw new NoRouteFoundError(
+      'No trains currently connecting these stations at this time'
+    )
   }
 
   return legs
 }
 
-export { getStations, getFare, getSchedules, getRoute, getTransitRoute, staleCache }
+export {
+  getStations,
+  getFare,
+  getSchedules,
+  getRoute,
+  getTransitRoute,
+  tryRouteWithSameLineSplit,
+  staleCache,
+}

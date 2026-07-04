@@ -1124,4 +1124,134 @@ describe('getTransitRoute', () => {
     expect(legs).toHaveLength(1)
     expect(legs[0].stops.map((s) => s.station_id)).toEqual(['JAKK', 'THB', 'MRI'])
   })
+
+  describe('with onHop (progressive/partial-failure mode)', () => {
+    test('reports each successful hop and returns all legs on full success', async () => {
+      schedulesByStation = {
+        PSMB: [
+          createScheduleRow({
+            train_id: '1151',
+            ka_name: 'COMMUTER LINE BOGOR',
+            color: '#E30A16',
+          }),
+        ],
+        MRI: [
+          createScheduleRow({
+            train_id: '1801',
+            ka_name: 'COMMUTER LINE CIKARANG',
+            color: '#0000FF',
+            time_est: '04:45:00',
+          }),
+        ],
+      }
+      trainSchedules = {
+        '1151': createVirtualTrainRow('1151', 'COMMUTER LINE BOGOR', '#E30A16', [
+          { station_id: 'PSMB', station_name: 'Pasar Minggu Baru', time_est: '04:31:00' },
+          { station_id: 'MRI', station_name: 'Manggarai', time_est: '04:41:00' },
+        ]),
+        '1801': createVirtualTrainRow('1801', 'COMMUTER LINE CIKARANG', '#0000FF', [
+          { station_id: 'MRI', station_name: 'Manggarai', time_est: '04:45:00' },
+          { station_id: 'THB', station_name: 'Tanah Abang', time_est: '04:58:00' },
+        ]),
+      }
+
+      const events: Array<{ hop: unknown; ok: boolean }> = []
+      const legs = await getTransitRoute('PSMB', 'THB', '04:00', (hop, outcome) => {
+        events.push({ hop, ok: outcome.ok })
+      })
+
+      expect(legs).toHaveLength(2)
+      expect(events).toHaveLength(2)
+      expect(events.every((e) => e.ok)).toBe(true)
+      expect(events[0].hop).toMatchObject({ index: 0, total: 2, from: 'PSMB', to: 'MRI' })
+      expect(events[1].hop).toMatchObject({ index: 1, total: 2, from: 'MRI', to: 'THB' })
+    })
+
+    test('does not throw on partial failure — returns legs found so far and marks the rest blocked', async () => {
+      schedulesByStation = {
+        PSMB: [
+          createScheduleRow({
+            train_id: '1151',
+            ka_name: 'COMMUTER LINE BOGOR',
+            color: '#E30A16',
+          }),
+        ],
+        MRI: [],
+      }
+      trainSchedules = {
+        '1151': createVirtualTrainRow('1151', 'COMMUTER LINE BOGOR', '#E30A16', [
+          { station_id: 'PSMB', station_name: 'Pasar Minggu Baru', time_est: '04:31:00' },
+          { station_id: 'MRI', station_name: 'Manggarai', time_est: '04:41:00' },
+        ]),
+      }
+
+      const events: Array<{
+        index: number
+        ok: boolean
+        blocked?: boolean
+      }> = []
+      const legs = await getTransitRoute('PSMB', 'THB', '04:00', (hop, outcome) => {
+        events.push({
+          index: hop.index,
+          ok: outcome.ok,
+          blocked: outcome.ok ? undefined : outcome.blocked,
+        })
+      })
+
+      // leg 1 (PSMB -> MRI) succeeded and is returned even though leg 2 failed
+      expect(legs).toHaveLength(1)
+      expect(legs[0].train_id).toBe('1151')
+
+      expect(events).toEqual([
+        { index: 0, ok: true, blocked: undefined },
+        { index: 1, ok: false, blocked: undefined },
+      ])
+    })
+
+    test('blocks every hop after a failed one instead of guessing a time to search from', async () => {
+      schedulesByStation = {
+        PSMB: [
+          createScheduleRow({
+            train_id: '1151',
+            ka_name: 'COMMUTER LINE BOGOR',
+            color: '#E30A16',
+          }),
+        ],
+        MRI: [],
+        THB: [],
+      }
+      trainSchedules = {
+        '1151': createVirtualTrainRow('1151', 'COMMUTER LINE BOGOR', '#E30A16', [
+          { station_id: 'PSMB', station_name: 'Pasar Minggu Baru', time_est: '04:31:00' },
+          { station_id: 'MRI', station_name: 'Manggarai', time_est: '04:41:00' },
+        ]),
+      }
+
+      const events: Array<{ index: number; ok: boolean; blocked?: boolean }> = []
+      const legs = await getTransitRoute('PSMB', 'RU', '04:00', (hop, outcome) => {
+        events.push({
+          index: hop.index,
+          ok: outcome.ok,
+          blocked: outcome.ok ? undefined : outcome.blocked,
+        })
+      })
+
+      expect(legs).toHaveLength(1)
+      expect(events).toEqual([
+        { index: 0, ok: true, blocked: undefined },
+        { index: 1, ok: false, blocked: undefined },
+        { index: 2, ok: false, blocked: true },
+      ])
+    })
+
+    test('reports a single blocked-from-the-start hop when stations share no line at all', async () => {
+      const events: Array<{ index: number; total: number; ok: boolean }> = []
+      const legs = await getTransitRoute('NONEXISTENT', 'THB', '04:00', (hop, outcome) => {
+        events.push({ index: hop.index, total: hop.total, ok: outcome.ok })
+      })
+
+      expect(legs).toEqual([])
+      expect(events).toEqual([{ index: 0, total: 0, ok: false }])
+    })
+  })
 })

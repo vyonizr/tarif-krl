@@ -1,9 +1,8 @@
-import { NextResponse } from 'next/server'
 import { getTransitRoute } from '@/lib/krl/adapter'
 import { getLineGraph } from '@/lib/krl/topology'
-import { ROUTE_RETRY_COUNT } from '@/lib/krl/constants'
-import { ok, fail } from '@/lib/krl/response'
-import { UpstreamError, NoRouteFoundError } from '@/lib/krl/types'
+import { fail } from '@/lib/krl/response'
+import { HopInfo, LegOutcome } from '@/lib/krl/types'
+import { NextResponse } from 'next/server'
 
 function defaultTime(): string {
   const now = new Date()
@@ -15,6 +14,10 @@ function defaultTime(): string {
 
 function isKnownStation(code: string): boolean {
   return getLineGraph().stations.has(code)
+}
+
+function sseChunk(event: string, data: unknown): string {
+  return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
 }
 
 export async function GET(req: Request) {
@@ -44,33 +47,61 @@ export async function GET(req: Request) {
     )
   }
 
-  let lastUpstreamError: UpstreamError | null = null
+  const encoder = new TextEncoder()
 
-  for (let attempt = 0; attempt <= ROUTE_RETRY_COUNT; attempt++) {
-    try {
-      const legs = await getTransitRoute(from, to, time)
-      return NextResponse.json(ok({ legs }))
-    } catch (error) {
-      if (error instanceof NoRouteFoundError) {
-        return NextResponse.json(fail(404, error.message), { status: 404 })
-      }
-      if (error instanceof UpstreamError) {
-        lastUpstreamError = error
-        if (attempt < ROUTE_RETRY_COUNT) {
-          continue
+  const stream = new ReadableStream({
+    async start(controller) {
+      let legsFound = 0
+      let legsFailed = 0
+
+      const onHop = (hop: HopInfo, outcome: LegOutcome) => {
+        if (outcome.ok) {
+          legsFound += outcome.legs.length
+          controller.enqueue(
+            encoder.encode(sseChunk('leg', { ...hop, legs: outcome.legs }))
+          )
+        } else {
+          legsFailed += 1
+          controller.enqueue(
+            encoder.encode(
+              sseChunk('leg-error', {
+                ...hop,
+                error: outcome.error,
+                blocked: outcome.blocked ?? false,
+              })
+            )
+          )
         }
       }
-      if (!(error instanceof UpstreamError)) {
-        console.error(error)
-        return NextResponse.json(fail(500, 'Internal server error'), {
-          status: 500,
-        })
-      }
-    }
-  }
 
-  return NextResponse.json(
-    fail(lastUpstreamError!.status, lastUpstreamError!.message),
-    { status: lastUpstreamError!.status }
-  )
+      try {
+        await getTransitRoute(from, to, time, onHop)
+      } catch (error) {
+        legsFailed += 1
+        const message =
+          error instanceof Error ? error.message : 'Internal server error'
+        controller.enqueue(
+          encoder.encode(
+            sseChunk('leg-error', {
+              index: 0,
+              total: 0,
+              error: { status: 500, message },
+              blocked: false,
+            })
+          )
+        )
+      }
+
+      controller.enqueue(encoder.encode(sseChunk('done', { legsFound, legsFailed })))
+      controller.close()
+    },
+  })
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  })
 }

@@ -12,7 +12,7 @@ import {
   SelectItem,
 } from "@/components/ui/select"
 
-import { IStationState, KRLStation, IFareResponse, IFavoriteRoute } from "../types"
+import { IStationState, KRLStation, IFareResponse, IFavoriteRoute, LegSlot } from "../types"
 import { IKRLRouteResult } from "@/lib/krl/types"
 import { getCurrentTimeInHHMM, convertToTitleCase } from "../utils"
 
@@ -40,12 +40,21 @@ interface FormSnapshot {
   region: string
   originStation: KRLStation | null
   destinationStation: KRLStation | null
-  routeLegs: IKRLRouteResult[] | null
+  legSlots: LegSlot[] | null
   routeError: { status: number; message: string } | null
   fare: number | null
   fareError: boolean
   favorites: IFavoriteRoute[]
   time: string
+}
+
+function legsToSlots(legs: IKRLRouteResult[]): LegSlot[] {
+  return legs.map((leg) => ({
+    status: "success",
+    from: leg.stops[0].station_id,
+    to: leg.stops[leg.stops.length - 1].station_id,
+    legs: [leg],
+  }))
 }
 
 const STORAGE_KEY = "krl-prefs"
@@ -160,11 +169,12 @@ export default function TrainRouteForm({
   const [isLoadingRoute, setIsLoadingRoute] = useState(false)
   const [isLoadingFare, setIsLoadingFare] = useState(false)
 
-  const [routeLegs, setRouteLegs] = useState<IKRLRouteResult[] | null>(null)
+  const [legSlots, setLegSlots] = useState<LegSlot[] | null>(null)
   const [routeError, setRouteError] = useState<{
     status: number
     message: string
   } | null>(null)
+  const [retryingHopIndexes, setRetryingHopIndexes] = useState<Set<number>>(new Set())
 
   const [fare, setFare] = useState<number | null>(null)
   const [fareError, setFareError] = useState(false)
@@ -197,7 +207,7 @@ export default function TrainRouteForm({
     setOriginStation(null)
     setDestinationStation(null)
     setFare(null)
-    setRouteLegs(null)
+    setLegSlots(null)
     setRouteError(null)
     setFareError(false)
     setTime(FROM_NOW)
@@ -206,7 +216,7 @@ export default function TrainRouteForm({
   const handleOriginSelect = useCallback(
     (station: KRLStation) => {
       setOriginStation(station)
-      setRouteLegs(null)
+      setLegSlots(null)
       setRouteError(null)
     },
     []
@@ -215,7 +225,7 @@ export default function TrainRouteForm({
   const handleDestinationSelect = useCallback(
     (station: KRLStation) => {
       setDestinationStation(station)
-      setRouteLegs(null)
+      setLegSlots(null)
       setRouteError(null)
     },
     []
@@ -224,7 +234,7 @@ export default function TrainRouteForm({
   const handleSwap = useCallback(() => {
     setOriginStation(destinationStation)
     setDestinationStation(originStation)
-    setRouteLegs(null)
+    setLegSlots(null)
     setRouteError(null)
   }, [originStation, destinationStation])
 
@@ -292,7 +302,7 @@ export default function TrainRouteForm({
       region,
       originStation,
       destinationStation,
-      routeLegs,
+      legSlots,
       routeError,
       fare,
       fareError,
@@ -311,7 +321,7 @@ export default function TrainRouteForm({
     if (mockDest) {
       setDestinationStation(mockDest.station)
     }
-    setRouteLegs(MOCK_ROUTE_LEGS)
+    setLegSlots(legsToSlots(MOCK_ROUTE_LEGS))
     setRouteError(null)
     setFare(MOCK_FARE)
     setFareError(false)
@@ -320,7 +330,7 @@ export default function TrainRouteForm({
     region,
     originStation,
     destinationStation,
-    routeLegs,
+    legSlots,
     routeError,
     fare,
     fareError,
@@ -336,7 +346,7 @@ export default function TrainRouteForm({
       setRegion(snap.region)
       setOriginStation(snap.originStation)
       setDestinationStation(snap.destinationStation)
-      setRouteLegs(snap.routeLegs)
+      setLegSlots(snap.legSlots)
       setRouteError(snap.routeError)
       setFare(snap.fare)
       setFareError(snap.fareError)
@@ -425,48 +435,180 @@ export default function TrainRouteForm({
   }, [region, originStation, destinationStation, isOnboardingDemo])
 
   const routeRequestId = useRef(0)
+  const eventSourceRef = useRef<EventSource | null>(null)
 
-  const fetchRoute = useCallback(async () => {
+  const startRouteSearch = useCallback(() => {
     if (!originStation || !destinationStation) return
     const requestId = ++routeRequestId.current
     setIsLoadingRoute(true)
-    setRouteLegs(null)
+    setLegSlots(null)
     setRouteError(null)
-    try {
-      const resolvedTime =
-        time === FROM_NOW ? getCurrentTimeInHHMM() : time
-      const res = await fetch(
-        `/api/v1/krl/route?` +
-          new URLSearchParams({
-            from: originStation.id,
-            to: destinationStation.id,
-            time: resolvedTime,
-          })
-      )
-      const json = await res.json()
+    setRetryingHopIndexes(new Set())
+
+    eventSourceRef.current?.close()
+
+    const resolvedTime = time === FROM_NOW ? getCurrentTimeInHHMM() : time
+    const es = new EventSource(
+      `/api/v1/krl/route?` +
+        new URLSearchParams({
+          from: originStation.id,
+          to: destinationStation.id,
+          time: resolvedTime,
+        })
+    )
+    eventSourceRef.current = es
+
+    const fillSlot = (
+      index: number,
+      total: number,
+      slot: LegSlot,
+      done = false
+    ) => {
       if (requestId !== routeRequestId.current) return
-      if (json.data) {
-        setRouteLegs(json.data.legs)
-      } else if (json.error) {
-        setRouteError(json.error)
+      setIsLoadingRoute(!done)
+      setLegSlots((prev) => {
+        const next = prev
+          ? [...prev]
+          : Array.from({ length: total }, (): LegSlot => ({ status: "pending" }))
+        next[index] = slot
+        return next
+      })
+    }
+
+    es.addEventListener("leg", (e: MessageEvent) => {
+      const data = JSON.parse(e.data)
+      fillSlot(data.index, data.total, {
+        status: "success",
+        from: data.from,
+        to: data.to,
+        legs: data.legs,
+      })
+    })
+
+    es.addEventListener("leg-error", (e: MessageEvent) => {
+      const data = JSON.parse(e.data)
+      if (requestId !== routeRequestId.current) return
+      if (data.total === 0) {
+        setIsLoadingRoute(false)
+        setRouteError(data.error)
+        return
       }
-    } catch (error) {
-      if (requestId !== routeRequestId.current) return
-      setRouteError({ status: 502, message: "Gagal memuat rute, coba lagi" })
-    } finally {
+      fillSlot(data.index, data.total, {
+        status: "error",
+        from: data.from,
+        to: data.to,
+        time: data.time,
+        error: data.error,
+        blocked: data.blocked,
+      })
+    })
+
+    es.addEventListener("done", () => {
       if (requestId === routeRequestId.current) setIsLoadingRoute(false)
+      es.close()
+    })
+
+    es.onerror = () => {
+      if (requestId === routeRequestId.current) {
+        setIsLoadingRoute(false)
+        setRouteError((prev) => prev ?? { status: 502, message: "Gagal memuat rute, coba lagi" })
+      }
+      es.close()
     }
   }, [originStation, destinationStation, time])
+
+  const setHopRetrying = useCallback((index: number, retrying: boolean) => {
+    setRetryingHopIndexes((prev) => {
+      const next = new Set(prev)
+      if (retrying) next.add(index)
+      else next.delete(index)
+      return next
+    })
+  }, [])
+
+  const retryHop = useCallback(
+    async (index: number, from: string, to: string, time: string) => {
+      setHopRetrying(index, true)
+      try {
+        const res = await fetch(
+          `/api/v1/krl/route/leg?` + new URLSearchParams({ from, to, time })
+        )
+        const json = await res.json()
+
+        if (!json.data) {
+          setLegSlots((prev) => {
+            if (!prev) return prev
+            const next = [...prev]
+            next[index] = { status: "error", from, to, time, error: json.error, blocked: false }
+            return next
+          })
+          return
+        }
+
+        const legs: IKRLRouteResult[] = json.data.legs
+        const chainHolder: {
+          value: { index: number; from: string; to: string } | null
+        } = { value: null }
+
+        setLegSlots((prev) => {
+          if (!prev) return prev
+          const next = [...prev]
+          next[index] = { status: "success", from, to, legs }
+          const following = next[index + 1]
+          if (following && following.status === "error" && following.blocked) {
+            chainHolder.value = { index: index + 1, from: following.from, to: following.to }
+          }
+          return next
+        })
+
+        if (chainHolder.value) {
+          const { index: nextIndex, from: nextFrom, to: nextTo } = chainHolder.value
+          const lastLeg = legs[legs.length - 1]
+          const newTime = lastLeg.stops[lastLeg.stops.length - 1].time_est
+          retryHop(nextIndex, nextFrom, nextTo, newTime)
+        }
+      } catch {
+        setLegSlots((prev) => {
+          if (!prev) return prev
+          const next = [...prev]
+          next[index] = {
+            status: "error",
+            from,
+            to,
+            time,
+            error: { status: 502, message: "Gagal memuat kereta, coba lagi" },
+            blocked: false,
+          }
+          return next
+        })
+      } finally {
+        setHopRetrying(index, false)
+      }
+    },
+    [setHopRetrying]
+  )
+
+  const handleRetryHop = useCallback(
+    (index: number) => {
+      const slot = legSlots?.[index]
+      if (!slot || slot.status !== "error" || slot.blocked) return
+      retryHop(index, slot.from, slot.to, slot.time)
+    },
+    [legSlots, retryHop]
+  )
 
   useEffect(() => {
     if (isOnboardingDemo) return
     if (!originStation || !destinationStation) {
-      setRouteLegs(null)
+      setLegSlots(null)
       setRouteError(null)
       return
     }
-    fetchRoute()
-  }, [fetchRoute, originStation, destinationStation, isOnboardingDemo])
+    startRouteSearch()
+    return () => {
+      eventSourceRef.current?.close()
+    }
+  }, [startRouteSearch, originStation, destinationStation, isOnboardingDemo])
 
   const fareRequestId = useRef(0)
 
@@ -512,16 +654,21 @@ export default function TrainRouteForm({
   }, [fetchFare, originStation, destinationStation, isOnboardingDemo])
 
   const showRouteItinerary =
-    originStation && destinationStation && routeLegs && !routeError
+    originStation && destinationStation && legSlots && legSlots.length > 0
 
   const showNoRouteError =
     originStation &&
     destinationStation &&
     routeError &&
+    !legSlots &&
     !isLoadingRoute
 
   const showLoading =
-    originStation && destinationStation && isLoadingRoute && !isOnboardingDemo
+    originStation &&
+    destinationStation &&
+    isLoadingRoute &&
+    !legSlots &&
+    !isOnboardingDemo
 
   const showDestinationPrompt =
     originStation && !destinationStation
@@ -656,36 +803,29 @@ export default function TrainRouteForm({
                   ? "Tidak ada rute ditemukan antara kedua stasiun ini."
                   : "Gagal memuat rute, coba lagi"}
               </p>
-              {routeError.status !== 404 &&
-                originStation?.id !== destinationStation?.id && (
-                  <Button
-                    onClick={fetchRoute}
-                    variant="outline"
-                    className="mt-3"
-                  >
-                    Coba Lagi
-                  </Button>
-                )}
+              {originStation?.id !== destinationStation?.id && (
+                <Button
+                  onClick={startRouteSearch}
+                  variant="outline"
+                  className="mt-3"
+                >
+                  Coba Lagi
+                </Button>
+              )}
             </div>
-            {originStation?.id === destinationStation?.id ? null : (
-              <RouteItinerary
-                legs={[]}
-                fare={null}
-                isFareLoading={false}
-                fareError
-              />
-            )}
           </div>
         )}
 
         {showRouteItinerary && (
           <div id="krl-route-result">
             <RouteItinerary
-              legs={routeLegs}
+              slots={legSlots}
               fare={fare}
               isFareLoading={isLoadingFare}
               fareError={fareError}
               isDemo={isOnboardingDemo}
+              onRetryHop={handleRetryHop}
+              retryingHopIndexes={retryingHopIndexes}
             />
           </div>
         )}

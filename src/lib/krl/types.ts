@@ -89,3 +89,17 @@ export class NoRouteFoundError extends Error {
     this.name = 'NoRouteFoundError'
   }
 }
+
+export type LegOutcome =
+  | { ok: true; legs: IKRLRouteResult[] }
+  | { ok: false; error: { status: number; message: string }; blocked?: boolean }
+
+export interface HopInfo {
+  index: number
+  total: number
+  from: string
+  to: string
+  time: string
+}
+
+export type OnHop = (hop: HopInfo, outcome: LegOutcome) => void
