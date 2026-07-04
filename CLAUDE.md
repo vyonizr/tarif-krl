@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Tarif KRL — a Next.js (App Router) web app for calculating commuter line fares and schedules for Jabodetabek/Yogyakarta KRL, and fares/routes for Jakarta MRT. Built on two upstream data sources: the KRL partner API (`kci.id/api/krl`) and a Supabase-backed dataset for MRT stations/routes.
+Jadwal KRL (formerly Tarif KRL) — a Next.js (App Router) web app for calculating commuter line fares and schedules for Jabodetabek/Yogyakarta KRL, and fares/routes for Jakarta MRT. Built on two upstream data sources: the KRL partner API (`kci.id/api/krl`) and a Supabase-backed dataset for MRT stations/routes.
 
 ## Commands
 

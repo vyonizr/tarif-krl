@@ -1,6 +1,6 @@
 openapi: '3.0.3'
 info:
-  title: Tarif KRL API
+  title: Jadwal KRL (formerly Tarif KRL) API
   version: '1.0.0'
   description: >-
     API for KRL commuter line fares, schedules, and stations, used by this
