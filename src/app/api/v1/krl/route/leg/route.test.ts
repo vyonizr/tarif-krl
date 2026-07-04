@@ -191,4 +191,22 @@ describe('GET /api/v1/krl/route/leg', () => {
     expect(body.data).toBeNull()
     expect(body.error?.status).toBe(502)
   })
+
+  test('falls back to repo-snapshot instead of 502 when a terminus station has one', async () => {
+    global.fetch = jest.fn().mockResolvedValue(createFetchResponse({}, false, 500))
+
+    // JAKK has data/schedule-snapshots/JAKK.json and train 5500A has
+    // data/train-snapshots/5500A.json committed, so this must never 5xx.
+    const req = makeRequest(
+      'http://localhost/api/v1/krl/route/leg?from=JAKK&to=KPB&time=04:00'
+    )
+    const response = await GET(req)
+    const body = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body.error).toBeNull()
+    expect(body.data.legs).toHaveLength(1)
+    expect(body.data.legs[0].stops.at(-1).station_id).toBe('KPB')
+    expect(response.headers.get('X-KRL-Data-Source')).toMatch(/^repo-snapshot/)
+  })
 })
