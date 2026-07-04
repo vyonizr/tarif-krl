@@ -2,7 +2,6 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import { Star, HelpCircle } from "lucide-react"
 
-import PenaltyNotification from "@/components/PenaltyNotification"
 import Spinner from "@/components/Spinner"
 import { Button } from "@/components/ui/button"
 import {
@@ -143,10 +142,12 @@ export default function TrainRouteForm({
   const initialToStation = initialTo
     ? findStationById(stations, initialTo)
     : null
-  const defaultRegion =
-    initialFromStation?.region ?? Object.keys(stations)[0]
+  const defaultRegion = Object.keys(stations)[0]
 
-  const regionKeys = useMemo(() => Object.keys(stations), [stations])
+  const regionKeys = useMemo(
+    () => Object.keys(stations).slice(0, 1),
+    [stations]
+  )
 
   const [region, setRegion] = useState<string>(defaultRegion)
   const [originStation, setOriginStation] = useState<KRLStation | null>(
@@ -265,7 +266,6 @@ export default function TrainRouteForm({
       const destination = findStationById(stations, favorite.destinationStationId)
       if (!origin || !destination) return
 
-      setRegion(favorite.region)
       setOriginStation(origin.station)
       setDestinationStation(destination.station)
     },
@@ -306,11 +306,9 @@ export default function TrainRouteForm({
     const mockDest = findStationById(stations, MOCK_DEST_STATION_ID)
 
     if (mockOrigin) {
-      setRegion(mockOrigin.region)
       setOriginStation(mockOrigin.station)
     }
     if (mockDest) {
-      if (!mockOrigin) setRegion(mockDest.region)
       setDestinationStation(mockDest.station)
     }
     setRouteLegs(MOCK_ROUTE_LEGS)
@@ -565,7 +563,7 @@ export default function TrainRouteForm({
 
         <div className="mt-4" id="krl-region-select">
           <label htmlFor="region" className="mb-1 block text-sm">Area</label>
-          <Select value={region} onValueChange={handleRegionChange}>
+          <Select value={region} onValueChange={handleRegionChange} disabled>
             <SelectTrigger className="h-11 w-full">
               <SelectValue />
             </SelectTrigger>
@@ -608,7 +606,7 @@ export default function TrainRouteForm({
                   }
                 >
                   <Star
-                    className="h-4 w-4"
+                    className={`h-4 w-4 ${isFavorited ? "text-amber-400" : ""}`}
                     fill={isFavorited ? "currentColor" : "none"}
                   />
                 </Button>
@@ -630,12 +628,6 @@ export default function TrainRouteForm({
           <label className="mb-1 block text-sm">Waktu Keberangkatan</label>
           <TimeSelect value={time} onChange={setTime} />
         </div>
-
-        {originStation?.id === destinationStation?.id && (
-          <div className="mt-3 flex justify-center">
-            <PenaltyNotification />
-          </div>
-        )}
 
         {showInitialPrompt && (
           <div className="mt-8 text-center text-sm text-slate-500">

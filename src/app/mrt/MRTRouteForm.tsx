@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, useMemo, Fragment } from 'react'
 
-import PenaltyNotification from '@/components/PenaltyNotification'
 import Spinner from '@/components/Spinner'
 import {
   Select,
@@ -229,9 +228,6 @@ export default function MRTRouteForm({
                   </p>
                 </>
               )}
-              {originStation.name === destinationStation?.name ? (
-                <PenaltyNotification />
-              ) : null}
             </div>
             <hr className="mt-4 border-t-2 border-slate-200 rounded-control" />
             <h2 className="mt-2 mb-4 text-xl text-center font-medium">
