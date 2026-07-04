@@ -11,6 +11,7 @@ import {
   MAX_TRANSIT_LEGS,
   GET_ROUTE_CONCURRENCY,
   ROUTE_EARLY_EXIT_MINUTES,
+  ROUTE_SEARCH_BUDGET_MS,
   BREAKER_FAILURE_THRESHOLD,
   BREAKER_WINDOW_MS,
   BREAKER_COOLDOWN_MS,
@@ -32,7 +33,11 @@ import {
 } from './types'
 import { getLineGraph, findTransferStations, getForkPoint, LINES } from './topology'
 import { convertToTitleCase, convertTimeToHHMM } from '@/app/utils'
-import { getScheduleSnapshot, getRepoScheduleSnapshot } from './snapshotStore'
+import {
+  getScheduleSnapshot,
+  getRepoScheduleSnapshot,
+  getRepoTrainScheduleSnapshot,
+} from './snapshotStore'
 
 const staleCache = new Map<string, { body: string; ts: number }>()
 const inFlight = new Map<string, Promise<Response>>()
@@ -368,6 +373,13 @@ async function getTrainSchedule(
     ) {
       return []
     }
+    if (error instanceof UpstreamError) {
+      const snapshot = await getRepoTrainScheduleSnapshot(trainId)
+      if (snapshot) {
+        markSource(meta, 'repo-snapshot', snapshot.capturedAt)
+        return snapshot.data
+      }
+    }
     throw error
   }
   const json: KciTrainScheduleResponse = await response.json()
@@ -402,6 +414,10 @@ function guessLineId(kaName: string): string | null {
   return null
 }
 
+function budgetExceeded(meta?: FetchMeta): boolean {
+  return typeof meta?.deadlineAt === 'number' && Date.now() >= meta.deadlineAt
+}
+
 async function getRoute(
   from: string,
   to: string,
@@ -420,6 +436,8 @@ async function getRoute(
   const refMinutes = parseMinutes(timeFrom)
 
   for (let batchStart = 0; batchStart < candidates.length; batchStart += GET_ROUTE_CONCURRENCY) {
+    if (batchStart > 0 && budgetExceeded(meta)) break
+
     const batch = candidates.slice(batchStart, batchStart + GET_ROUTE_CONCURRENCY)
     const batchResults = await Promise.allSettled(
       batch.map(async ({ train_id, ka_name, color }) => {
@@ -529,6 +547,12 @@ async function tryRouteWithSameLineSplit(
     const step = fromIdx < toIdx ? 1 : -1
 
     for (let mid = fromIdx + step; mid !== toIdx; mid += step) {
+      if (budgetExceeded(meta)) {
+        throw new NoRouteFoundError(
+          'No direct route found between the given stations'
+        )
+      }
+
       const midStation = stations[mid]
       try {
         const leg1 = await getRoute(from, midStation, timeFrom, meta)
@@ -578,6 +602,10 @@ async function getTransitRoute(
     )
   }
 
+  if (meta && meta.deadlineAt === undefined) {
+    meta.deadlineAt = Date.now() + ROUTE_SEARCH_BUDGET_MS
+  }
+
   try {
     const legs = await tryRouteWithSameLineSplit(from, to, timeFrom, meta)
     onHop?.({ index: 0, total: 1, from, to, time: timeFrom }, { ok: true, legs })
@@ -625,6 +653,8 @@ async function getTransitRoute(
 
   for (let i = 0; i < total; i++) {
     const hop = { index: i, total, from: waypoints[i], to: waypoints[i + 1], time: currentTime }
+
+    if (!blocked && budgetExceeded(meta)) blocked = true
 
     if (blocked) {
       onHop!(hop, {

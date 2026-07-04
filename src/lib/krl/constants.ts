@@ -27,6 +27,14 @@ const GET_ROUTE_CONCURRENCY = 3
 // in the 3-hour window once a good-enough match is already in hand.
 const ROUTE_EARLY_EXIT_MINUTES = 5
 
+// Wall-clock budget for an entire multi-hop route search (all hops
+// combined), not per fetch. Without this, a hop with no valid midpoint can
+// burn through many sequential per-candidate timeouts (each up to
+// UPSTREAM_TIMEOUT_MS + retry) before giving up — the per-fetch timeouts
+// were never the problem, the lack of an overall ceiling was. Once exceeded,
+// remaining hops report as blocked instead of still being searched.
+const ROUTE_SEARCH_BUDGET_MS = 8000
+
 // Circuit breaker: open after this many consecutive failures within the
 // window, stay open for the cooldown, then allow one half-open probe.
 // Must stay above GET_ROUTE_CONCURRENCY — otherwise one cold-start batch of
@@ -60,6 +68,7 @@ export {
   MAX_TRANSIT_LEGS,
   GET_ROUTE_CONCURRENCY,
   ROUTE_EARLY_EXIT_MINUTES,
+  ROUTE_SEARCH_BUDGET_MS,
   BREAKER_FAILURE_THRESHOLD,
   BREAKER_WINDOW_MS,
   BREAKER_COOLDOWN_MS,

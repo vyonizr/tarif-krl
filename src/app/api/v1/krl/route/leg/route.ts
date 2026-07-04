@@ -3,6 +3,7 @@ import { tryRouteWithSameLineSplit } from '@/lib/krl/adapter'
 import { getLineGraph } from '@/lib/krl/topology'
 import { ok, fail, dataSourceHeaders } from '@/lib/krl/response'
 import { UpstreamError, NoRouteFoundError, FetchMeta } from '@/lib/krl/types'
+import { ROUTE_SEARCH_BUDGET_MS } from '@/lib/krl/constants'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,7 +41,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const meta: FetchMeta = { source: 'live' }
+    const meta: FetchMeta = { source: 'live', deadlineAt: Date.now() + ROUTE_SEARCH_BUDGET_MS }
     const legs = await tryRouteWithSameLineSplit(from, to, time, meta)
     return NextResponse.json(ok({ legs }), { headers: dataSourceHeaders(meta) })
   } catch (error) {

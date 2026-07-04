@@ -1,9 +1,14 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
-import { KciScheduleRow } from './types'
+import { KciScheduleRow, KciTrainScheduleRow } from './types'
 
 interface Snapshot {
   data: KciScheduleRow[]
+  capturedAt: string
+}
+
+interface TrainSnapshot {
+  data: KciTrainScheduleRow[]
   capturedAt: string
 }
 
@@ -17,6 +22,21 @@ async function getRepoScheduleSnapshot(stationId: string): Promise<Snapshot | nu
   try {
     const raw = await readFile(filePath, 'utf8')
     const parsed = JSON.parse(raw) as { data: KciScheduleRow[]; capturedAt: string }
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+// Same idea, but for a single train's full stop sequence (used to verify a
+// candidate train reaches the hop's destination and to build its `stops`
+// list — getSchedules's snapshot can't stand in for this, it only has each
+// train's origin departure + final dest, not every intermediate stop).
+async function getRepoTrainScheduleSnapshot(trainId: string): Promise<TrainSnapshot | null> {
+  const filePath = path.join(process.cwd(), 'data', 'train-snapshots', `${trainId}.json`)
+  try {
+    const raw = await readFile(filePath, 'utf8')
+    const parsed = JSON.parse(raw) as TrainSnapshot
     return parsed
   } catch {
     return null
@@ -76,5 +96,10 @@ async function setScheduleSnapshot(
   })
 }
 
-export { getScheduleSnapshot, setScheduleSnapshot, getRepoScheduleSnapshot }
-export type { Snapshot }
+export {
+  getScheduleSnapshot,
+  setScheduleSnapshot,
+  getRepoScheduleSnapshot,
+  getRepoTrainScheduleSnapshot,
+}
+export type { Snapshot, TrainSnapshot }

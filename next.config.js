@@ -7,7 +7,7 @@ const nextConfig = {
   // be listed explicitly to end up in the deployed function bundle.
   experimental: {
     outputFileTracingIncludes: {
-      '/api/v1/krl/**': ['./data/schedule-snapshots/**'],
+      '/api/v1/krl/**': ['./data/schedule-snapshots/**', './data/train-snapshots/**'],
     },
   },
 }

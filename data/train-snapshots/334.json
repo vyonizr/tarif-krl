@@ -1,0 +1,16 @@
+{
+  "trainId": "334",
+  "capturedAt": "2026-07-04T14:26:35.395Z",
+  "data": [
+    {
+      "train_id": "334",
+      "ka_name": "COMMUTER LINE WALAHAR",
+      "station_id": "CKR",
+      "station_name": "CIKARANG",
+      "time_est": "18:35:00",
+      "transit_station": false,
+      "color": "#0084D8",
+      "transit": ""
+    }
+  ]
+}

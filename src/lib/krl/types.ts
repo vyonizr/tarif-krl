@@ -78,6 +78,10 @@ export type DataSource = 'live' | 'stale-cache' | 'blob-snapshot' | 'repo-snapsh
 export interface FetchMeta {
   source: DataSource
   capturedAt?: string
+  // Epoch ms after which a multi-hop route search should stop trying new
+  // candidates/midpoints and treat remaining work as blocked. Set once by
+  // getTransitRoute; absent for single-leg callers, so they're unaffected.
+  deadlineAt?: number
 }
 
 export class UpstreamError extends Error {
