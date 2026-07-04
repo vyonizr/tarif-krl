@@ -8,6 +8,7 @@ import {
   REVALIDATE_TRAIN_SCHEDULE,
   ROUTE_SEARCH_WINDOW_HOURS,
   MAX_TRANSIT_LEGS,
+  GET_ROUTE_CONCURRENCY,
 } from './constants'
 import {
   KciStationResponse,
@@ -48,8 +49,8 @@ async function fetchWithRetry(
       clearTimeout(timeoutId)
 
       if (!response.ok) {
-        if (response.status >= 500) {
-          throw new Error('retryable upstream 5xx')
+        if (response.status >= 500 || response.status === 429) {
+          throw new Error('retryable upstream error')
         }
         throw new UpstreamError(
           502,
@@ -264,37 +265,36 @@ async function getRoute(
   let bestMatch: { result: IKRLRouteResult; diffMinutes: number } | null = null
   const refMinutes = parseMinutes(timeFrom)
 
-  for (let i = 0; i < candidates.length; i++) {
-    const { train_id, ka_name, color } = candidates[i]
+  for (let batchStart = 0; batchStart < candidates.length; batchStart += GET_ROUTE_CONCURRENCY) {
+    const batch = candidates.slice(batchStart, batchStart + GET_ROUTE_CONCURRENCY)
+    const batchResults = await Promise.allSettled(
+      batch.map(async ({ train_id, ka_name, color }) => {
+        if (sharedLineIds.length > 0) {
+          const candidateLine = guessLineId(ka_name)
+          if (candidateLine && !sharedLineIds.includes(candidateLine)) return null
+        }
 
-    if (sharedLineIds.length > 0) {
-      const candidateLine = guessLineId(ka_name)
-      if (candidateLine && !sharedLineIds.includes(candidateLine)) continue
-    }
+        let stops
+        try {
+          stops = await getTrainSchedule(train_id)
+        } catch (error) {
+          if (error instanceof NoRouteFoundError) throw error
+          return null
+        }
 
-    let stops
-    try {
-      stops = await getTrainSchedule(train_id)
-    } catch (error) {
-      if (error instanceof NoRouteFoundError) throw error
-      continue
-    }
+        const fromIndex = stops.findIndex((s) => s.station_id === from)
+        if (fromIndex === -1) return null
 
-    const fromIndex = stops.findIndex((s) => s.station_id === from)
-    if (fromIndex === -1) continue
+        const toIndex = stops.findIndex(
+          (s, idx) => s.station_id === to && idx >= fromIndex
+        )
+        if (toIndex === -1) return null
 
-    const toIndex = stops.findIndex(
-      (s, idx) => s.station_id === to && idx >= fromIndex
-    )
-    if (toIndex === -1) continue
+        const departureMinutes = parseMinutes(stops[fromIndex].time_est)
+        let diffMinutes = departureMinutes - refMinutes
+        if (diffMinutes < 0) diffMinutes += 24 * 60
 
-    const departureMinutes = parseMinutes(stops[fromIndex].time_est)
-    let diffMinutes = departureMinutes - refMinutes
-    if (diffMinutes < 0) diffMinutes += 24 * 60
-
-    if (!bestMatch || diffMinutes < bestMatch.diffMinutes) {
-      bestMatch = {
-        result: {
+        return {
           train_id,
           train_name: ka_name,
           color,
@@ -303,8 +303,29 @@ async function getRoute(
             station_name: convertToTitleCase(s.station_name),
             time_est: convertTimeToHHMM(s.time_est),
           })),
-        },
-        diffMinutes,
+          diffMinutes,
+        }
+      })
+    )
+
+    for (const settled of batchResults) {
+      if (settled.status === 'rejected') {
+        if (settled.reason instanceof NoRouteFoundError) throw settled.reason
+        continue
+      }
+      const candidate = settled.value
+      if (!candidate) continue
+
+      if (!bestMatch || candidate.diffMinutes < bestMatch.diffMinutes) {
+        bestMatch = {
+          result: {
+            train_id: candidate.train_id,
+            train_name: candidate.train_name,
+            color: candidate.color,
+            stops: candidate.stops,
+          },
+          diffMinutes: candidate.diffMinutes,
+        }
       }
     }
   }
