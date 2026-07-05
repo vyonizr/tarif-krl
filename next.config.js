@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable Cross Origin
+  // allowedDevOrigins: ['192.168.0.112'],
   // Repo-committed schedule snapshots (data/schedule-snapshots/*.json) are
   // read dynamically at runtime as a last-resort fallback (see
   // src/lib/krl/snapshotStore.ts's getRepoScheduleSnapshot), so Next's
