@@ -59,6 +59,7 @@ export interface IMrtFareScheduleResult {
   fare: number
   timeEstimation: number
   direction: { start: string; end: string }
+  headingTowards: string
   schedule: {
     weekdays: string[]
     weekends: string[]

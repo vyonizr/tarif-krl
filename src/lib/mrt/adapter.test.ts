@@ -310,4 +310,53 @@ describe('getFareAndSchedule', () => {
       'Station not found in MRT_LINE_ORDER'
     )
   })
+
+  test('headingTowards resolves to schedule.end when directionKey === end', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(createFetchResponse(createRouteResponse()))
+
+    const result = await getFareAndSchedule(4, 6)
+
+    expect(result.headingTowards).toBe('Bundaran HI')
+  })
+
+  test('headingTowards resolves to schedule.start when directionKey === start', async () => {
+    const response = createRouteResponse()
+    response.data.from.id = 36
+    response.data.from.name = 'Stasiun MRT Blok M BCA'
+    response.data.from.object = {
+      schedule: {
+        start: 'Lebak Bulus',
+        end: 'Bundaran HI',
+        weekdaysStart: '05:30:00;05:45:00',
+        weekdaysEnd: '06:00:00',
+        weekendsStart: '06:30:00',
+        weekendsEnd: '07:00:00',
+      },
+    }
+
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(createFetchResponse(response))
+
+    const result = await getFareAndSchedule(36, 4)
+
+    expect(result.headingTowards).toBe('Lebak Bulus')
+  })
+
+  test('headingTowards falls back to toObj.name when schedule is missing', async () => {
+    const response = createRouteResponse()
+    delete response.data.from.object.schedule
+    response.data.from.name = 'Stasiun MRT Lebak Bulus'
+    response.data.to.name = 'Bundaran HI Bank Jakarta'
+
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(createFetchResponse(response))
+
+    const result = await getFareAndSchedule(4, 6)
+
+    expect(result.headingTowards).toBe('Bundaran HI Bank Jakarta')
+  })
 })

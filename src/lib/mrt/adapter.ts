@@ -98,8 +98,12 @@ async function getFareAndSchedule(
   let weekdays: string[] = []
   let weekends: string[] = []
 
+  let headingTowards: string
+
   if (schedule) {
     direction = { start: schedule.start, end: schedule.end }
+    headingTowards =
+      directionKey === 'end' ? schedule.end : schedule.start
 
     if (directionKey === 'end') {
       weekdays = parseSemicolonTimes(schedule.weekdaysEnd)
@@ -114,12 +118,15 @@ async function getFareAndSchedule(
       start: otherKey === 'start' ? fromObj.name : toObj.name,
       end: otherKey === 'end' ? fromObj.name : toObj.name,
     }
+    headingTowards =
+      directionKey === 'end' ? direction.end : direction.start
   }
 
   return {
     fare: integration.cost,
     timeEstimation: parseInt(integration.timeEstimation, 10) || 0,
     direction,
+    headingTowards,
     schedule: { weekdays, weekends },
   }
 }
