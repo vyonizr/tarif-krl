@@ -1,152 +1,34 @@
 import { NextResponse } from 'next/server'
-import { IMRTStop } from '../../../types'
-
-import { MRT_BASE_FARE, MRT_NEXT_STATION_FARE } from '../../../constants'
+import { getFareAndSchedule } from '@/lib/mrt/adapter'
+import { ok, fail } from '@/lib/mrt/response'
 
 export const dynamic = 'force-dynamic'
-
-function getNumberOfStops(
-  departingStopOrder: number,
-  destinationStopOrder: number
-) {
-  return Math.abs(departingStopOrder - destinationStopOrder)
-}
-
-function calculateFare(numberOfStops: number) {
-  if (numberOfStops === 0) {
-    return 0
-  }
-  let fare = MRT_BASE_FARE + (numberOfStops - 1) * MRT_NEXT_STATION_FARE
-  return fare
-}
-
-function findSharedRoute(
-  departingStops: IMRTStop[],
-  destinationStops: IMRTStop[]
-) {
-  for (let i = 0; i < departingStops.length; i++) {
-    for (let j = 0; j < destinationStops.length; j++) {
-      if (
-        departingStops[i].route_id === destinationStops[j].route_id &&
-        departingStops[i].order < destinationStops[j].order
-      ) {
-        return departingStops[i].route_id
-      }
-    }
-  }
-
-  return null
-}
-
-const headers = new Headers()
-headers.set('Content-Type', 'application/json')
-headers.set('apikey', process.env.NEXT_PUBLIC_SUPABASE_KEY || '')
-headers.set(
-  'Authorization',
-  `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_KEY}` || ''
-)
-
-async function getStopsByStationId(stationId: number) {
-  try {
-    const response = await fetch(
-      process.env.SUPABASE_URL +
-        '/stops?' +
-        new URLSearchParams({
-          select: '*',
-          station_id: `eq.${stationId}`,
-        }),
-      { headers }
-    )
-
-    const responseJSON = await response.json()
-    return responseJSON
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-async function getStations(
-  routeId: number,
-  departingStationId: number,
-  destinationStationId: number
-) {
-  try {
-    const responseRoute = await fetch(
-      process.env.SUPABASE_URL +
-        '/stops?' +
-        new URLSearchParams({
-          select: 'id,order,station_id,stations(id,name),route_id',
-          route_id: `eq.${routeId}`,
-          order: 'order.asc',
-        }),
-      { headers }
-    )
-
-    let responseRouteJSON = await responseRoute.json()
-    const departingStopIndex = responseRouteJSON.findIndex(
-      (stop: IMRTStop) => stop.station_id === departingStationId
-    )
-
-    const destinationStopIndex = responseRouteJSON.findIndex(
-      (stop: IMRTStop) => stop.station_id === destinationStationId
-    )
-
-    const filteredStops = responseRouteJSON.filter(
-      (_: IMRTStop, index: number) => {
-        return index >= departingStopIndex && index <= destinationStopIndex
-      }
-    )
-
-    return filteredStops
-  } catch (error) {
-    console.error(error)
-  }
-}
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
-    const departingStationId: string | null = searchParams.get('from')
-    const destinationStationId: string | null = searchParams.get('to')
-    if (departingStationId !== null && destinationStationId !== null) {
-      const departingStops = await getStopsByStationId(
-        parseInt(departingStationId)
-      )
-      const destinationStops = await getStopsByStationId(
-        parseInt(destinationStationId)
-      )
+    const from = searchParams.get('from')
+    const to = searchParams.get('to')
+    const datetime = searchParams.get('datetime') || undefined
 
-      const sharedRouteId = findSharedRoute(departingStops, destinationStops)
-
-      const departingStop = departingStops.find(
-        (stop: IMRTStop) => stop.route_id === sharedRouteId
-      )
-      const destinationStop = destinationStops.find(
-        (stop: IMRTStop) => stop.route_id === sharedRouteId
-      )
-
-      const numberOfStops = getNumberOfStops(
-        destinationStop.order,
-        departingStop.order
-      )
-
-      let passedStations = []
-
-      if (sharedRouteId !== null) {
-        passedStations = await getStations(
-          sharedRouteId,
-          parseInt(departingStationId),
-          parseInt(destinationStationId)
-        )
-      }
-
-      const fare = calculateFare(numberOfStops)
+    if (!from || !to) {
       return NextResponse.json(
-        { fare, passed_stations: passedStations, route_id: sharedRouteId },
-        { status: 200 }
+        fail(400, 'Parameters "from" and "to" are required'),
+        { status: 400 }
       )
     }
-  } catch (err) {
-    return NextResponse.json({ error: err }, { status: 500 })
+
+    const data = await getFareAndSchedule(
+      parseInt(from, 10),
+      parseInt(to, 10),
+      datetime
+    )
+    return NextResponse.json(ok(data))
+  } catch (error) {
+    console.error(error)
+    return NextResponse.json(
+      fail(500, error instanceof Error ? error.message : 'Internal server error'),
+      { status: 500 }
+    )
   }
 }

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Jadwal KRL (formerly Tarif KRL) is a Next.js (App Router) web app for calculating commuter line fares and schedules for Jabodetabek/Yogyakarta KRL, and fares/routes for Jakarta MRT. Built on two upstream data sources: the KRL partner API (`kci.id/api/krl`) and a Supabase-backed dataset for MRT stations/routes.
+Jadwal KRL (formerly Tarif KRL) is a Next.js (App Router) web app for calculating commuter line fares and schedules for Jabodetabek/Yogyakarta KRL, and fares/routes for Jakarta MRT. Built on two upstream data sources: the KRL partner API (`kci.id/api/krl`) and the official Jakarta MRT API (`beweb-dev.jakartamrt.co.id/middleware/api`).
 
 ## Commands
 
@@ -18,9 +18,7 @@ Jadwal KRL (formerly Tarif KRL) is a Next.js (App Router) web app for calculatin
 
 ## Environment
 
-Requires `SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KEY` (see `.env.example`), used by all MRT-related routes/pages to query Supabase's PostgREST API directly via `fetch`, not a Supabase client SDK.
-
-There are no optional environment variables, since schedule/route data is served entirely from the repo-committed snapshot in `src/lib/krl/snapshotStore.ts` (see `npm run snapshot:refresh` above), not from Vercel Blob or a cron job, since Blob isn't viable on the Hobby plan this app deploys on.
+No required environment variables. `MRT_MIDDLEWARE_BASE_URL` can optionally override the default upstream MRT API hostname (`src/lib/mrt/constants.ts`). KRL schedule/route data is served entirely from the repo-committed snapshot in `src/lib/krl/snapshotStore.ts` (see `npm run snapshot:refresh` above), not from Vercel Blob or a cron job, since Blob isn't viable on the Hobby plan this app deploys on.
 
 Git hooks live in `.githooks/` (e.g. `pre-merge-commit`, which blocks merging into `main` if `package.json`'s version wasn't bumped) and require `core.hooksPath` to point there, which `npm install`'s `postinstall` script sets automatically, since `core.hooksPath` is local git config and not tracked by the repo itself.
 
@@ -37,10 +35,12 @@ Two independent transport modules living side by side under `src/app/`, each fol
 - Errors are typed (`UpstreamError`, `NoRouteFoundError` in `src/lib/krl/types.ts`) and mapped to HTTP status by the route handlers, not thrown as generic errors.
 - `src/app/api-docs/` serves interactive API docs via `@scalar/nextjs-api-reference`, reading the spec from `public/openapi.yaml`; keep that file in sync when changing `api/v1/krl/*` routes.
 
-**MRT (`src/app/mrt/`)**
-- MRT data (stations, routes, stop ordering) is *not* from an official API; it's a hand-maintained dataset in Supabase, queried via raw `fetch` to Supabase's PostgREST endpoint (`process.env.SUPABASE_URL + '/stations'|'/routes'|'/stops'`, headers set with `apikey`/`Authorization`). See `src/app/api/mrt/*/route.ts` and the `getData`/`getRoutesData` functions in `src/app/mrt/page.tsx`.
-- `page.tsx` also separately fetches official MRT station metadata (facilities, schedule notes, banners) from `jakartamrt.co.id`, routed through `corsproxy.io` (`CORS_MRT_STATIONS_OFFICIAL_URL` in `constants.ts`) since that endpoint doesn't send CORS headers.
-- Fare calculation (`src/app/api/mrt/fare/route.ts`) is computed locally, not fetched: given two station IDs, it finds each station's stops (a station can belong to multiple routes/stops), finds a shared route where the departure stop's `order` precedes the destination's (`findSharedRoute`), then computes fare as `MRT_BASE_FARE + (numberOfStops - 1) * MRT_NEXT_STATION_FARE`.
+**MRT (`src/app/mrt/`, backed by `src/lib/mrt/`)**
+- `page.tsx` calls `getData()`/`getDataOfficial()` which fetch from Supabase and the corsproxy-bridged `jakartamrt.co.id` endpoint respectively. **Note**: page.tsx still references Supabase — a follow-up frontend migration is pending (see `docs/mrt-official-api-migration-sdd.md`).
+- `MRTRouteForm.tsx` is the client component; it imports types from the old `src/app/types.ts` and constants from `src/app/constants.ts`. **Note**: this too is pending the frontend follow-up migration.
+- `src/app/api/mrt/{stations,fare}/route.ts` are thin `NextResponse` wrappers around `src/lib/mrt/adapter.ts`, which does the real work: fetches from `MRT_MIDDLEWARE_BASE_URL` (`https://beweb-dev.jakartamrt.co.id/middleware/api`, see `src/lib/mrt/constants.ts`) with `origin`/`referer` header spoofing, and returns everything wrapped in the `{ data, error }` envelope from `src/lib/mrt/response.ts` (`ok`/`fail`).
+- `getStations()` calls `/datum` to return `{ id, slug, name }` station objects. `getFareAndSchedule(from, to, datetime)` calls `POST /route`, resolves travel direction using a hardcoded `MRT_LINE_ORDER` array (station ids from Lebak Bulus to Bundaran HI in physical order, in `src/lib/mrt/constants.ts`), and returns `{ fare, timeEstimation, direction, schedule }`. The old `/api/mrt/routes` route was deleted — termini names now come from the fare/schedule response.
+- Fare is computed by the upstream API (`integration.cost`), not locally. `MRT_BASE_FARE`/`MRT_NEXT_STATION_FARE`/`SAME_STATION_PENALTY_FARE` are kept as documentation constants in `src/lib/mrt/constants.ts`.
 
 **Shared conventions**
 - `src/app/constants.ts` holds MRT fare constants and the `jakartamrt.co.id`/corsproxy URLs. KRL's own constants (upstream base URL, revalidate windows, retry/timeout, routing tunables) live in `src/lib/krl/constants.ts`.
