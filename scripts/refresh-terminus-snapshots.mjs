@@ -134,7 +134,11 @@ async function main() {
 
 async function refreshTrainSnapshots(trainIds) {
   const changed = []
-  const ids = [...trainIds]
+  const ids = [...trainIds].sort((a, b) => {
+    const aMissing = !existsSync(path.join(TRAIN_SNAPSHOT_DIR, `${a}.json`))
+    const bMissing = !existsSync(path.join(TRAIN_SNAPSHOT_DIR, `${b}.json`))
+    return aMissing === bMissing ? 0 : aMissing ? -1 : 1
+  })
 
   for (let i = 0; i < ids.length; i += FETCH_CONCURRENCY) {
     const batch = ids.slice(i, i + FETCH_CONCURRENCY)
