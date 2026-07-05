@@ -906,7 +906,7 @@ export default function TrainRouteForm({
               retryingHopIndexes={retryingHopIndexes}
             />
             <p className="mt-3 text-center text-xs text-slate-400">
-              Data jadwal &amp; tarif bersumber dari KCI, bukan real-time dari operator.
+              Data jadwal &amp; tarif bersumber dari KCI
             </p>
           </div>
         )}

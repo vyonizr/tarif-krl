@@ -60,9 +60,22 @@ async function fetchTrainSchedule(trainId) {
   return json.data
 }
 
+function parseTrainIdsArg() {
+  const arg = process.argv.slice(2).find((a) => a.startsWith('--train='))
+  return arg ? arg.slice('--train='.length).split(',').filter(Boolean) : null
+}
+
 async function main() {
   await mkdir(SNAPSHOT_DIR, { recursive: true })
   await mkdir(TRAIN_SNAPSHOT_DIR, { recursive: true })
+
+  const onlyTrainIds = parseTrainIdsArg()
+  if (onlyTrainIds) {
+    console.log(`[snapshot] refreshing only train(s): ${onlyTrainIds.join(', ')}`)
+    const changedTrains = await refreshTrainSnapshots(new Set(onlyTrainIds))
+    console.log(changedTrains.length === 0 ? 'No schedule changes.' : `Done. ${changedTrains.length} train snapshot(s) updated.`)
+    return
+  }
 
   console.log('[snapshot] fetching station list...')
   let allStationIds
@@ -157,6 +170,7 @@ async function refreshTrainSnapshots(trainIds) {
           null,
           2
         )
+        await mkdir(path.dirname(filePath), { recursive: true })
         await writeFile(filePath, body + '\n')
         return trainId
       })

@@ -28,7 +28,7 @@ const steps: Step[] = [
       <div>
         <h3 className="mb-1 text-base font-semibold">Area</h3>
         <p className="text-sm">
-          Pilih area (Jabodetabek atau Yogyakarta) di sini.
+          Pilih area (untuk saat ini baru tersedia Jabodetabek) di sini.
         </p>
       </div>
     ),

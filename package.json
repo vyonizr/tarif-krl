@@ -11,7 +11,8 @@
     "lint": "next lint",
     "test": "jest",
     "test:e2e": "playwright test",
-    "snapshot:refresh": "node scripts/refresh-terminus-snapshots.mjs"
+    "snapshot:refresh": "node scripts/refresh-terminus-snapshots.mjs",
+    "snapshot:fill-missing": "node scripts/fill-missing-snapshots.mjs"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.3.2",
