@@ -176,6 +176,7 @@ export default function KRLOnboardingTour({
         close: "Tutup",
         last: "Selesai",
         next: "Lanjut",
+        nextWithProgress: "Lanjut ({current} dari {total})",
         skip: "Lewati",
       }}
     />

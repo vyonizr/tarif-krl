@@ -26,7 +26,7 @@ export default function RootLayout({
         }
       >
         {children}
-        <footer className="py-4 text-center text-xs text-slate-400">
+        <footer className="py-4 text-center text-xs text-slate-500">
           <p>
             &copy; 2023-{new Date().getFullYear()}{' '}
             <Link

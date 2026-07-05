@@ -33,7 +33,7 @@ test.describe('KRL golden-path flows', () => {
     await expect(page.locator('text=Rp').first()).toBeVisible({ timeout: 15000 })
   })
 
-  test('same station for origin and destination is rejected', async ({
+  test('same station for origin and destination shows flat penalty fare', async ({
     page,
   }) => {
     await page.goto('/krl')
@@ -42,16 +42,10 @@ test.describe('KRL golden-path flows', () => {
     await selectStation(page, 'Pilih Stasiun Asal', 'Jakarta Kota')
     await selectStation(page, 'Pilih Stasiun Tujuan', 'Jakarta Kota')
 
-    await page.waitForTimeout(2000)
-
-    const hasError = await page
-      .locator('text=Origin and destination must be different stations')
-      .isVisible()
-      .catch(() => false)
-
-    const noFare = (await page.locator('text=Rp').count()) === 0
-
-    expect(hasError || noFare).toBe(true)
+    await expect(page.locator('text=Stasiun asal dan tujuan sama')).toBeVisible({
+      timeout: 15000,
+    })
+    await expect(page.locator('text=Rp 3.000')).toBeVisible()
   })
 
   test('save favorite route, reload preserves it, click repopulates form', async ({

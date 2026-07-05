@@ -14,7 +14,8 @@ import {
 
 import { IStationState, KRLStation, IFareResponse, IFavoriteRoute, LegSlot } from "../types"
 import { IKRLRouteResult } from "@/lib/krl/types"
-import { getCurrentTimeInHHMM, convertToTitleCase } from "../utils"
+import { SAME_STATION_FARE } from "@/lib/krl/constants"
+import { getCurrentTimeInHHMM, convertToTitleCase, formatToRupiah } from "../utils"
 
 import StationCombobox from "./StationCombobox"
 import SwapButton from "./SwapButton"
@@ -480,6 +481,11 @@ export default function TrainRouteForm({
 
   const startRouteSearch = useCallback(() => {
     if (!originStation || !destinationStation) return
+    if (originStation.id === destinationStation.id) {
+      setLegSlots(null)
+      setRouteError(null)
+      return
+    }
     const requestId = ++routeRequestId.current
     setIsLoadingRoute(true)
     setLegSlots(null)
@@ -668,6 +674,12 @@ export default function TrainRouteForm({
 
   const fetchFare = useCallback(async () => {
     if (!originStation || !destinationStation) return
+    if (originStation.id === destinationStation.id) {
+      setFare(SAME_STATION_FARE)
+      setFareError(false)
+      setFareSource(null)
+      return
+    }
     const requestId = ++fareRequestId.current
     setIsLoadingFare(true)
     setFareError(false)
@@ -722,10 +734,14 @@ export default function TrainRouteForm({
     )
   }, [fareSource, routeSource])
 
+  const showSameStationNotice =
+    originStation && destinationStation && originStation.id === destinationStation.id
+
   const showRouteItinerary =
-    originStation && destinationStation && legSlots && legSlots.length > 0
+    !showSameStationNotice && originStation && destinationStation && legSlots && legSlots.length > 0
 
   const showNoRouteError =
+    !showSameStationNotice &&
     originStation &&
     destinationStation &&
     routeError &&
@@ -733,6 +749,7 @@ export default function TrainRouteForm({
     !isLoadingRoute
 
   const showLoading =
+    !showSameStationNotice &&
     originStation &&
     destinationStation &&
     isLoadingRoute &&
@@ -872,16 +889,23 @@ export default function TrainRouteForm({
                   ? "Tidak ada rute ditemukan antara kedua stasiun ini."
                   : "Gagal memuat rute, coba lagi"}
               </p>
-              {originStation?.id !== destinationStation?.id && (
-                <Button
-                  onClick={startRouteSearch}
-                  variant="outline"
-                  className="mt-3"
-                >
-                  Coba Lagi
-                </Button>
-              )}
+              <Button
+                onClick={startRouteSearch}
+                variant="outline"
+                className="mt-3"
+              >
+                Coba Lagi
+              </Button>
             </div>
+          </div>
+        )}
+
+        {showSameStationNotice && (
+          <div className="mt-8 rounded-lg bg-amber-50 p-4 text-center">
+            <p className="text-sm text-amber-800">
+              Stasiun asal dan tujuan sama. Tap masuk dan keluar di stasiun yang sama dikenakan tarif flat{" "}
+              <span className="font-semibold">{formatToRupiah(SAME_STATION_FARE)}</span>.
+            </p>
           </div>
         )}
 

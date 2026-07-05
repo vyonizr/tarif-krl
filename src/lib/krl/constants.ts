@@ -11,6 +11,10 @@ const UPSTREAM_RETRY_COUNT = 1
 const ROUTE_SEARCH_WINDOW_HOURS = 3
 const MAX_TRANSIT_LEGS = 3
 
+// Flat fare charged by KCI when tapping in and out at the same station
+// without traveling (no route/legs apply in this case).
+const SAME_STATION_FARE = 3000
+
 // Concurrency for the daily snapshot cron when scraping station schedules
 // and train stop sequences from KCI. Kept modest to avoid tripping KCI's
 // own burst throttling (which was measured against real 429 responses).
@@ -26,4 +30,5 @@ export {
   ROUTE_SEARCH_WINDOW_HOURS,
   MAX_TRANSIT_LEGS,
   SNAPSHOT_FETCH_CONCURRENCY,
+  SAME_STATION_FARE,
 }
