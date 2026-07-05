@@ -8,8 +8,8 @@ import { KCI_BASE_URL } from '../src/lib/krl/constants.ts'
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 const SNAPSHOT_DIR = path.join(ROOT, 'data', 'schedule-snapshots')
 const TRAIN_SNAPSHOT_DIR = path.join(ROOT, 'data', 'train-snapshots')
-const FETCH_CONCURRENCY = 5
-const INTER_BATCH_DELAY_MS = 300
+const FETCH_CONCURRENCY = 1
+const INTER_BATCH_DELAY_MS = 12_000 // 1 req every 12s → 5 req/min, to stay under upstream's 429 threshold
 
 async function fetchFromKci(path, timeoutMs = 10_000, retries = 3) {
   const url = `${KCI_BASE_URL}/${path}`
