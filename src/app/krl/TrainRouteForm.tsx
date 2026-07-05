@@ -881,7 +881,17 @@ export default function TrainRouteForm({
 
         {dataSourceNotice?.source === "repo-snapshot" && (showRouteItinerary || showNoRouteError) && (
           <div className="mt-4 rounded-lg bg-blue-50 p-3 text-xs text-blue-700">
-            {`Menampilkan jadwal bawaan aplikasi (terakhir berubah: ${formatSnapshotDate(dataSourceNotice.capturedAt)}) — mungkin tidak mencerminkan perubahan terbaru.`}
+            {`Menampilkan jadwal bawaan aplikasi (terakhir berubah: ${formatSnapshotDate(dataSourceNotice.capturedAt)}). `}
+            Untuk informasi lebih detail seperti kepadatan kereta dan info transit peron, unduh{" "}
+            <a
+              href="https://play.google.com/store/apps/details?id=com.kci.access"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              C-Access
+            </a>
+            .
           </div>
         )}
 
@@ -897,7 +907,15 @@ export default function TrainRouteForm({
               retryingHopIndexes={retryingHopIndexes}
             />
             <p className="mt-3 text-center text-xs text-slate-400">
-              Data jadwal &amp; tarif bersumber dari KCI
+              Data jadwal &amp; tarif bersumber dari{" "}
+              <a
+                href="https://kci.id/perjalanan-krl/jadwal-kereta"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                KCI
+              </a>
             </p>
           </div>
         )}
