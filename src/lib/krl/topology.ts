@@ -107,7 +107,7 @@ function buildLineGraph(): LineGraph {
 
     if (sharedStations.length >= 2 && !LINE_EDGE_OVERRIDES[key]) {
       console.warn(
-        `Line pair ${key} has ${sharedStations.length} shared stations: ${sharedStations.join(', ')} — consider adding an override`
+        `Line pair ${key} has ${sharedStations.length} shared stations: ${sharedStations.join(', ')}, consider adding an override`
       )
     }
   }

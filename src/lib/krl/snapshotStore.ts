@@ -29,7 +29,7 @@ async function getRepoScheduleSnapshot(stationId: string): Promise<Snapshot | nu
 
 // Same idea, but for a single train's full stop sequence (used to verify a
 // candidate train reaches the hop's destination and to build its `stops`
-// list — getSchedules's snapshot can't stand in for this, it only has each
+// list, since getSchedules's snapshot can't stand in for this: it only has each
 // train's origin departure + final dest, not every intermediate stop).
 async function getRepoTrainScheduleSnapshot(trainId: string): Promise<TrainSnapshot | null> {
   const filePath = path.join(process.cwd(), 'data', 'train-snapshots', `${trainId}.json`)

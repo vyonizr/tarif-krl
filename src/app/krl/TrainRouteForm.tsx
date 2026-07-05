@@ -565,7 +565,7 @@ export default function TrainRouteForm({
     })
 
     es.onerror = () => {
-      // A dropped/stalled connection leaves readyState CONNECTING — the
+      // A dropped/stalled connection leaves readyState CONNECTING while the
       // browser is already retrying on its own, so let it. Only a fatal
       // condition (bad status/content-type) closes it for good, and that's
       // when we should actually surface a failure.

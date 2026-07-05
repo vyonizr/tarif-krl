@@ -123,7 +123,7 @@ async function main() {
         if (changed) changedStations.push(stationId)
         console.log(`[snapshot] ${stationId}: ${changed ? 'updated' : 'unchanged'} (${count} trains)`)
       } else {
-        console.error(`[snapshot] ${stationId}: FAILED — ${result.reason.message}`)
+        console.error(`[snapshot] ${stationId}: FAILED: ${result.reason.message}`)
       }
     }
     if (i + FETCH_CONCURRENCY < allStationIds.length) {
@@ -142,7 +142,7 @@ async function main() {
     `Done. ${changedStations.length} station snapshot(s) updated, ` +
       `${changedTrains.length} train snapshot(s) updated.`
   )
-  console.log('Snapshots written to data/schedule-snapshots/ and data/train-snapshots/ — commit and push manually.')
+  console.log('Snapshots written to data/schedule-snapshots/ and data/train-snapshots/. Commit and push manually.')
 }
 
 async function refreshTrainSnapshots(trainIds) {
@@ -181,7 +181,7 @@ async function refreshTrainSnapshots(trainIds) {
       if (result.status === 'fulfilled') {
         if (result.value) changed.push(result.value)
       } else {
-        console.error(`[snapshot] train ${trainId}: FAILED — ${result.reason.message}`)
+        console.error(`[snapshot] train ${trainId}: FAILED: ${result.reason.message}`)
       }
     }
     if (i + FETCH_CONCURRENCY < ids.length) {

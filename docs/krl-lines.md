@@ -1,7 +1,7 @@
 # KRL Lines
 
 Source of truth for line membership/topology is `src/lib/krl/topology.ts` (`LINES`).
-This doc is the human-readable version — station names next to their codes, in
+This doc is the human-readable version, with station names next to their codes, in
 the order trains actually run. Keep both in sync when KAI Commuter changes a route.
 
 ## Bogor/Nambo (red)
@@ -47,7 +47,7 @@ Tanah Tinggi (THI) – Tangerang (TNG)
 
 Modeled in `topology.ts` as a single path (Cikarang out to Kampung Bandan, then
 the shared loop segment back toward Jatinegara) rather than as four separate
-named patterns — that's all the routing/transfer logic needs. The full set of
+named patterns, since that's all the routing/transfer logic needs. The full set of
 real-world loop patterns run by KAI Commuter:
 
 - **Full Racket A:** Cikarang (CKR) – Metland Telagamurni (TLM) – Cibitung (CIT) –
@@ -60,5 +60,5 @@ real-world loop patterns run by KAI Commuter:
 - **Full Racket B:** same stations, reversed direction around the loop (via
   Manggarai/Sudirman first from Kampung Bandan side, then Jatinegara).
 - **Half Racket A/B:** Cikarang (CKR) to Kampung Bandan (KPB) only, via the
-  Manggarai side, in each direction — no loop closure past Kampung Bandan.
+  Manggarai side, in each direction, with no loop closure past Kampung Bandan.
 

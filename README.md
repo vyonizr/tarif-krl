@@ -23,7 +23,7 @@ npm test              # run Jest unit tests
 npm run test:e2e      # run Playwright end-to-end tests
 ```
 
-Requires `SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KEY` in your environment, used for the MRT data — copy `.env.example` to `.env.local` and fill those in.
+Requires `SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KEY` in your environment, used for the MRT data. Copy `.env.example` to `.env.local` and fill those in.
 
 ## API docs
 

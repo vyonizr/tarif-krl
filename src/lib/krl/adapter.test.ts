@@ -943,7 +943,7 @@ describe('getTransitRoute with onHop', () => {
     expect(events.every((e) => e.ok)).toBe(true)
   })
 
-  test('does not throw on partial failure — returns legs found so far and marks rest blocked', async () => {
+  test('does not throw on partial failure, returns legs found so far and marks rest blocked', async () => {
     setupSchedules({
       PSMB: [createScheduleRow({ train_id: '1151', ka_name: 'COMMUTER LINE BOGOR', color: '#E30A16' })],
       MRI: [],
