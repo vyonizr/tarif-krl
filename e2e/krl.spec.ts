@@ -103,3 +103,48 @@ test.describe('KRL golden-path flows', () => {
     expect(legCount).toBeGreaterThanOrEqual(1)
   })
 })
+
+test.describe('KRL onboarding tour', () => {
+  test('exiting mid-tour then reopening via Bantuan restarts from step one with mock data', async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      localStorage.removeItem('krl-onboarding-seen')
+    })
+    await page.goto('/krl')
+    await page.waitForSelector('text=Jadwal KRL', { timeout: 30000 })
+
+    // Tour auto-starts on first visit; advance one step so mock data is injected.
+    await page.waitForSelector('text=Halaman ini membantu', { timeout: 10000 })
+    await page.locator('button[data-action="primary"]').click()
+    await page.waitForTimeout(300)
+
+    // Exit mid-tour via the close (X) icon, not skip/finish.
+    await page.locator('button[data-action="close"]').click()
+    await page.waitForTimeout(300)
+    await expect(page.locator('.react-joyride__tooltip')).toHaveCount(0)
+
+    // User picks a real station pair after the mock was cleared.
+    await selectStation(page, 'Pilih Stasiun Asal', 'Jakarta Kota')
+    await selectStation(page, 'Pilih Stasiun Tujuan', 'Manggarai')
+    await expect(page.locator('text=Rp').first()).toBeVisible({ timeout: 15000 })
+
+    // Reopen the tour via the help button.
+    await page.locator('button').filter({ hasText: 'Bantuan' }).click()
+    await page.waitForTimeout(300)
+
+    // It must restart from step one, not resume where it left off.
+    await expect(page.locator('text=Halaman ini membantu')).toBeVisible()
+
+    // Advancing into the tour must re-inject the mock scenario, replacing
+    // the real Jakarta Kota / Manggarai selection with the mock Bogor / Serpong one.
+    await page.locator('button[data-action="primary"]').click()
+    await page.waitForTimeout(300)
+
+    await expect(
+      page.locator('button').filter({ hasText: 'Bogor' }).first()
+    ).toBeVisible()
+    await expect(page.locator('text=Serpong').first()).toBeVisible()
+    await expect(page.locator('text=Contoh').first()).toBeVisible()
+  })
+})

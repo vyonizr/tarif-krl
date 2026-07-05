@@ -89,7 +89,7 @@ export const MOCK_ROUTE_LEGS: IKRLRouteResult[] = [
   },
 ]
 
-export const MOCK_FARE = 11000
+export const MOCK_FARE = 9000
 
 export function createMockFavorites(): IFavoriteRoute[] {
   return [

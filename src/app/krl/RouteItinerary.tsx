@@ -255,6 +255,14 @@ export default function RouteItinerary({
               <span className="text-sm">{formatToRupiah(fare)}</span>
             </div>
           )}
+          {!isFareLoading && fareError && (
+            <div className="grid grid-cols-[20px_1fr] items-center gap-x-3">
+              <Banknote className="h-4 w-4" />
+              <span className="text-sm text-red-600">
+                Gagal memuat tarif, coba lagi
+              </span>
+            </div>
+          )}
         </div>
       )}
 

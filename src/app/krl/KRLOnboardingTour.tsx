@@ -1,6 +1,6 @@
 "use client"
 import { useRef } from "react"
-import { Joyride, EVENTS, STATUS } from "react-joyride"
+import { Joyride, ACTIONS, EVENTS, STATUS } from "react-joyride"
 import type { Step, EventHandler } from "react-joyride"
 
 interface KRLOnboardingTourProps {
@@ -148,7 +148,9 @@ export default function KRLOnboardingTour({
     }
 
     if (
-      (data.status === STATUS.FINISHED || data.status === STATUS.SKIPPED) &&
+      (data.status === STATUS.FINISHED ||
+        data.status === STATUS.SKIPPED ||
+        data.action === ACTIONS.CLOSE) &&
       !tourEndedRef.current
     ) {
       tourEndedRef.current = true

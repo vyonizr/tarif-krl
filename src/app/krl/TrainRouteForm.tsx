@@ -219,7 +219,13 @@ export default function TrainRouteForm({
 
   const [isOnboardingDemo, setIsOnboardingDemo] = useState(false)
   const [onboardingTourOpen, setOnboardingTourOpen] = useState(false)
+  const [onboardingTourRunId, setOnboardingTourRunId] = useState(0)
   const formSnapshotRef = useRef<FormSnapshot | null>(null)
+
+  const startOnboardingTour = useCallback(() => {
+    setOnboardingTourRunId((id) => id + 1)
+    setOnboardingTourOpen(true)
+  }, [])
 
   const isFavorited = useMemo(() => {
     if (!originStation || !destinationStation) return false
@@ -397,7 +403,7 @@ export default function TrainRouteForm({
   useEffect(() => {
     const seen = getOnboardingSeen()
     if (!seen && !initialFrom && !initialTo) {
-      setOnboardingTourOpen(true)
+      startOnboardingTour()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -742,6 +748,7 @@ export default function TrainRouteForm({
   return (
     <>
       <KRLOnboardingTour
+        key={onboardingTourRunId}
         run={onboardingTourOpen}
         onInjectMockData={handleInjectMockData}
         onTourEnd={handleTourEnd}
@@ -753,7 +760,7 @@ export default function TrainRouteForm({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setOnboardingTourOpen(true)}
+            onClick={startOnboardingTour}
             className="gap-1.5 text-xs text-slate-400 hover:text-slate-600"
           >
             <HelpCircle className="h-3.5 w-3.5" />
@@ -797,32 +804,31 @@ export default function TrainRouteForm({
           />
         </div>
 
-        <div id="krl-swap-button">
-          <SwapButton
-            onSwap={handleSwap}
-            disabled={!originStation && !destinationStation}
-          >
-            {originStation &&
-              destinationStation &&
-              originStation.id !== destinationStation.id && (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  id="krl-favorite-toggle"
-                  onClick={handleToggleFavorite}
-                  className="h-11 w-11 rounded-pill bg-white"
-                  aria-label={
-                    isFavorited ? "Hapus dari favorit" : "Simpan ke favorit"
-                  }
-                >
-                  <Star
-                    className={`h-4 w-4 ${isFavorited ? "text-amber-400" : ""}`}
-                    fill={isFavorited ? "currentColor" : "none"}
-                  />
-                </Button>
-              )}
-          </SwapButton>
-        </div>
+        <SwapButton
+          id="krl-swap-button"
+          onSwap={handleSwap}
+          disabled={!originStation && !destinationStation}
+        >
+          {originStation &&
+            destinationStation &&
+            originStation.id !== destinationStation.id && (
+              <Button
+                variant="outline"
+                size="icon"
+                id="krl-favorite-toggle"
+                onClick={handleToggleFavorite}
+                className="h-11 w-11 rounded-pill bg-white"
+                aria-label={
+                  isFavorited ? "Hapus dari favorit" : "Simpan ke favorit"
+                }
+              >
+                <Star
+                  className={`h-4 w-4 ${isFavorited ? "text-amber-400" : ""}`}
+                  fill={isFavorited ? "currentColor" : "none"}
+                />
+              </Button>
+            )}
+        </SwapButton>
 
         <div id="krl-destination-combobox">
           <label className="mb-1 block text-sm">Stasiun Tujuan</label>
