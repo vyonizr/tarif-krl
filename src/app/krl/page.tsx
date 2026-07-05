@@ -17,11 +17,10 @@ export default async function Home({
   try {
     stations = await getStations()
   } catch (error) {
-    if (error instanceof UpstreamError) {
-      loadError = error.message
-    } else {
-      loadError = 'An unexpected error occurred'
-    }
+    loadError =
+      error instanceof UpstreamError
+        ? 'Data stasiun sedang tidak bisa diakses'
+        : 'Terjadi kesalahan yang tidak terduga'
     stations = {}
   }
 
