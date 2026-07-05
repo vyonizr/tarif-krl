@@ -1,0 +1,139 @@
+{
+  "trainId": "733F",
+  "capturedAt": "2026-07-04T23:56:25.070Z",
+  "data": [
+    {
+      "train_id": "733F",
+      "ka_name": "COMMUTER LINE YOGYAKARTA",
+      "station_id": "PL",
+      "station_name": "PALUR",
+      "time_est": "11:07:00",
+      "transit_station": false,
+      "color": "#E30A16",
+      "transit": ""
+    },
+    {
+      "train_id": "733F",
+      "ka_name": "COMMUTER LINE YOGYAKARTA",
+      "station_id": "SK",
+      "station_name": "SOLO JEBRES",
+      "time_est": "11:13:00",
+      "transit_station": false,
+      "color": "#E30A16",
+      "transit": ""
+    },
+    {
+      "train_id": "733F",
+      "ka_name": "COMMUTER LINE YOGYAKARTA",
+      "station_id": "SLO",
+      "station_name": "SOLO BALAPAN",
+      "time_est": "11:19:00",
+      "transit_station": true,
+      "color": "#E30A16",
+      "transit": ""
+    },
+    {
+      "train_id": "733F",
+      "ka_name": "COMMUTER LINE YOGYAKARTA",
+      "station_id": "PWS",
+      "station_name": "PURWOSARI",
+      "time_est": "11:24:00",
+      "transit_station": false,
+      "color": "#E30A16",
+      "transit": ""
+    },
+    {
+      "train_id": "733F",
+      "ka_name": "COMMUTER LINE YOGYAKARTA",
+      "station_id": "GW",
+      "station_name": "GAWOK",
+      "time_est": "11:42:00",
+      "transit_station": false,
+      "color": "#E30A16",
+      "transit": ""
+    },
+    {
+      "train_id": "733F",
+      "ka_name": "COMMUTER LINE YOGYAKARTA",
+      "station_id": "DL",
+      "station_name": "DELANGGU",
+      "time_est": "11:49:00",
+      "transit_station": false,
+      "color": "#E30A16",
+      "transit": ""
+    },
+    {
+      "train_id": "733F",
+      "ka_name": "COMMUTER LINE YOGYAKARTA",
+      "station_id": "CE",
+      "station_name": "CEPER",
+      "time_est": "11:56:00",
+      "transit_station": false,
+      "color": "#E30A16",
+      "transit": ""
+    },
+    {
+      "train_id": "733F",
+      "ka_name": "COMMUTER LINE YOGYAKARTA",
+      "station_id": "KT",
+      "station_name": "KLATEN",
+      "time_est": "12:05:00",
+      "transit_station": false,
+      "color": "#E30A16",
+      "transit": ""
+    },
+    {
+      "train_id": "733F",
+      "ka_name": "COMMUTER LINE YOGYAKARTA",
+      "station_id": "SWT",
+      "station_name": "SROWOT",
+      "time_est": "12:12:00",
+      "transit_station": false,
+      "color": "#E30A16",
+      "transit": ""
+    },
+    {
+      "train_id": "733F",
+      "ka_name": "COMMUTER LINE YOGYAKARTA",
+      "station_id": "BBN",
+      "station_name": "BRAMBANAN",
+      "time_est": "12:19:00",
+      "transit_station": false,
+      "color": "#E30A16",
+      "transit": ""
+    },
+    {
+      "train_id": "733F",
+      "ka_name": "COMMUTER LINE YOGYAKARTA",
+      "station_id": "MGW",
+      "station_name": "MAGUWO",
+      "time_est": "12:28:00",
+      "transit_station": false,
+      "color": "#E30A16",
+      "transit": ""
+    },
+    {
+      "train_id": "733F",
+      "ka_name": "COMMUTER LINE YOGYAKARTA",
+      "station_id": "LPN",
+      "station_name": "LEMPUYANGAN",
+      "time_est": "12:37:00",
+      "transit_station": false,
+      "color": "#E30A16",
+      "transit": ""
+    },
+    {
+      "train_id": "733F",
+      "ka_name": "COMMUTER LINE YOGYAKARTA",
+      "station_id": "YK",
+      "station_name": "YOGYAKARTA",
+      "time_est": "12:41:00",
+      "transit_station": true,
+      "color": "#E30A16",
+      "transit": [
+        "#ff0000",
+        "#0000ff"
+      ]
+    }
+  ]
+}
