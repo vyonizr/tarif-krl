@@ -13,7 +13,7 @@ Jadwal KRL (formerly Tarif KRL) is a Next.js (App Router) web app for calculatin
 - `npm run start`: run production build
 - `npm run lint`: ESLint (`next/core-web-vitals` config)
 - `npm test`: Jest, covering `src/lib/krl/{adapter,response}.ts`, `src/app/utils.ts`, `src/app/krl/TrainRouteForm.tsx`, and the `src/app/api/v1/krl/*` route handlers
-- `npm run test:e2e`: Playwright (`e2e/krl.spec.ts`), spins up `e2e/mock-server.mjs` as a fake KCI upstream plus a production build/start of the app itself (see `playwright.config.ts`)
+- `npm run test:e2e`: Playwright (`e2e/krl.spec.ts` and `e2e/mrt.spec.ts`), spins up `e2e/mock-server.mjs` as a fake KCI upstream and `e2e/mrt-mock-server.mjs` as a fake MRT upstream, plus a production build/start of the app itself (see `playwright.config.ts`)
 - `npm run snapshot:refresh`: runs `scripts/refresh-terminus-snapshots.mjs` to (re-)scrape upstream schedules into the repo-committed snapshot fallback (see snapshot tiers below)
 
 ## Environment

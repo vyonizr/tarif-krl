@@ -20,7 +20,7 @@ export default async function Home() {
         <span>← Kembali ke halaman utama</span>
       </Link>
       <h1 className="text-center text-3xl font-bold">
-        <Balancer>Tarif & Jadwal MRT Jakarta</Balancer>
+        <Balancer>Jadwal MRT Jakarta</Balancer>
       </h1>
       {loadError && (
         <div className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
