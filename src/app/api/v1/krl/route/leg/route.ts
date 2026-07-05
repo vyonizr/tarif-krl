@@ -40,7 +40,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const meta: FetchMeta = { source: 'blob-snapshot' }
+    const meta: FetchMeta = { source: 'repo-snapshot' }
     const legs = await tryRouteWithSameLineSplit(from, to, time, meta)
     return NextResponse.json(ok({ legs }), { headers: dataSourceHeaders(meta) })
   } catch (error) {

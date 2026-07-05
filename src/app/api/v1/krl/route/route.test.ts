@@ -1,21 +1,15 @@
 import { GET } from './route'
 
 jest.mock('../../../../../lib/krl/snapshotStore', () => ({
-  getScheduleSnapshot: jest.fn(),
   getRepoScheduleSnapshot: jest.fn(),
-  getTrainSnapshot: jest.fn(),
   getRepoTrainScheduleSnapshot: jest.fn(),
 }))
 
 const {
-  getScheduleSnapshot,
   getRepoScheduleSnapshot,
-  getTrainSnapshot,
   getRepoTrainScheduleSnapshot,
 } = require('../../../../../lib/krl/snapshotStore') as {
-  getScheduleSnapshot: jest.Mock
   getRepoScheduleSnapshot: jest.Mock
-  getTrainSnapshot: jest.Mock
   getRepoTrainScheduleSnapshot: jest.Mock
 }
 
@@ -121,14 +115,13 @@ describe('GET /api/v1/krl/route (SSE)', () => {
   })
 
   test('streams SSE events for a successful single-leg route', async () => {
-    getScheduleSnapshot.mockImplementation((id: string) => {
+    getRepoScheduleSnapshot.mockImplementation((id: string) => {
       if (id === 'JAKK') return Promise.resolve(
         scheduleSnapshot([createScheduleRow({ train_id: '1151', ka_name: 'COMMUTER LINE BOGOR', color: '#E30A16' })])
       )
       return Promise.resolve(null)
     })
-    getRepoScheduleSnapshot.mockResolvedValue(null)
-    getTrainSnapshot.mockImplementation((id: string) => {
+    getRepoTrainScheduleSnapshot.mockImplementation((id: string) => {
       if (id === '1151') return Promise.resolve(
         trainSnapshot([
           createTrainRow('JAKK', 'Jakarta Kota', '04:00:00', { color: '#E30A16' }),
@@ -137,7 +130,6 @@ describe('GET /api/v1/krl/route (SSE)', () => {
       )
       return Promise.resolve(null)
     })
-    getRepoTrainScheduleSnapshot.mockResolvedValue(null)
 
     const req = makeRequest('http://localhost/api/v1/krl/route?from=JAKK&to=MRI&time=04:00')
     const response = await GET(req)
@@ -160,7 +152,7 @@ describe('GET /api/v1/krl/route (SSE)', () => {
   })
 
   test('streams SSE events for a multi-leg transit route', async () => {
-    getScheduleSnapshot.mockImplementation((id: string) => {
+    getRepoScheduleSnapshot.mockImplementation((id: string) => {
       if (id === 'PSMB') return Promise.resolve(
         scheduleSnapshot([createScheduleRow({ train_id: '1151', ka_name: 'COMMUTER LINE BOGOR', color: '#E30A16' })])
       )
@@ -169,8 +161,7 @@ describe('GET /api/v1/krl/route (SSE)', () => {
       )
       return Promise.resolve(null)
     })
-    getRepoScheduleSnapshot.mockResolvedValue(null)
-    getTrainSnapshot.mockImplementation((id: string) => {
+    getRepoTrainScheduleSnapshot.mockImplementation((id: string) => {
       if (id === '1151') return Promise.resolve(
         trainSnapshot([
           createTrainRow('PSMB', 'Pasar Minggu Baru', '04:31:00', { color: '#E30A16' }),
@@ -185,7 +176,6 @@ describe('GET /api/v1/krl/route (SSE)', () => {
       )
       return Promise.resolve(null)
     })
-    getRepoTrainScheduleSnapshot.mockResolvedValue(null)
 
     const req = makeRequest('http://localhost/api/v1/krl/route?from=PSMB&to=THB&time=04:00')
     const response = await GET(req)
@@ -209,14 +199,13 @@ describe('GET /api/v1/krl/route (SSE)', () => {
   })
 
   test('streams leg-error events on partial failure', async () => {
-    getScheduleSnapshot.mockImplementation((id: string) => {
+    getRepoScheduleSnapshot.mockImplementation((id: string) => {
       if (id === 'PSMB') return Promise.resolve(
         scheduleSnapshot([createScheduleRow({ train_id: '1151', ka_name: 'COMMUTER LINE BOGOR', color: '#E30A16' })])
       )
       return Promise.resolve(scheduleSnapshot([]))
     })
-    getRepoScheduleSnapshot.mockResolvedValue(null)
-    getTrainSnapshot.mockImplementation((id: string) => {
+    getRepoTrainScheduleSnapshot.mockImplementation((id: string) => {
       if (id === '1151') return Promise.resolve(
         trainSnapshot([
           createTrainRow('PSMB', 'Pasar Minggu Baru', '04:31:00', { color: '#E30A16' }),
@@ -225,7 +214,6 @@ describe('GET /api/v1/krl/route (SSE)', () => {
       )
       return Promise.resolve(null)
     })
-    getRepoTrainScheduleSnapshot.mockResolvedValue(null)
 
     const req = makeRequest('http://localhost/api/v1/krl/route?from=PSMB&to=DU&time=04:00')
     const response = await GET(req)

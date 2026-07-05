@@ -1,21 +1,15 @@
 import { GET } from './route'
 
 jest.mock('../../../../../../lib/krl/snapshotStore', () => ({
-  getScheduleSnapshot: jest.fn(),
   getRepoScheduleSnapshot: jest.fn(),
-  getTrainSnapshot: jest.fn(),
   getRepoTrainScheduleSnapshot: jest.fn(),
 }))
 
 const {
-  getScheduleSnapshot,
   getRepoScheduleSnapshot,
-  getTrainSnapshot,
   getRepoTrainScheduleSnapshot,
 } = require('../../../../../../lib/krl/snapshotStore') as {
-  getScheduleSnapshot: jest.Mock
   getRepoScheduleSnapshot: jest.Mock
-  getTrainSnapshot: jest.Mock
   getRepoTrainScheduleSnapshot: jest.Mock
 }
 
@@ -90,17 +84,15 @@ beforeEach(() => {
 
 describe('GET /api/v1/krl/route/leg', () => {
   test('returns 200 with legs for valid params', async () => {
-    getScheduleSnapshot.mockResolvedValue(
+    getRepoScheduleSnapshot.mockResolvedValue(
       snapshot([createScheduleRow({ train_id: '1151', ka_name: 'COMMUTER LINE BOGOR', color: '#E30A16' })])
     )
-    getRepoScheduleSnapshot.mockResolvedValue(null)
-    getTrainSnapshot.mockResolvedValue(
+    getRepoTrainScheduleSnapshot.mockResolvedValue(
       trainSnapshot([
         createTrainRow('JAKK', 'Jakarta Kota', '04:00:00', { color: '#E30A16' }),
         createTrainRow('MRI', 'Manggarai', '04:15:00', { color: '#E30A16' }),
       ])
     )
-    getRepoTrainScheduleSnapshot.mockResolvedValue(null)
 
     const req = makeRequest('http://localhost/api/v1/krl/route/leg?from=JAKK&to=MRI&time=04:00')
     const response = await GET(req)
@@ -110,6 +102,7 @@ describe('GET /api/v1/krl/route/leg', () => {
     expect(body.data.legs).toHaveLength(1)
     expect(body.data.legs[0].train_id).toBe('1151')
     expect(body.error).toBeNull()
+    expect(response.headers.get('X-KRL-Data-Source')).toMatch(/^repo-snapshot/)
   })
 
   test('returns 400 when params are missing', async () => {
@@ -140,9 +133,7 @@ describe('GET /api/v1/krl/route/leg', () => {
   })
 
   test('returns 404 when no route found', async () => {
-    getScheduleSnapshot.mockResolvedValue(snapshot([]))
-    getRepoScheduleSnapshot.mockResolvedValue(null)
-    getTrainSnapshot.mockResolvedValue(null)
+    getRepoScheduleSnapshot.mockResolvedValue(snapshot([]))
     getRepoTrainScheduleSnapshot.mockResolvedValue(null)
 
     const req = makeRequest('http://localhost/api/v1/krl/route/leg?from=JAKK&to=MRI&time=04:00')
@@ -152,29 +143,5 @@ describe('GET /api/v1/krl/route/leg', () => {
     expect(response.status).toBe(404)
     expect(body.data).toBeNull()
     expect(body.error).toBeDefined()
-  })
-
-  test('falls back to repo-snapshot when blob not available', async () => {
-    getScheduleSnapshot.mockResolvedValue(null)
-    getRepoScheduleSnapshot.mockResolvedValue(
-      snapshot([createScheduleRow({ train_id: '1151', ka_name: 'COMMUTER LINE TANJUNG PRIOK', color: '#E30A16' })])
-    )
-    getTrainSnapshot.mockResolvedValue(null)
-    getRepoTrainScheduleSnapshot.mockResolvedValue(
-      trainSnapshot([
-        createTrainRow('JAKK', 'Jakarta Kota', '04:00:00', { color: '#E30A16' }),
-        createTrainRow('KPB', 'Kampung Bandan', '04:15:00', { color: '#E30A16' }),
-      ])
-    )
-
-    const req = makeRequest('http://localhost/api/v1/krl/route/leg?from=JAKK&to=KPB&time=04:00')
-    const response = await GET(req)
-    const body = await response.json()
-
-    expect(response.status).toBe(200)
-    expect(body.error).toBeNull()
-    expect(body.data.legs).toHaveLength(1)
-    expect(body.data.legs[0].stops.at(-1).station_id).toBe('KPB')
-    expect(response.headers.get('X-KRL-Data-Source')).toMatch(/^repo-snapshot/)
   })
 })

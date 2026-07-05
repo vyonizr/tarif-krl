@@ -54,7 +54,7 @@ interface DataSourceNotice {
 }
 
 const DATA_SOURCE_RANK: Record<string, number> = {
-  "blob-snapshot": 0,
+  live: 0,
   "repo-snapshot": 1,
 }
 
@@ -65,13 +65,6 @@ function parseDataSourceHeader(value: string | null): DataSourceNotice | null {
     ? rest.slice("captured-at=".length)
     : undefined
   return { source, capturedAt }
-}
-
-function formatCapturedAt(capturedAt?: string): string {
-  if (!capturedAt) return "sebelumnya"
-  const date = new Date(capturedAt)
-  if (isNaN(date.getTime())) return "sebelumnya"
-  return date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
 }
 
 function formatSnapshotDate(capturedAt?: string): string {
@@ -886,11 +879,9 @@ export default function TrainRouteForm({
           </div>
         )}
 
-        {dataSourceNotice && (showRouteItinerary || showNoRouteError) && (
+        {dataSourceNotice?.source === "repo-snapshot" && (showRouteItinerary || showNoRouteError) && (
           <div className="mt-4 rounded-lg bg-blue-50 p-3 text-xs text-blue-700">
-            {dataSourceNotice.source === "blob-snapshot"
-              ? `Jadwal berdasarkan data yang diperbarui setiap hari (terakhir: ${formatSnapshotDate(dataSourceNotice.capturedAt)}) — bukan jadwal real-time.`
-              : `Menampilkan jadwal bawaan aplikasi (terakhir berubah: ${formatSnapshotDate(dataSourceNotice.capturedAt)}) — mungkin tidak mencerminkan perubahan terbaru.`}
+            {`Menampilkan jadwal bawaan aplikasi (terakhir berubah: ${formatSnapshotDate(dataSourceNotice.capturedAt)}) — mungkin tidak mencerminkan perubahan terbaru.`}
           </div>
         )}
 

@@ -273,11 +273,12 @@ components:
   headers:
     X-KRL-Data-Source:
       description: >-
-        Which tier served this response: `live` (fresh upstream fetch),
-        `stale-cache` (in-memory fallback from a prior successful fetch), or
-        `blob-snapshot` (daily-warmed snapshot for line-terminus stations,
-        used when both live and stale-cache are unavailable). A
-        `; captured-at=<ISO timestamp>` suffix is appended for the latter two.
+        Which tier served this response: `live` (fresh upstream fetch, used
+        only by `/v1/krl/stations` and `/v1/krl/fare`) or `repo-snapshot`
+        (the repo-committed snapshot, refreshed via `npm run
+        snapshot:refresh`, used by `/v1/krl/schedules` and
+        `/v1/krl/route*`). A `; captured-at=<ISO timestamp>` suffix is
+        appended for the latter.
       schema:
         type: string
 

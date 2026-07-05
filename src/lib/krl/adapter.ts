@@ -25,9 +25,7 @@ import {
 import { getLineGraph, findTransferStations, getForkPoint, hasSharedLine, LINES } from './topology'
 import { convertToTitleCase, convertTimeToHHMM } from '@/app/utils'
 import {
-  getScheduleSnapshot,
   getRepoScheduleSnapshot,
-  getTrainSnapshot,
   getRepoTrainScheduleSnapshot,
 } from './snapshotStore'
 
@@ -35,9 +33,7 @@ const RetryableHttpError = class extends Error {}
 
 const SOURCE_RANK: Record<DataSource, number> = {
   live: 0,
-  'stale-cache': 1,
-  'blob-snapshot': 2,
-  'repo-snapshot': 3,
+  'repo-snapshot': 1,
 }
 
 function markSource(meta: FetchMeta | undefined, source: DataSource, capturedAt?: string): void {
@@ -215,12 +211,6 @@ async function getSchedules(
   timeTo: string = '23:59',
   meta?: FetchMeta
 ): Promise<KciScheduleRow[]> {
-  const snapshot = await getScheduleSnapshot(stationId)
-  if (snapshot) {
-    markSource(meta, 'blob-snapshot', snapshot.capturedAt)
-    return filterSchedules(snapshot.data, timeFrom, timeTo)
-  }
-
   const repoSnapshot = await getRepoScheduleSnapshot(stationId)
   if (repoSnapshot) {
     markSource(meta, 'repo-snapshot', repoSnapshot.capturedAt)
@@ -234,12 +224,6 @@ async function getTrainSchedule(
   trainId: string,
   meta?: FetchMeta
 ): Promise<KciTrainScheduleResponse['data']> {
-  const snapshot = await getTrainSnapshot(trainId)
-  if (snapshot) {
-    markSource(meta, 'blob-snapshot', snapshot.capturedAt)
-    return snapshot.data
-  }
-
   const repoSnapshot = await getRepoTrainScheduleSnapshot(trainId)
   if (repoSnapshot) {
     markSource(meta, 'repo-snapshot', repoSnapshot.capturedAt)

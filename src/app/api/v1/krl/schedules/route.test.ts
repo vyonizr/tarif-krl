@@ -1,16 +1,14 @@
 import { GET } from './route'
 
 jest.mock('../../../../../lib/krl/snapshotStore', () => ({
-  getScheduleSnapshot: jest.fn(),
   getRepoScheduleSnapshot: jest.fn(),
-  getTrainSnapshot: jest.fn(),
   getRepoTrainScheduleSnapshot: jest.fn(),
 }))
 
 const {
-  getScheduleSnapshot,
+  getRepoScheduleSnapshot,
 } = require('../../../../../lib/krl/snapshotStore') as {
-  getScheduleSnapshot: jest.Mock
+  getRepoScheduleSnapshot: jest.Mock
 }
 
 function makeRequest(url: string): Request {
@@ -27,7 +25,7 @@ beforeEach(() => {
 
 describe('GET /api/v1/krl/schedules', () => {
   test('returns 200 with schedules for valid params', async () => {
-    getScheduleSnapshot.mockResolvedValue(
+    getRepoScheduleSnapshot.mockResolvedValue(
       snapshot([
         {
           train_id: '1',
@@ -79,7 +77,7 @@ describe('GET /api/v1/krl/schedules', () => {
   })
 
   test('filters out non-passenger trains', async () => {
-    getScheduleSnapshot.mockResolvedValue(
+    getRepoScheduleSnapshot.mockResolvedValue(
       snapshot([
         {
           train_id: '1',

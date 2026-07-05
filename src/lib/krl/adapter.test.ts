@@ -8,22 +8,16 @@ jest.mock('./snapshotStore', () => {
   const actual = jest.requireActual('./snapshotStore')
   return {
     ...actual,
-    getScheduleSnapshot: jest.fn(),
     getRepoScheduleSnapshot: jest.fn(),
-    getTrainSnapshot: jest.fn(),
     getRepoTrainScheduleSnapshot: jest.fn(),
   }
 })
 
 const {
-  getScheduleSnapshot,
   getRepoScheduleSnapshot,
-  getTrainSnapshot,
   getRepoTrainScheduleSnapshot,
 } = require('./snapshotStore') as {
-  getScheduleSnapshot: jest.Mock
   getRepoScheduleSnapshot: jest.Mock
-  getTrainSnapshot: jest.Mock
   getRepoTrainScheduleSnapshot: jest.Mock
 }
 
@@ -341,44 +335,25 @@ describe('getFare', () => {
 
 describe('getSchedules', () => {
   beforeEach(() => {
-    getScheduleSnapshot.mockReset()
     getRepoScheduleSnapshot.mockReset()
   })
 
-  test('returns filtered data from blob snapshot', async () => {
-    getScheduleSnapshot.mockResolvedValue(
+  test('returns filtered data from repo snapshot', async () => {
+    getRepoScheduleSnapshot.mockResolvedValue(
       snapshot([
         createScheduleRow({ train_id: '1', ka_name: 'COMMUTER LINE BOGOR', time_est: '10:30:00' }),
         createScheduleRow({ train_id: '2', ka_name: 'COMMUTER LINE CIKARANG', time_est: '09:00:00' }),
       ])
     )
-    getRepoScheduleSnapshot.mockResolvedValue(null)
 
     const result = await getSchedules('STA1', '10:00', '22:00')
 
     expect(result).toHaveLength(1)
     expect(result[0].train_id).toBe('1')
-    expect(getScheduleSnapshot).toHaveBeenCalledWith('STA1')
-    expect(getRepoScheduleSnapshot).not.toHaveBeenCalled()
-  })
-
-  test('falls back to repo snapshot when blob not available', async () => {
-    getScheduleSnapshot.mockResolvedValue(null)
-    getRepoScheduleSnapshot.mockResolvedValue(
-      snapshot([
-        createScheduleRow({ train_id: '1', time_est: '10:30:00' }),
-      ])
-    )
-
-    const result = await getSchedules('STA1', '10:00')
-
-    expect(result).toHaveLength(1)
-    expect(getScheduleSnapshot).toHaveBeenCalledWith('STA1')
     expect(getRepoScheduleSnapshot).toHaveBeenCalledWith('STA1')
   })
 
   test('returns empty array when no snapshot available', async () => {
-    getScheduleSnapshot.mockResolvedValue(null)
     getRepoScheduleSnapshot.mockResolvedValue(null)
 
     const result = await getSchedules('STA1', '10:00')
@@ -387,14 +362,13 @@ describe('getSchedules', () => {
   })
 
   test('filters out non-passenger trains from snapshot data', async () => {
-    getScheduleSnapshot.mockResolvedValue(
+    getRepoScheduleSnapshot.mockResolvedValue(
       snapshot([
         createScheduleRow({ train_id: '1', ka_name: 'COMMUTER LINE BOGOR', time_est: '10:00:00' }),
         createScheduleRow({ train_id: '2', ka_name: 'TIDAK ANGKUT PENUMPANG', time_est: '10:05:00' }),
         createScheduleRow({ train_id: '3', ka_name: 'COMMUTER LINE CIKARANG', time_est: '10:10:00' }),
       ])
     )
-    getRepoScheduleSnapshot.mockResolvedValue(null)
 
     const result = await getSchedules('STA1', '10:00')
 
@@ -403,7 +377,7 @@ describe('getSchedules', () => {
   })
 
   test('filters results to the requested window', async () => {
-    getScheduleSnapshot.mockResolvedValue(
+    getRepoScheduleSnapshot.mockResolvedValue(
       snapshot([
         createScheduleRow({ train_id: '1', time_est: '09:00:00' }),
         createScheduleRow({ train_id: '2', time_est: '10:30:00' }),
@@ -421,18 +395,13 @@ describe('getSchedules', () => {
 
 describe('getRoute', () => {
   function setupRouteSchedules(stationId: string, rows: KciScheduleRow[]) {
-    getScheduleSnapshot.mockImplementation((id: string) => {
+    getRepoScheduleSnapshot.mockImplementation((id: string) => {
       if (id === stationId) return Promise.resolve(snapshot(rows))
       return Promise.resolve(null)
     })
-    getRepoScheduleSnapshot.mockResolvedValue(null)
   }
 
   function setupTrainSchedules(schedules: Record<string, KciTrainScheduleRow[]>) {
-    getTrainSnapshot.mockImplementation((id: string) => {
-      const data = schedules[id]
-      return Promise.resolve(data ? trainSnapshot(data) : null)
-    })
     getRepoTrainScheduleSnapshot.mockImplementation((id: string) => {
       const data = schedules[id]
       return Promise.resolve(data ? trainSnapshot(data) : null)
@@ -440,13 +409,9 @@ describe('getRoute', () => {
   }
 
   beforeEach(() => {
-    getScheduleSnapshot.mockReset()
     getRepoScheduleSnapshot.mockReset()
-    getTrainSnapshot.mockReset()
     getRepoTrainScheduleSnapshot.mockReset()
-    getScheduleSnapshot.mockResolvedValue(null)
     getRepoScheduleSnapshot.mockResolvedValue(null)
-    getTrainSnapshot.mockResolvedValue(null)
     getRepoTrainScheduleSnapshot.mockResolvedValue(null)
   })
 
@@ -641,51 +606,24 @@ describe('getRoute', () => {
 // ──── data source tracking ─────────────────────────────────────
 
 describe('data source tracking (FetchMeta)', () => {
-  test('marks meta as blob-snapshot from getSchedules', async () => {
-    getScheduleSnapshot.mockResolvedValue(
-      snapshot([createScheduleRow({ train_id: '1', time_est: '10:00:00' })])
-    )
-    getRepoScheduleSnapshot.mockResolvedValue(null)
-
-    const meta: FetchMeta = { source: 'blob-snapshot' }
-    await getSchedules('STA1', '10:00', '22:00', meta)
-
-    expect(meta.source).toBe('blob-snapshot')
-    expect(meta.capturedAt).toBeDefined()
-  })
-
-  test('marks meta as repo-snapshot when only repo snapshot available', async () => {
-    getScheduleSnapshot.mockResolvedValue(null)
+  test('marks meta as repo-snapshot from getSchedules', async () => {
     getRepoScheduleSnapshot.mockResolvedValue(
       snapshot([createScheduleRow({ train_id: '1', time_est: '10:00:00' })])
     )
 
-    const meta: FetchMeta = { source: 'blob-snapshot' }
+    const meta: FetchMeta = { source: 'live' }
     await getSchedules('STA1', '10:00', '22:00', meta)
 
     expect(meta.source).toBe('repo-snapshot')
     expect(meta.capturedAt).toBeDefined()
   })
 
-  test('getTrainSchedule marks blob-snapshot when blob train snapshot present', async () => {
-    getTrainSnapshot.mockResolvedValue(
-      trainSnapshot([createTrainRow('JAKK', 'Jakarta Kota', '04:00:00')])
-    )
-    getRepoTrainScheduleSnapshot.mockResolvedValue(null)
-
-    const meta: FetchMeta = { source: 'blob-snapshot' }
-    await getTrainSchedule('1151', meta)
-
-    expect(meta.source).toBe('blob-snapshot')
-  })
-
-  test('getTrainSchedule marks repo-snapshot when only repo train snapshot available', async () => {
-    getTrainSnapshot.mockResolvedValue(null)
+  test('getTrainSchedule marks repo-snapshot when repo train snapshot present', async () => {
     getRepoTrainScheduleSnapshot.mockResolvedValue(
       trainSnapshot([createTrainRow('JAKK', 'Jakarta Kota', '04:00:00')])
     )
 
-    const meta: FetchMeta = { source: 'blob-snapshot' }
+    const meta: FetchMeta = { source: 'live' }
     await getTrainSchedule('1151', meta)
 
     expect(meta.source).toBe('repo-snapshot')
@@ -740,18 +678,13 @@ describe('line graph', () => {
 
 describe('getTransitRoute', () => {
   function setupSchedules(map: Record<string, KciScheduleRow[]>) {
-    getScheduleSnapshot.mockImplementation((id: string) => {
+    getRepoScheduleSnapshot.mockImplementation((id: string) => {
       const data = map[id]
       return Promise.resolve(data ? snapshot(data) : null)
     })
-    getRepoScheduleSnapshot.mockResolvedValue(null)
   }
 
   function setupTrains(map: Record<string, KciTrainScheduleRow[]>) {
-    getTrainSnapshot.mockImplementation((id: string) => {
-      const data = map[id]
-      return Promise.resolve(data ? trainSnapshot(data) : null)
-    })
     getRepoTrainScheduleSnapshot.mockImplementation((id: string) => {
       const data = map[id]
       return Promise.resolve(data ? trainSnapshot(data) : null)
@@ -967,18 +900,13 @@ describe('getTransitRoute', () => {
 
 describe('getTransitRoute with onHop', () => {
   function setupSchedules(map: Record<string, KciScheduleRow[]>) {
-    getScheduleSnapshot.mockImplementation((id: string) => {
+    getRepoScheduleSnapshot.mockImplementation((id: string) => {
       const data = map[id]
       return Promise.resolve(data ? snapshot(data) : null)
     })
-    getRepoScheduleSnapshot.mockResolvedValue(null)
   }
 
   function setupTrains(map: Record<string, KciTrainScheduleRow[]>) {
-    getTrainSnapshot.mockImplementation((id: string) => {
-      const data = map[id]
-      return Promise.resolve(data ? trainSnapshot(data) : null)
-    })
     getRepoTrainScheduleSnapshot.mockImplementation((id: string) => {
       const data = map[id]
       return Promise.resolve(data ? trainSnapshot(data) : null)
