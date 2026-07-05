@@ -9,12 +9,29 @@ const STATIONS = [
   { id: 6, slug: 'bundaran-hi', name: 'Bundaran HI Bank Jakarta' },
 ]
 
+function nearTimes(offsetsMinutes) {
+  const now = new Date()
+  return offsetsMinutes
+    .map((offset) => {
+      const t = new Date(now.getTime() + offset * 60000)
+      const hh = t.getHours().toString().padStart(2, '0')
+      const mm = t.getMinutes().toString().padStart(2, '0')
+      return `${hh}:${mm}:00`
+    })
+    .join(';')
+}
+
+// Offsets are relative to "now" so the golden-path e2e test always finds a
+// departure within the component's 1-hour display window, regardless of
+// when the suite runs.
+const LEBAK_BULUS_END_SCHEDULE = nearTimes([5, 20, 45, 90])
+
 const SCHEDULES = {
   4: {
     start: 'Lebak Bulus',
     end: 'Bundaran HI Bank Jakarta',
-    weekdaysEnd: '05:00:00;06:00:00;07:00:00;12:00:00;18:00:00;23:59:00',
-    weekendsEnd: '06:00:00;07:00:00;08:00:00;12:00:00;18:00:00;23:59:00',
+    weekdaysEnd: LEBAK_BULUS_END_SCHEDULE,
+    weekendsEnd: LEBAK_BULUS_END_SCHEDULE,
   },
   5: {
     start: 'Lebak Bulus',

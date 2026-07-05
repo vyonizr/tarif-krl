@@ -1,10 +1,9 @@
 "use client"
 import { useState, useEffect, useMemo, useCallback, useRef } from "react"
-import { Clock, Banknote, ArrowRightLeft } from "lucide-react"
+import { Banknote, ArrowRightLeft } from "lucide-react"
 
 import Spinner from "@/components/Spinner"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 
 import { IMRTStation, IMrtFareScheduleResult } from "@/lib/mrt/types"
 import { SAME_STATION_PENALTY_FARE } from "@/lib/mrt/constants"
@@ -14,7 +13,6 @@ import {
   getTypeOfDay,
   convertTimeToHHMM,
   calculateMRTETA,
-  formatMinutesToDuration,
 } from "../utils"
 
 import MRTStationCombobox from "./MRTStationCombobox"
@@ -22,7 +20,6 @@ import SwapButton from "../krl/SwapButton"
 import TimeSelect from "../krl/TimeSelect"
 
 const FROM_NOW = "Sekarang"
-const MRT_LINE_COLOR = "#0F5FAB"
 
 interface MRTRouteFormProps {
   stations: IMRTStation[]
@@ -122,7 +119,9 @@ export default function MRTRouteForm({ stations }: MRTRouteFormProps) {
     const daySchedule =
       typeOfDay === "weekday" ? schedule.weekdays : schedule.weekends
     const resolvedTime = time === FROM_NOW ? getCurrentTimeInHHMM() : time
-    return daySchedule.filter((t) => t >= resolvedTime)
+    return daySchedule
+      .filter((t) => convertTimeToHHMM(t) >= resolvedTime)
+      .slice(0, 5)
   }, [schedule, time, typeOfDay])
 
   const showSameStationNotice =
@@ -228,23 +227,10 @@ export default function MRTRouteForm({ stations }: MRTRouteFormProps) {
       {!showSameStationNotice && !isLoadingFare && fare !== null && (
         <div className="mt-8">
           <div className="mb-4 space-y-1 rounded-lg border border-amber-200/60 bg-amber-50 px-4 py-3 text-amber-900">
-            {timeEstimation !== null && departureTimes.length > 0 && (
-              <div className="grid grid-cols-[20px_1fr] items-center gap-x-3">
-                <Clock className="h-4 w-4" />
-                <span className="text-base font-medium">
-                  {formatMinutesToDuration(timeEstimation)} (estimasi tiba{" "}
-                  {calculateMRTETA(
-                    convertTimeToHHMM(departureTimes[0]),
-                    String(timeEstimation)
-                  )}{" "}
-                  WIB)
-                </span>
-              </div>
-            )}
             {headingTowards && (
               <div className="grid grid-cols-[20px_1fr] items-center gap-x-3">
                 <ArrowRightLeft className="h-4 w-4" />
-                <span className="text-sm">Menuju {headingTowards}</span>
+                <span className="text-sm">Arah {headingTowards}</span>
               </div>
             )}
             <div className="grid grid-cols-[20px_1fr] items-center gap-x-3">
@@ -254,31 +240,32 @@ export default function MRTRouteForm({ stations }: MRTRouteFormProps) {
           </div>
 
           {departureTimes.length > 0 && (
-            <div id="mrt-departure-list">
-              {departureTimes.map((t, i) => (
-                <div
-                  key={i}
-                  data-testid="mrt-departure-row"
-                  className="grid grid-cols-[20px_1fr_auto] items-center gap-x-3 py-1.5"
-                >
-                  <div className="flex justify-center">
-                    <div
-                      className="h-3 w-3 shrink-0 rounded-full border-2 border-white"
-                      style={{ backgroundColor: MRT_LINE_COLOR }}
-                    />
-                  </div>
-                  <div className="min-w-0 text-sm">
-                    {i === 0 && (
-                      <Badge variant="outline" className="mr-2 border-amber-300 bg-amber-100 text-amber-700">
-                        Berikutnya
-                      </Badge>
+            <div className="w-full">
+              <p className="mb-1 text-center text-sm font-medium text-slate-700">
+                Kereta Berikutnya
+              </p>
+              <div id="mrt-departure-list" className="divide-y divide-slate-100">
+                {departureTimes.map((t, i) => (
+                  <div
+                    key={i}
+                    data-testid="mrt-departure-row"
+                    className={`px-3 py-1.5 text-center text-sm tabular-nums ${
+                      i === 0
+                        ? "rounded-md bg-[#E7EEF8] font-semibold text-[#19519A]"
+                        : "text-slate-600"
+                    }`}
+                  >
+                    {convertTimeToHHMM(t)}
+                    {timeEstimation !== null && (
+                      <span className="text-slate-400">
+                        {" "}
+                        &rarr; tiba{" "}
+                        {calculateMRTETA(convertTimeToHHMM(t), String(timeEstimation))}
+                      </span>
                     )}
                   </div>
-                  <div className="shrink-0 text-sm tabular-nums text-slate-500">
-                    {convertTimeToHHMM(t)}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 

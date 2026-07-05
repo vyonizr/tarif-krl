@@ -12,14 +12,12 @@ test.describe('MRT golden-path flows', () => {
     await selectStation(page, 'Pilih Stasiun Tujuan', 'Bundaran HI')
 
     await expect(page.locator('text=Rp').first()).toBeVisible({ timeout: 15000 })
-    await expect(page.locator('text=30 menit')).toBeVisible()
-    await expect(
-      page.locator('text=Menuju Bundaran HI Bank Jakarta')
-    ).toBeVisible()
+    await expect(page.locator('text=Arah Bundaran HI')).toBeVisible()
 
+    await expect(page.locator('text=Kereta Berikutnya')).toBeVisible()
     const departureRows = page.getByTestId('mrt-departure-row')
     await expect(departureRows.first()).toBeVisible()
-    await expect(departureRows.first().locator('text=Berikutnya')).toBeVisible()
+    await expect(departureRows.first().locator('text=tiba')).toBeVisible()
   })
 
   test('same station for origin and destination shows flat penalty fare', async ({
@@ -71,6 +69,6 @@ test.describe('MRT golden-path flows', () => {
     await page.locator('button').filter({ hasText: 'Coba Lagi' }).click()
 
     await expect(page.locator('text=Rp').first()).toBeVisible({ timeout: 15000 })
-    await expect(page.locator('text=30 menit')).toBeVisible()
+    await expect(page.locator('text=Kereta Berikutnya')).toBeVisible()
   })
 })
