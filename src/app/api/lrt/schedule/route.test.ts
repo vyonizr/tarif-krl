@@ -24,13 +24,19 @@ function createRequest(params: Record<string, string>): Request {
 
 describe('GET /api/lrt/schedule', () => {
   test('returns 200 with the departure time list', async () => {
-    getSchedule.mockResolvedValue(['05:39', '05:43'])
+    getSchedule.mockResolvedValue({
+      times: ['05:39', '05:43'],
+      capturedAt: '2026-01-01T00:00:00.000Z',
+    })
 
     const response = await GET(createRequest({ station: 'cawang', day: 'weekday' }))
     const body = await response.json()
 
     expect(response.status).toBe(200)
-    expect(body.data).toEqual(['05:39', '05:43'])
+    expect(body.data).toEqual({
+      times: ['05:39', '05:43'],
+      capturedAt: '2026-01-01T00:00:00.000Z',
+    })
     expect(getSchedule).toHaveBeenCalledWith('cawang', 'weekday')
   })
 

@@ -3,6 +3,7 @@ import {
   CIBUBUR_LINE_ORDER,
   BEKASI_LINE_ORDER,
   FORK_POINT,
+  TRUNK,
   resolveLineOrder,
 } from './topology'
 import { getRepoLrtScheduleSnapshot } from './snapshotStore'
@@ -18,10 +19,13 @@ async function getStations(): Promise<ILRTStation[]> {
   return [...LRT_STATIONS]
 }
 
-async function getSchedule(slug: string, dayType: LRTDayType): Promise<string[] | null> {
+async function getSchedule(
+  slug: string,
+  dayType: LRTDayType
+): Promise<{ times: string[]; capturedAt: string } | null> {
   const snapshot = await getRepoLrtScheduleSnapshot(slug)
   if (!snapshot) return null
-  return snapshot[dayType]
+  return { times: snapshot[dayType], capturedAt: snapshot.capturedAt }
 }
 
 async function buildDirectLeg(
@@ -31,7 +35,14 @@ async function buildDirectLeg(
 ): Promise<ILRTDirectJourney> {
   const fromIndex = path.indexOf(from)
   const toIndex = path.indexOf(to)
-  const headingTowardsSlug = toIndex > fromIndex ? path[path.length - 1] : path[0]
+  let headingTowardsSlug = toIndex > fromIndex ? path[path.length - 1] : path[0]
+
+  // Both branches share the trunk, so a trunk-only trip heading away from Dukuh
+  // Atas can't claim a specific branch terminus: the train serving it may end at
+  // either fork. Cawang is the furthest point that's certain.
+  if (headingTowardsSlug !== 'dukuh-atas-bni' && TRUNK.includes(from) && TRUNK.includes(to)) {
+    headingTowardsSlug = FORK_POINT
+  }
 
   const snapshot = await getRepoLrtScheduleSnapshot(from)
   if (!snapshot) {
@@ -41,9 +52,15 @@ async function buildDirectLeg(
   return {
     type: 'direct',
     from,
+    fromName: stationName(from),
     to,
+    toName: stationName(to),
     headingTowards: stationName(headingTowardsSlug),
-    schedule: { weekday: snapshot.weekday, holiday: snapshot.holiday },
+    schedule: {
+      weekday: snapshot.weekday,
+      holiday: snapshot.holiday,
+      capturedAt: snapshot.capturedAt,
+    },
   }
 }
 

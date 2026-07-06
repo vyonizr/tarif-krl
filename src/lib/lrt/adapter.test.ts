@@ -36,7 +36,7 @@ describe('getSchedule', () => {
 
     const result = await getSchedule('cawang', 'weekday')
 
-    expect(result).toEqual(['05:39', '05:43'])
+    expect(result).toEqual({ times: ['05:39', '05:43'], capturedAt: '2026-01-01T00:00:00.000Z' })
     expect(getRepoLrtScheduleSnapshot).toHaveBeenCalledWith('cawang')
   })
 
@@ -50,7 +50,7 @@ describe('getSchedule', () => {
 
     const result = await getSchedule('cawang', 'holiday')
 
-    expect(result).toEqual(['05:53', '05:57'])
+    expect(result).toEqual({ times: ['05:53', '05:57'], capturedAt: '2026-01-01T00:00:00.000Z' })
   })
 
   test('returns null when the snapshot is missing', async () => {
@@ -66,7 +66,7 @@ describe('getJourney', () => {
   test('returns a direct journey for two cibubur-branch stations', async () => {
     getRepoLrtScheduleSnapshot.mockResolvedValue({
       stationId: 'harjamukti',
-      capturedAt: '',
+      capturedAt: '2026-01-01T00:00:00.000Z',
       weekday: ['05:18'],
       holiday: ['05:35'],
     })
@@ -76,14 +76,34 @@ describe('getJourney', () => {
     expect(result).toEqual({
       type: 'direct',
       from: 'harjamukti',
+      fromName: 'Harjamukti',
       to: 'taman-mini',
+      toName: 'Taman Mini',
       headingTowards: 'Dukuh Atas BNI',
-      schedule: { weekday: ['05:18'], holiday: ['05:35'] },
+      schedule: {
+        weekday: ['05:18'],
+        holiday: ['05:35'],
+        capturedAt: '2026-01-01T00:00:00.000Z',
+      },
     })
     expect(getRepoLrtScheduleSnapshot).toHaveBeenCalledWith('harjamukti')
   })
 
-  test('headingTowards resolves to the outward branch terminus', async () => {
+  test('headingTowards resolves to the outward branch terminus once past the fork', async () => {
+    getRepoLrtScheduleSnapshot.mockResolvedValue({
+      stationId: 'cawang',
+      capturedAt: '',
+      weekday: ['06:05'],
+      holiday: ['06:21'],
+    })
+
+    const result = await getJourney('cawang', 'harjamukti')
+
+    expect(result.type).toBe('direct')
+    expect((result as { headingTowards: string }).headingTowards).toBe('Harjamukti')
+  })
+
+  test('headingTowards clamps to the fork for a trunk-only trip away from Dukuh Atas', async () => {
     getRepoLrtScheduleSnapshot.mockResolvedValue({
       stationId: 'dukuh-atas-bni',
       capturedAt: '',
@@ -91,10 +111,24 @@ describe('getJourney', () => {
       holiday: ['06:21'],
     })
 
-    const result = await getJourney('dukuh-atas-bni', 'harjamukti')
+    const result = await getJourney('dukuh-atas-bni', 'cikoko')
 
     expect(result.type).toBe('direct')
-    expect((result as { headingTowards: string }).headingTowards).toBe('Harjamukti')
+    expect((result as { headingTowards: string }).headingTowards).toBe('Cawang')
+  })
+
+  test('headingTowards is Dukuh Atas BNI for a trunk-only trip heading inward', async () => {
+    getRepoLrtScheduleSnapshot.mockResolvedValue({
+      stationId: 'cikoko',
+      capturedAt: '',
+      weekday: ['06:05'],
+      holiday: ['06:21'],
+    })
+
+    const result = await getJourney('cikoko', 'dukuh-atas-bni')
+
+    expect(result.type).toBe('direct')
+    expect((result as { headingTowards: string }).headingTowards).toBe('Dukuh Atas BNI')
   })
 
   test('returns a transfer journey when crossing from cibubur to bekasi branch', async () => {
@@ -115,16 +149,24 @@ describe('getJourney', () => {
     expect(result.legs[0]).toEqual({
       type: 'direct',
       from: 'harjamukti',
+      fromName: 'Harjamukti',
       to: 'cawang',
+      toName: 'Cawang',
       headingTowards: 'Dukuh Atas BNI',
-      schedule: { weekday: ['harjamukti-weekday'], holiday: ['harjamukti-holiday'] },
+      schedule: {
+        weekday: ['harjamukti-weekday'],
+        holiday: ['harjamukti-holiday'],
+        capturedAt: '',
+      },
     })
     expect(result.legs[1]).toEqual({
       type: 'direct',
       from: 'cawang',
+      fromName: 'Cawang',
       to: 'jati-mulya',
+      toName: 'Jati Mulya',
       headingTowards: 'Jati Mulya',
-      schedule: { weekday: ['cawang-weekday'], holiday: ['cawang-holiday'] },
+      schedule: { weekday: ['cawang-weekday'], holiday: ['cawang-holiday'], capturedAt: '' },
     })
   })
 

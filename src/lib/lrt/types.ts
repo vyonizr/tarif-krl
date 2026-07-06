@@ -12,12 +12,15 @@ export type LRTDayType = 'weekday' | 'holiday'
 export interface ILRTSchedule {
   weekday: string[]
   holiday: string[]
+  capturedAt: string
 }
 
 export interface ILRTDirectJourney {
   type: 'direct'
   from: string
+  fromName: string
   to: string
+  toName: string
   headingTowards: string
   schedule: ILRTSchedule
 }

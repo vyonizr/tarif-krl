@@ -29,7 +29,7 @@ describe('GET /api/lrt/journey', () => {
       from: 'harjamukti',
       to: 'taman-mini',
       headingTowards: 'Dukuh Atas BNI',
-      schedule: { weekday: ['05:18'], holiday: ['05:35'] },
+      schedule: { weekday: ['05:18'], holiday: ['05:35'], capturedAt: '2026-01-01T00:00:00.000Z' },
     })
 
     const response = await GET(createRequest({ from: 'harjamukti', to: 'taman-mini' }))
