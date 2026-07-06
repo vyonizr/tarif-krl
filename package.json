@@ -12,6 +12,7 @@
     "test": "jest",
     "test:e2e": "playwright test",
     "snapshot:refresh": "node scripts/refresh-terminus-snapshots.mjs",
+    "snapshot:refresh:lrt": "node scripts/refresh-lrt-snapshot.mjs",
     "snapshot:fill-missing": "node scripts/fill-missing-snapshots.mjs"
   },
   "dependencies": {
