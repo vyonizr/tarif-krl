@@ -1,6 +1,6 @@
 {
   "stationId": "AK",
-  "capturedAt": "2026-07-04T22:36:46.444Z",
+  "capturedAt": "2026-07-10T22:58:58.482Z",
   "data": [
     {
       "train_id": "5701B",
@@ -77,8 +77,8 @@
     {
       "train_id": "5028B",
       "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "ANGKE-BEKASI VIA MRI",
-      "dest": "BEKASI VIA MRI",
+      "route_name": "ANGKE-BEKASI",
+      "dest": "BEKASI",
       "time_est": "06:11:00",
       "color": "#0084D8",
       "dest_time": "07:05:00"
@@ -104,8 +104,8 @@
     {
       "train_id": "5030C",
       "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "ANGKE-BEKASI VIA MRI",
-      "dest": "BEKASI VIA MRI",
+      "route_name": "ANGKE-BEKASI",
+      "dest": "BEKASI",
       "time_est": "06:32:00",
       "color": "#0084D8",
       "dest_time": "07:21:00"
@@ -183,15 +183,6 @@
       "dest_time": "08:29:00"
     },
     {
-      "train_id": "5041C",
-      "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "BEKASI-ANGKE VIA MRI",
-      "dest": "ANGKE VIA MRI",
-      "time_est": "07:06:00",
-      "color": "#0084D8",
-      "dest_time": "07:15:00"
-    },
-    {
       "train_id": "5708B",
       "ka_name": "COMMUTER LINE CIKARANG",
       "route_name": "KAMPUNGBANDAN-MANGGARAI",
@@ -264,15 +255,6 @@
       "dest_time": "09:08:00"
     },
     {
-      "train_id": "5051B",
-      "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "BEKASI-ANGKE VIA MRI",
-      "dest": "ANGKE VIA MRI",
-      "time_est": "07:48:00",
-      "color": "#0084D8",
-      "dest_time": "07:56:00"
-    },
-    {
       "train_id": "5712B",
       "ka_name": "COMMUTER LINE CIKARANG",
       "route_name": "KAMPUNGBANDAN-MANGGARAI",
@@ -329,8 +311,8 @@
     {
       "train_id": "5054B",
       "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "ANGKE-BEKASI VIA MRI",
-      "dest": "BEKASI VIA MRI",
+      "route_name": "ANGKE-BEKASI",
+      "dest": "BEKASI",
       "time_est": "08:16:00",
       "color": "#0084D8",
       "dest_time": "09:12:00"
@@ -374,8 +356,8 @@
     {
       "train_id": "6014B",
       "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "ANGKE-BEKASI VIA MRI",
-      "dest": "BEKASI VIA MRI",
+      "route_name": "ANGKE-BEKASI",
+      "dest": "BEKASI",
       "time_est": "08:45:00",
       "color": "#0084D8",
       "dest_time": "09:42:00"
@@ -437,8 +419,8 @@
     {
       "train_id": "5062C",
       "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "ANGKE-BEKASI VIA MRI",
-      "dest": "BEKASI VIA MRI",
+      "route_name": "ANGKE-BEKASI",
+      "dest": "BEKASI",
       "time_est": "09:18:00",
       "color": "#0084D8",
       "dest_time": "10:14:00"
@@ -617,8 +599,8 @@
     {
       "train_id": "5080B",
       "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "ANGKE-BEKASI VIA MRI",
-      "dest": "BEKASI VIA MRI",
+      "route_name": "ANGKE-BEKASI",
+      "dest": "BEKASI",
       "time_est": "11:03:00",
       "color": "#0084D8",
       "dest_time": "11:56:00"
@@ -703,15 +685,6 @@
       "time_est": "11:54:00",
       "color": "#0084D8",
       "dest_time": "13:13:00"
-    },
-    {
-      "train_id": "5093B",
-      "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "BEKASI-ANGKE VIA MRI",
-      "dest": "ANGKE VIA MRI",
-      "time_est": "12:03:00",
-      "color": "#0084D8",
-      "dest_time": "12:10:00"
     },
     {
       "train_id": "5090C",
@@ -1029,15 +1002,6 @@
       "dest_time": "16:08:00"
     },
     {
-      "train_id": "5123B",
-      "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "BEKASI-ANGKE VIA MRI",
-      "dest": "ANGKE VIA MRI",
-      "time_est": "15:17:00",
-      "color": "#0084D8",
-      "dest_time": "15:25:00"
-    },
-    {
       "train_id": "5122C",
       "ka_name": "COMMUTER LINE CIKARANG",
       "route_name": "KAMPUNGBANDAN-CIKARANG VIA MRI",
@@ -1128,15 +1092,6 @@
       "dest_time": "17:05:00"
     },
     {
-      "train_id": "5131B",
-      "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "BEKASI-ANGKE VIA MRI",
-      "dest": "ANGKE VIA MRI",
-      "time_est": "16:13:00",
-      "color": "#0084D8",
-      "dest_time": "16:21:00"
-    },
-    {
       "train_id": "6050C",
       "ka_name": "COMMUTER LINE CIKARANG",
       "route_name": "KAMPUNGBANDAN-BEKASI",
@@ -1184,8 +1139,8 @@
     {
       "train_id": "5134B",
       "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "ANGKE-BEKASI VIA MRI",
-      "dest": "BEKASI VIA MRI",
+      "route_name": "ANGKE-BEKASI",
+      "dest": "BEKASI",
       "time_est": "16:46:00",
       "color": "#0084D8",
       "dest_time": "17:39:00"
@@ -1389,15 +1344,6 @@
       "dest_time": "18:55:00"
     },
     {
-      "train_id": "5155B",
-      "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "BEKASI-ANGKE VIA MRI",
-      "dest": "ANGKE VIA MRI",
-      "time_est": "18:35:00",
-      "color": "#0084D8",
-      "dest_time": "18:43:00"
-    },
-    {
       "train_id": "6062B",
       "ka_name": "COMMUTER LINE CIKARANG",
       "route_name": "KAMPUNGBANDAN-BEKASI",
@@ -1495,15 +1441,6 @@
       "time_est": "19:26:00",
       "color": "#0084D8",
       "dest_time": "19:49:00"
-    },
-    {
-      "train_id": "5165B",
-      "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "BEKASI-ANGKE VIA MRI",
-      "dest": "ANGKE VIA MRI",
-      "time_est": "19:30:00",
-      "color": "#0084D8",
-      "dest_time": "19:37:00"
     },
     {
       "train_id": "5160B",
@@ -1623,19 +1560,10 @@
       "dest_time": "20:47:00"
     },
     {
-      "train_id": "5175B",
-      "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "BEKASI-ANGKE VIA MRI",
-      "dest": "ANGKE VIA MRI",
-      "time_est": "20:45:00",
-      "color": "#0084D8",
-      "dest_time": "20:52:00"
-    },
-    {
       "train_id": "5170B",
       "ka_name": "COMMUTER LINE CIKARANG",
-      "route_name": "ANGKE-BEKASI VIA MRI",
-      "dest": "BEKASI VIA MRI",
+      "route_name": "ANGKE-BEKASI",
+      "dest": "BEKASI",
       "time_est": "20:49:00",
       "color": "#0084D8",
       "dest_time": "21:40:00"

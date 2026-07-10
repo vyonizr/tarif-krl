@@ -1,6 +1,6 @@
 {
   "stationId": "CJT",
-  "capturedAt": "2026-07-05T21:41:35.552Z",
+  "capturedAt": "2026-07-10T23:02:29.007Z",
   "data": [
     {
       "train_id": "1814D",
@@ -66,15 +66,6 @@
       "dest_time": "05:57:00"
     },
     {
-      "train_id": "1627D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "TIGARAKSA-TANAHABANG",
-      "dest": "TANAHABANG",
-      "time_est": "05:06:00",
-      "color": "#16812B",
-      "dest_time": "06:07:00"
-    },
-    {
       "train_id": "1629D",
       "ka_name": "COMMUTER LINE RANGKASBITUNG",
       "route_name": "RANGKASBITUNG-TANAHABANG",
@@ -91,15 +82,6 @@
       "time_est": "05:21:00",
       "color": "#16812B",
       "dest_time": "06:03:00"
-    },
-    {
-      "train_id": "1612D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "PARUNGPANJANG-TIGARAKSA",
-      "dest": "TIGARAKSA",
-      "time_est": "05:32:30",
-      "color": "#16812B",
-      "dest_time": "05:46:00"
     },
     {
       "train_id": "1633D",
@@ -127,15 +109,6 @@
       "time_est": "05:55:00",
       "color": "#16812B",
       "dest_time": "06:56:00"
-    },
-    {
-      "train_id": "1639D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "TIGARAKSA-TANAHABANG",
-      "dest": "TANAHABANG",
-      "time_est": "06:07:00",
-      "color": "#16812B",
-      "dest_time": "07:06:00"
     },
     {
       "train_id": "1616D",

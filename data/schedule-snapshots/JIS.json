@@ -1,31 +1,13 @@
 {
   "stationId": "JIS",
-  "capturedAt": "2026-07-04T22:37:12.987Z",
+  "capturedAt": "2026-07-08T07:36:10.686Z",
   "data": [
-    {
-      "train_id": "2200",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "05:12:00",
-      "color": "#DD0067",
-      "dest_time": "05:16:00"
-    },
     {
       "train_id": "2203A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "05:34:00",
-      "color": "#DD0067",
-      "dest_time": "05:46:00"
-    },
-    {
-      "train_id": "2202",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "05:42:00",
       "color": "#DD0067",
       "dest_time": "05:46:00"
     },
@@ -39,15 +21,6 @@
       "dest_time": "06:16:00"
     },
     {
-      "train_id": "2204",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "06:12:00",
-      "color": "#DD0067",
-      "dest_time": "06:16:00"
-    },
-    {
       "train_id": "2207A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
@@ -57,29 +30,11 @@
       "dest_time": "06:46:00"
     },
     {
-      "train_id": "2206",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "06:42:00",
-      "color": "#DD0067",
-      "dest_time": "06:46:00"
-    },
-    {
       "train_id": "2209A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "07:04:00",
-      "color": "#DD0067",
-      "dest_time": "07:16:00"
-    },
-    {
-      "train_id": "2208",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "07:12:00",
       "color": "#DD0067",
       "dest_time": "07:16:00"
     },
@@ -102,29 +57,11 @@
       "dest_time": "07:46:00"
     },
     {
-      "train_id": "2210",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "07:42:00",
-      "color": "#DD0067",
-      "dest_time": "07:46:00"
-    },
-    {
       "train_id": "2213A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "08:04:00",
-      "color": "#DD0067",
-      "dest_time": "08:16:00"
-    },
-    {
-      "train_id": "2212",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "08:12:00",
       "color": "#DD0067",
       "dest_time": "08:16:00"
     },
@@ -138,29 +75,11 @@
       "dest_time": "08:46:00"
     },
     {
-      "train_id": "2214",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "08:42:00",
-      "color": "#DD0067",
-      "dest_time": "08:46:00"
-    },
-    {
       "train_id": "2217A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "09:04:00",
-      "color": "#DD0067",
-      "dest_time": "09:16:00"
-    },
-    {
-      "train_id": "2216",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "09:12:00",
       "color": "#DD0067",
       "dest_time": "09:16:00"
     },
@@ -174,29 +93,11 @@
       "dest_time": "09:46:00"
     },
     {
-      "train_id": "2218",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "09:42:00",
-      "color": "#DD0067",
-      "dest_time": "09:46:00"
-    },
-    {
       "train_id": "2221A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "10:04:00",
-      "color": "#DD0067",
-      "dest_time": "10:16:00"
-    },
-    {
-      "train_id": "2220",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "10:12:00",
       "color": "#DD0067",
       "dest_time": "10:16:00"
     },
@@ -210,29 +111,11 @@
       "dest_time": "10:46:00"
     },
     {
-      "train_id": "2222",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "10:42:00",
-      "color": "#DD0067",
-      "dest_time": "10:46:00"
-    },
-    {
       "train_id": "2225A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "11:04:00",
-      "color": "#DD0067",
-      "dest_time": "11:16:00"
-    },
-    {
-      "train_id": "2224",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "11:12:00",
       "color": "#DD0067",
       "dest_time": "11:16:00"
     },
@@ -246,29 +129,11 @@
       "dest_time": "11:46:00"
     },
     {
-      "train_id": "2226",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "11:42:00",
-      "color": "#DD0067",
-      "dest_time": "11:46:00"
-    },
-    {
       "train_id": "2229A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "12:04:00",
-      "color": "#DD0067",
-      "dest_time": "12:16:00"
-    },
-    {
-      "train_id": "2228",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "12:12:00",
       "color": "#DD0067",
       "dest_time": "12:16:00"
     },
@@ -282,29 +147,11 @@
       "dest_time": "12:46:00"
     },
     {
-      "train_id": "2230",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "12:42:00",
-      "color": "#DD0067",
-      "dest_time": "12:46:00"
-    },
-    {
       "train_id": "2233A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "13:04:00",
-      "color": "#DD0067",
-      "dest_time": "13:16:00"
-    },
-    {
-      "train_id": "2232",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "13:12:00",
       "color": "#DD0067",
       "dest_time": "13:16:00"
     },
@@ -318,29 +165,11 @@
       "dest_time": "13:46:00"
     },
     {
-      "train_id": "2234",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "13:42:00",
-      "color": "#DD0067",
-      "dest_time": "13:46:00"
-    },
-    {
       "train_id": "2237A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "14:04:00",
-      "color": "#DD0067",
-      "dest_time": "14:16:00"
-    },
-    {
-      "train_id": "2236",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "14:12:00",
       "color": "#DD0067",
       "dest_time": "14:16:00"
     },
@@ -354,29 +183,11 @@
       "dest_time": "14:46:00"
     },
     {
-      "train_id": "2238",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "14:42:00",
-      "color": "#DD0067",
-      "dest_time": "14:46:00"
-    },
-    {
       "train_id": "2241A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "15:04:00",
-      "color": "#DD0067",
-      "dest_time": "15:16:00"
-    },
-    {
-      "train_id": "2240",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "15:12:00",
       "color": "#DD0067",
       "dest_time": "15:16:00"
     },
@@ -390,29 +201,11 @@
       "dest_time": "15:46:00"
     },
     {
-      "train_id": "2242",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "15:42:00",
-      "color": "#DD0067",
-      "dest_time": "15:46:00"
-    },
-    {
       "train_id": "2245A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "16:04:00",
-      "color": "#DD0067",
-      "dest_time": "16:16:00"
-    },
-    {
-      "train_id": "2244",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "16:12:00",
       "color": "#DD0067",
       "dest_time": "16:16:00"
     },
@@ -426,15 +219,6 @@
       "dest_time": "16:46:00"
     },
     {
-      "train_id": "2246",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "16:42:00",
-      "color": "#DD0067",
-      "dest_time": "16:46:00"
-    },
-    {
       "train_id": "2249A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
@@ -444,38 +228,11 @@
       "dest_time": "17:16:00"
     },
     {
-      "train_id": "2248",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "17:12:00",
-      "color": "#DD0067",
-      "dest_time": "17:16:00"
-    },
-    {
-      "train_id": "2250",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "17:42:00",
-      "color": "#DD0067",
-      "dest_time": "17:46:00"
-    },
-    {
       "train_id": "2253A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "18:04:00",
-      "color": "#DD0067",
-      "dest_time": "18:16:00"
-    },
-    {
-      "train_id": "2252",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "18:12:00",
       "color": "#DD0067",
       "dest_time": "18:16:00"
     },
@@ -489,29 +246,11 @@
       "dest_time": "18:46:00"
     },
     {
-      "train_id": "2254",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "18:42:00",
-      "color": "#DD0067",
-      "dest_time": "18:46:00"
-    },
-    {
       "train_id": "2257A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "19:04:00",
-      "color": "#DD0067",
-      "dest_time": "19:16:00"
-    },
-    {
-      "train_id": "2256",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "19:12:00",
       "color": "#DD0067",
       "dest_time": "19:16:00"
     },
@@ -525,15 +264,6 @@
       "dest_time": "19:46:00"
     },
     {
-      "train_id": "2258",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "19:42:00",
-      "color": "#DD0067",
-      "dest_time": "19:46:00"
-    },
-    {
       "train_id": "2261A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
@@ -543,29 +273,11 @@
       "dest_time": "20:16:00"
     },
     {
-      "train_id": "2260",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "20:12:00",
-      "color": "#DD0067",
-      "dest_time": "20:16:00"
-    },
-    {
       "train_id": "2263A",
       "ka_name": "COMMUTER LINE TANJUNGPRIUK",
       "route_name": "TANJUNGPRIUK-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "20:34:00",
-      "color": "#DD0067",
-      "dest_time": "20:46:00"
-    },
-    {
-      "train_id": "2262",
-      "ka_name": "COMMUTER LINE TANJUNGPRIUK",
-      "route_name": "JAKARTAKOTA-TANJUNGPRIUK",
-      "dest": "TANJUNGPRIUK",
-      "time_est": "20:42:00",
       "color": "#DD0067",
       "dest_time": "20:46:00"
     },

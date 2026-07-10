@@ -1,25 +1,7 @@
 {
   "stationId": "BJD",
-  "capturedAt": "2026-07-05T21:38:09.267Z",
+  "capturedAt": "2026-07-10T22:59:14.532Z",
   "data": [
-    {
-      "train_id": "R1143",
-      "ka_name": "DINAS RANGKAIAN KRL",
-      "route_name": "BOGOR-DEPOK",
-      "dest": "DEPOK",
-      "time_est": "00:03:00",
-      "color": "#E30A16",
-      "dest_time": "00:14:00"
-    },
-    {
-      "train_id": "D1/R1452-1",
-      "ka_name": "DINAS RANGKAIAN KRL",
-      "route_name": "BOGOR-DEPOK",
-      "dest": "DEPOK",
-      "time_est": "00:07:00",
-      "color": "#E30A16",
-      "dest_time": "00:19:00"
-    },
     {
       "train_id": "1460",
       "ka_name": "COMMUTER LINE BOGOR",
@@ -57,24 +39,6 @@
       "dest_time": "01:15:00"
     },
     {
-      "train_id": "R1100",
-      "ka_name": "DINAS RANGKAIAN KRL",
-      "route_name": "DEPOK-BOGOR",
-      "dest": "BOGOR",
-      "time_est": "03:52:00",
-      "color": "#E30A16",
-      "dest_time": "04:06:00"
-    },
-    {
-      "train_id": "R1102",
-      "ka_name": "DINAS RANGKAIAN KRL",
-      "route_name": "DEPOK-BOGOR",
-      "dest": "BOGOR",
-      "time_est": "03:57:00",
-      "color": "#E30A16",
-      "dest_time": "04:11:00"
-    },
-    {
       "train_id": "1104",
       "ka_name": "COMMUTER LINE BOGOR",
       "route_name": "DEPOK-BOGOR",
@@ -82,15 +46,6 @@
       "time_est": "04:03:00",
       "color": "#E30A16",
       "dest_time": "04:17:00"
-    },
-    {
-      "train_id": "R1106",
-      "ka_name": "DINAS RANGKAIAN KRL",
-      "route_name": "DEPOK-BOGOR",
-      "dest": "BOGOR",
-      "time_est": "04:08:00",
-      "color": "#E30A16",
-      "dest_time": "04:22:00"
     },
     {
       "train_id": "1108",
@@ -120,15 +75,6 @@
       "dest_time": "05:33:00"
     },
     {
-      "train_id": "D1/R1173-2",
-      "ka_name": "DINAS RANGKAIAN KRL",
-      "route_name": "DEPOK-BOGOR",
-      "dest": "BOGOR",
-      "time_est": "04:23:00",
-      "color": "#E30A16",
-      "dest_time": "04:37:00"
-    },
-    {
       "train_id": "1001",
       "ka_name": "COMMUTER LINE BOGOR",
       "route_name": "BOGOR-MANGGARAI",
@@ -154,15 +100,6 @@
       "time_est": "04:38:00",
       "color": "#E30A16",
       "dest_time": "04:52:00"
-    },
-    {
-      "train_id": "1163F",
-      "ka_name": "COMMUTER LINE BOGOR",
-      "route_name": "BOGOR-JAKARTAKOTA",
-      "dest": "JAKARTAKOTA",
-      "time_est": "04:38:00",
-      "color": "#E30A16",
-      "dest_time": "05:48:00"
     },
     {
       "train_id": "1165",
@@ -264,15 +201,6 @@
       "dest_time": "06:30:00"
     },
     {
-      "train_id": "D1/R1191-2",
-      "ka_name": "DINAS RANGKAIAN KRL",
-      "route_name": "DEPOK-BOGOR",
-      "dest": "BOGOR",
-      "time_est": "05:21:00",
-      "color": "#E30A16",
-      "dest_time": "05:35:00"
-    },
-    {
       "train_id": "1177",
       "ka_name": "COMMUTER LINE BOGOR",
       "route_name": "BOGOR-JAKARTAKOTA",
@@ -327,15 +255,6 @@
       "dest_time": "06:56:00"
     },
     {
-      "train_id": "1124F",
-      "ka_name": "COMMUTER LINE BOGOR",
-      "route_name": "DEPOK-BOGOR",
-      "dest": "BOGOR",
-      "time_est": "05:46:00",
-      "color": "#E30A16",
-      "dest_time": "06:00:00"
-    },
-    {
       "train_id": "1007",
       "ka_name": "COMMUTER LINE BOGOR",
       "route_name": "BOGOR-MANGGARAI",
@@ -370,15 +289,6 @@
       "time_est": "06:03:00",
       "color": "#E30A16",
       "dest_time": "07:17:00"
-    },
-    {
-      "train_id": "1126F",
-      "ka_name": "COMMUTER LINE BOGOR",
-      "route_name": "DEPOK-BOGOR",
-      "dest": "BOGOR",
-      "time_est": "06:05:00",
-      "color": "#E30A16",
-      "dest_time": "06:19:00"
     },
     {
       "train_id": "1191",
@@ -444,15 +354,6 @@
       "dest_time": "06:41:00"
     },
     {
-      "train_id": "1195F",
-      "ka_name": "COMMUTER LINE BOGOR",
-      "route_name": "BOGOR-JAKARTAKOTA",
-      "dest": "JAKARTAKOTA",
-      "time_est": "06:28:00",
-      "color": "#E30A16",
-      "dest_time": "07:38:00"
-    },
-    {
       "train_id": "1197",
       "ka_name": "COMMUTER LINE BOGOR",
       "route_name": "BOGOR-JAKARTAKOTA",
@@ -460,15 +361,6 @@
       "time_est": "06:33:00",
       "color": "#E30A16",
       "dest_time": "07:47:00"
-    },
-    {
-      "train_id": "1150F",
-      "ka_name": "COMMUTER LINE BOGOR",
-      "route_name": "JAKARTAKOTA-BOGOR",
-      "dest": "BOGOR",
-      "time_est": "06:35:00",
-      "color": "#E30A16",
-      "dest_time": "06:49:00"
     },
     {
       "train_id": "1011",
@@ -487,15 +379,6 @@
       "time_est": "06:40:00",
       "color": "#E30A16",
       "dest_time": "06:54:00"
-    },
-    {
-      "train_id": "1199F",
-      "ka_name": "COMMUTER LINE BOGOR",
-      "route_name": "BOGOR-JAKARTAKOTA",
-      "dest": "JAKARTAKOTA",
-      "time_est": "06:43:00",
-      "color": "#E30A16",
-      "dest_time": "07:53:00"
     },
     {
       "train_id": "1004",
@@ -577,15 +460,6 @@
       "time_est": "07:17:00",
       "color": "#E30A16",
       "dest_time": "07:31:00"
-    },
-    {
-      "train_id": "1211A",
-      "ka_name": "COMMUTER LINE BOGOR",
-      "route_name": "BOGOR-JAKARTAKOTA",
-      "dest": "JAKARTAKOTA",
-      "time_est": "07:18:00",
-      "color": "#E30A16",
-      "dest_time": "08:34:00"
     },
     {
       "train_id": "1213A",
@@ -2181,15 +2055,6 @@
       "dest_time": "20:01:00"
     },
     {
-      "train_id": "1374F",
-      "ka_name": "COMMUTER LINE BOGOR",
-      "route_name": "JAKARTAKOTA-BOGOR",
-      "dest": "BOGOR",
-      "time_est": "18:46:00",
-      "color": "#E30A16",
-      "dest_time": "19:00:00"
-    },
-    {
       "train_id": "1101",
       "ka_name": "COMMUTER LINE BOGOR",
       "route_name": "BOGOR-DEPOK",
@@ -2296,15 +2161,6 @@
       "time_est": "19:21:00",
       "color": "#E30A16",
       "dest_time": "19:35:00"
-    },
-    {
-      "train_id": "1429F",
-      "ka_name": "COMMUTER LINE BOGOR",
-      "route_name": "BOGOR-JAKARTAKOTA",
-      "dest": "JAKARTAKOTA",
-      "time_est": "19:22:00",
-      "color": "#E30A16",
-      "dest_time": "20:35:00"
     },
     {
       "train_id": "1384",
@@ -2703,15 +2559,6 @@
       "dest_time": "22:06:00"
     },
     {
-      "train_id": "1426F",
-      "ka_name": "COMMUTER LINE BOGOR",
-      "route_name": "JAKARTAKOTA-BOGOR",
-      "dest": "BOGOR",
-      "time_est": "21:58:00",
-      "color": "#E30A16",
-      "dest_time": "22:12:00"
-    },
-    {
       "train_id": "1428",
       "ka_name": "COMMUTER LINE BOGOR",
       "route_name": "JAKARTAKOTA-BOGOR",
@@ -2793,15 +2640,6 @@
       "dest_time": "23:42:00"
     },
     {
-      "train_id": "1125F",
-      "ka_name": "COMMUTER LINE BOGOR",
-      "route_name": "BOGOR-DEPOK",
-      "dest": "DEPOK",
-      "time_est": "22:40:00",
-      "color": "#E30A16",
-      "dest_time": "22:52:00"
-    },
-    {
       "train_id": "1438",
       "ka_name": "COMMUTER LINE BOGOR",
       "route_name": "JAKARTAKOTA-BOGOR",
@@ -2865,15 +2703,6 @@
       "dest_time": "23:27:00"
     },
     {
-      "train_id": "D1/R1438-1",
-      "ka_name": "DINAS RANGKAIAN KRL",
-      "route_name": "BOGOR-DEPOK",
-      "dest": "DEPOK",
-      "time_est": "23:18:00",
-      "color": "#E30A16",
-      "dest_time": "23:30:00"
-    },
-    {
       "train_id": "1448",
       "ka_name": "COMMUTER LINE BOGOR",
       "route_name": "JAKARTAKOTA-BOGOR",
@@ -2908,15 +2737,6 @@
       "time_est": "23:37:00",
       "color": "#E30A16",
       "dest_time": "23:49:00"
-    },
-    {
-      "train_id": "R1141",
-      "ka_name": "DINAS RANGKAIAN KRL",
-      "route_name": "BOGOR-DEPOK",
-      "dest": "DEPOK",
-      "time_est": "23:55:00",
-      "color": "#E30A16",
-      "dest_time": "00:06:00"
     },
     {
       "train_id": "1458",

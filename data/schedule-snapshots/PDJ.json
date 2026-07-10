@@ -1,6 +1,6 @@
 {
   "stationId": "PDJ",
-  "capturedAt": "2026-07-05T21:55:52.310Z",
+  "capturedAt": "2026-07-10T23:16:36.196Z",
   "data": [
     {
       "train_id": "1820D",
@@ -102,15 +102,6 @@
       "dest_time": "07:06:00"
     },
     {
-      "train_id": "1627D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "TIGARAKSA-TANAHABANG",
-      "dest": "TANAHABANG",
-      "time_est": "05:48:00",
-      "color": "#16812B",
-      "dest_time": "06:07:00"
-    },
-    {
       "train_id": "1620D",
       "ka_name": "COMMUTER LINE RANGKASBITUNG",
       "route_name": "TANAHABANG-TIGARAKSA",
@@ -127,15 +118,6 @@
       "time_est": "05:57:00",
       "color": "#16812B",
       "dest_time": "06:16:00"
-    },
-    {
-      "train_id": "1631D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "PARUNGPANJANG-TANAHABANG",
-      "dest": "TANAHABANG",
-      "time_est": "06:08:00",
-      "color": "#16812B",
-      "dest_time": "06:27:00"
     },
     {
       "train_id": "1622D",
@@ -192,24 +174,6 @@
       "dest_time": "06:56:00"
     },
     {
-      "train_id": "1628D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "TANAHABANG-SERPONG",
-      "dest": "SERPONG",
-      "time_est": "06:39:00",
-      "color": "#93ca3e",
-      "dest_time": "06:54:00"
-    },
-    {
-      "train_id": "1639D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "TIGARAKSA-TANAHABANG",
-      "dest": "TANAHABANG",
-      "time_est": "06:47:00",
-      "color": "#16812B",
-      "dest_time": "07:06:00"
-    },
-    {
       "train_id": "1630D",
       "ka_name": "COMMUTER LINE RANGKASBITUNG",
       "route_name": "TANAHABANG-RANGKASBITUNG",
@@ -217,15 +181,6 @@
       "time_est": "06:49:00",
       "color": "#16812B",
       "dest_time": "08:08:00"
-    },
-    {
-      "train_id": "1632D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "TANAHABANG-PARUNGPANJANG",
-      "dest": "PARUNGPANJANG",
-      "time_est": "06:59:00",
-      "color": "#16812B",
-      "dest_time": "07:29:00"
     },
     {
       "train_id": "1641D",
@@ -282,24 +237,6 @@
       "dest_time": "08:50:00"
     },
     {
-      "train_id": "1647D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "SERPONG-TANAHABANG",
-      "dest": "TANAHABANG",
-      "time_est": "07:31:00",
-      "color": "#93ca3e",
-      "dest_time": "07:50:00"
-    },
-    {
-      "train_id": "1640D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "TANAHABANG-PARUNGPANJANG",
-      "dest": "PARUNGPANJANG",
-      "time_est": "07:39:00",
-      "color": "#16812B",
-      "dest_time": "08:09:00"
-    },
-    {
       "train_id": "1649D",
       "ka_name": "COMMUTER LINE RANGKASBITUNG",
       "route_name": "RANGKASBITUNG-TANAHABANG",
@@ -345,15 +282,6 @@
       "dest_time": "08:52:00"
     },
     {
-      "train_id": "1655D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "PARUNGPANJANG-TANAHABANG",
-      "dest": "TANAHABANG",
-      "time_est": "08:10:00",
-      "color": "#16812B",
-      "dest_time": "08:29:00"
-    },
-    {
       "train_id": "1646D",
       "ka_name": "COMMUTER LINE RANGKASBITUNG",
       "route_name": "TANAHABANG-RANGKASBITUNG",
@@ -370,15 +298,6 @@
       "time_est": "08:20:00",
       "color": "#16812B",
       "dest_time": "08:39:00"
-    },
-    {
-      "train_id": "1648D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "TANAHABANG-PARUNGPANJANG",
-      "dest": "PARUNGPANJANG",
-      "time_est": "08:21:00",
-      "color": "#16812B",
-      "dest_time": "08:51:00"
     },
     {
       "train_id": "1659D",
@@ -424,24 +343,6 @@
       "time_est": "08:51:00",
       "color": "#16812B",
       "dest_time": "10:12:00"
-    },
-    {
-      "train_id": "1663D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "PARUNGPANJANG-TANAHABANG",
-      "dest": "TANAHABANG",
-      "time_est": "08:51:00",
-      "color": "#16812B",
-      "dest_time": "09:11:00"
-    },
-    {
-      "train_id": "1656D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "TANAHABANG-PARUNGPANJANG",
-      "dest": "PARUNGPANJANG",
-      "time_est": "09:00:00",
-      "color": "#16812B",
-      "dest_time": "09:30:00"
     },
     {
       "train_id": "1665D",
@@ -514,15 +415,6 @@
       "time_est": "09:39:00",
       "color": "#16812B",
       "dest_time": "09:58:00"
-    },
-    {
-      "train_id": "1664D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "TANAHABANG-PARUNGPANJANG",
-      "dest": "PARUNGPANJANG",
-      "time_est": "09:43:00",
-      "color": "#16812B",
-      "dest_time": "10:13:00"
     },
     {
       "train_id": "1675D",
