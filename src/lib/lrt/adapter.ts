@@ -49,6 +49,16 @@ async function buildDirectLeg(
     throw new Error(`Missing schedule snapshot for station: ${from}`)
   }
 
+  const stationSlugs: string[] =
+    fromIndex <= toIndex
+      ? path.slice(fromIndex, toIndex + 1)
+      : [...path.slice(toIndex, fromIndex + 1)].reverse()
+
+  const stations = stationSlugs.map((slug) => ({
+    slug,
+    name: stationName(slug),
+  }))
+
   return {
     type: 'direct',
     from,
@@ -56,6 +66,7 @@ async function buildDirectLeg(
     to,
     toName: stationName(to),
     headingTowards: stationName(headingTowardsSlug),
+    stations,
     schedule: {
       weekday: snapshot.weekday,
       holiday: snapshot.holiday,

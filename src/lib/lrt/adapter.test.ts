@@ -80,6 +80,12 @@ describe('getJourney', () => {
       to: 'taman-mini',
       toName: 'Taman Mini',
       headingTowards: 'Dukuh Atas BNI',
+      stations: [
+        { slug: 'harjamukti', name: 'Harjamukti' },
+        { slug: 'ciracas', name: 'Ciracas' },
+        { slug: 'kampung-rambutan', name: 'Kampung Rambutan' },
+        { slug: 'taman-mini', name: 'Taman Mini' },
+      ],
       schedule: {
         weekday: ['05:18'],
         holiday: ['05:35'],
@@ -153,6 +159,13 @@ describe('getJourney', () => {
       to: 'cawang',
       toName: 'Cawang',
       headingTowards: 'Dukuh Atas BNI',
+      stations: [
+        { slug: 'harjamukti', name: 'Harjamukti' },
+        { slug: 'ciracas', name: 'Ciracas' },
+        { slug: 'kampung-rambutan', name: 'Kampung Rambutan' },
+        { slug: 'taman-mini', name: 'Taman Mini' },
+        { slug: 'cawang', name: 'Cawang' },
+      ],
       schedule: {
         weekday: ['harjamukti-weekday'],
         holiday: ['harjamukti-holiday'],
@@ -166,6 +179,15 @@ describe('getJourney', () => {
       to: 'jati-mulya',
       toName: 'Jati Mulya',
       headingTowards: 'Jati Mulya',
+      stations: [
+        { slug: 'cawang', name: 'Cawang' },
+        { slug: 'halim', name: 'Halim' },
+        { slug: 'jati-bening-baru', name: 'Jati Bening Baru' },
+        { slug: 'cikunir-1', name: 'Cikunir 1' },
+        { slug: 'cikunir-2', name: 'Cikunir 2' },
+        { slug: 'bekasi-barat', name: 'Bekasi Barat' },
+        { slug: 'jati-mulya', name: 'Jati Mulya' },
+      ],
       schedule: { weekday: ['cawang-weekday'], holiday: ['cawang-holiday'], capturedAt: '' },
     })
   })

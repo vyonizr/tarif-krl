@@ -27,8 +27,16 @@ describe('GET /api/lrt/journey', () => {
     getJourney.mockResolvedValue({
       type: 'direct',
       from: 'harjamukti',
+      fromName: 'Harjamukti',
       to: 'taman-mini',
+      toName: 'Taman Mini',
       headingTowards: 'Dukuh Atas BNI',
+      stations: [
+        { slug: 'harjamukti', name: 'Harjamukti' },
+        { slug: 'ciracas', name: 'Ciracas' },
+        { slug: 'kampung-rambutan', name: 'Kampung Rambutan' },
+        { slug: 'taman-mini', name: 'Taman Mini' },
+      ],
       schedule: { weekday: ['05:18'], holiday: ['05:35'], capturedAt: '2026-01-01T00:00:00.000Z' },
     })
 

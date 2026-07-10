@@ -44,6 +44,12 @@ export interface IKRLSchedule {
   dest_time: string
 }
 
+export interface ILRTFavoriteRoute {
+  originSlug: string
+  destinationSlug: string
+  savedAt: number
+}
+
 export interface IFavoriteRoute {
   originStationId: string
   destinationStationId: string

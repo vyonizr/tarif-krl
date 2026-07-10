@@ -15,6 +15,11 @@ export interface ILRTSchedule {
   capturedAt: string
 }
 
+export interface ILRTStationEntry {
+  slug: string
+  name: string
+}
+
 export interface ILRTDirectJourney {
   type: 'direct'
   from: string
@@ -22,6 +27,7 @@ export interface ILRTDirectJourney {
   to: string
   toName: string
   headingTowards: string
+  stations: ILRTStationEntry[]
   schedule: ILRTSchedule
 }
 

@@ -738,6 +738,17 @@ components:
           type: string
         headingTowards:
           type: string
+        stations:
+          type: array
+          description: List of stations passed through in travel order, including origin and destination
+          items:
+            type: object
+            properties:
+              slug:
+                type: string
+              name:
+                type: string
+            required: [slug, name]
         schedule:
           type: object
           properties:
@@ -753,7 +764,7 @@ components:
               type: string
               description: When this snapshot was captured from the upstream schedule
           required: [weekday, holiday, capturedAt]
-      required: [type, from, fromName, to, toName, headingTowards, schedule]
+      required: [type, from, fromName, to, toName, headingTowards, stations, schedule]
 
     LrtTransferJourney:
       type: object
