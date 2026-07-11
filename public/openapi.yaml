@@ -28,6 +28,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/StationsEnvelope'
+              example:
+                data:
+                  Jabodetabek:
+                    - id: 'THB'
+                      name: 'Tanah Abang'
+                    - id: 'BOO'
+                      name: 'Bogor'
+                error: null
         '502':
           description: Upstream unavailable
           content:
@@ -51,12 +59,14 @@ paths:
           schema:
             type: string
           description: Origin station code
+          example: 'THB'
         - name: to
           in: query
           required: true
           schema:
             type: string
           description: Destination station code
+          example: 'BOO'
       responses:
         '200':
           description: OK
@@ -67,6 +77,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FareEnvelope'
+              example:
+                data:
+                  - from: 'THB'
+                    to: 'BOO'
+                    fare: 4000
+                    distance: '25-30 KM'
+                error: null
         '400':
           description: Missing required parameters
           content:
@@ -123,12 +140,14 @@ paths:
           schema:
             type: string
           description: Origin station code
+          example: 'THB'
         - name: to
           in: query
           required: true
           schema:
             type: string
           description: Destination station code
+          example: 'BOO'
         - name: time
           in: query
           required: false
@@ -136,6 +155,7 @@ paths:
             type: string
             format: 'HH:MM'
           description: 'Departure time (Asia/Jakarta). Defaults to current server time.'
+          example: '07:30'
       responses:
         '200':
           description: >-
@@ -146,6 +166,12 @@ paths:
             text/event-stream:
               schema:
                 type: string
+              example: |
+                event: leg
+                data: {"index":0,"total":1,"from":"THB","to":"BOO","time":"07:30","legs":[{"train_id":"2734","train_name":"Commuter Line Bogor","color":"#EE1E25","stops":[{"station_id":"THB","station_name":"Tanah Abang","time_est":"07:30"},{"station_id":"BOO","station_name":"Bogor","time_est":"08:45"}]}]}
+
+                event: done
+                data: {"legsFound":1,"legsFailed":0,"dataSource":{"source":"repo-snapshot","capturedAt":"2026-06-01T00:00:00.000Z"}}
         '400':
           description: Missing/invalid parameters, or unrecognized station codes
           content:
@@ -167,12 +193,14 @@ paths:
           schema:
             type: string
           description: Hop origin station code
+          example: 'MRI'
         - name: to
           in: query
           required: true
           schema:
             type: string
           description: Hop destination station code
+          example: 'THB'
         - name: time
           in: query
           required: true
@@ -180,6 +208,7 @@ paths:
             type: string
             format: 'HH:MM'
           description: Hop departure time, as reported in the original leg-error event
+          example: '07:45'
       responses:
         '200':
           description: OK
@@ -190,6 +219,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RouteEnvelope'
+              example:
+                data:
+                  legs:
+                    - train_id: '2734'
+                      train_name: 'Commuter Line Bogor'
+                      color: '#EE1E25'
+                      stops:
+                        - station_id: 'MRI'
+                          station_name: 'Manggarai'
+                          time_est: '07:45'
+                        - station_id: 'THB'
+                          station_name: 'Tanah Abang'
+                          time_est: '08:00'
+                error: null
         '400':
           description: Missing/invalid parameters, or unrecognized station codes
           content:
@@ -225,6 +268,7 @@ paths:
           schema:
             type: string
           description: Station code
+          example: 'THB'
         - name: time_from
           in: query
           required: true
@@ -232,6 +276,7 @@ paths:
             type: string
             format: 'HH:MM'
           description: Start of time window
+          example: '07:00'
         - name: time_to
           in: query
           required: false
@@ -240,6 +285,7 @@ paths:
             format: 'HH:MM'
             default: '23:00'
           description: End of time window
+          example: '09:00'
       responses:
         '200':
           description: OK
@@ -250,6 +296,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SchedulesEnvelope'
+              example:
+                data:
+                  - train_id: '2734'
+                    ka_name: 'Commuter Line Bogor'
+                    route_name: 'Bogor'
+                    dest: 'Bogor'
+                    time_est: '07:30'
+                    color: '#EE1E25'
+                    dest_time: '08:45'
+                error: null
         '400':
           description: Missing required parameters
           content:
@@ -258,6 +314,220 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '502':
           description: Upstream unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /lrt/stations:
+    get:
+      summary: List LRT Jabodebek stations
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LrtStationsEnvelope'
+              example:
+                data:
+                  - slug: 'harjamukti'
+                    name: 'Harjamukti'
+                  - slug: 'dukuh-atas'
+                    name: 'Dukuh Atas'
+                error: null
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /lrt/schedule:
+    get:
+      summary: Get departure schedule for an LRT station
+      parameters:
+        - name: station
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Station slug
+          example: 'harjamukti'
+        - name: day
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [weekday, holiday]
+          description: Day type
+          example: 'weekday'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LrtScheduleEnvelope'
+              example:
+                data:
+                  times: ['05:00', '05:30', '06:00']
+                  capturedAt: '2026-06-01T00:00:00.000Z'
+                error: null
+        '400':
+          description: Missing/invalid parameters, or unrecognized station
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: No schedule snapshot for this station
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /lrt/journey:
+    get:
+      summary: Get journey (direct or transfer) between two LRT stations
+      description: |
+        Resolves a journey along the LRT Jabodebek line topology. Stations on
+        the same branch (or trunk) resolve as a single `direct` journey.
+        Stations on opposite branches (Cibubur vs. Bekasi) resolve as a
+        `transfer` journey through the Cawang fork point, made up of two
+        direct legs.
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Origin station slug
+          example: 'harjamukti'
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Destination station slug
+          example: 'dukuh-atas'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LrtJourneyEnvelope'
+              example:
+                data:
+                  type: 'direct'
+                  from: 'harjamukti'
+                  fromName: 'Harjamukti'
+                  to: 'dukuh-atas'
+                  toName: 'Dukuh Atas'
+                  headingTowards: 'Dukuh Atas'
+                  schedule:
+                    weekday: ['05:00', '05:30', '06:00']
+                    holiday: ['05:30', '06:00']
+                    capturedAt: '2026-06-01T00:00:00.000Z'
+                error: null
+        '400':
+          description: Missing/invalid parameters, same from/to, or unrecognized station
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /mrt/stations:
+    get:
+      summary: List MRT stations
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MrtStationsEnvelope'
+              example:
+                data:
+                  - id: 1
+                    slug: 'lebak-bulus'
+                    name: 'Lebak Bulus Grab'
+                  - id: 13
+                    slug: 'bundaran-hi'
+                    name: 'Bundaran HI Bank DKI'
+                error: null
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /mrt/fare:
+    get:
+      summary: Get fare, direction, and schedule between two MRT stations
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Origin station id
+          example: 1
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Destination station id
+          example: 13
+        - name: datetime
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Departure datetime passed through to the upstream MRT API
+          example: '2026-06-01 07:30:00'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MrtFareEnvelope'
+              example:
+                data:
+                  fare: 14000
+                  timeEstimation: 30
+                  direction:
+                    start: 'Lebak Bulus Grab'
+                    end: 'Bundaran HI Bank DKI'
+                  headingTowards: 'Bundaran HI Bank DKI'
+                  schedule:
+                    weekdays: ['05:00', '05:10', '05:20']
+                    weekends: ['05:30', '05:50']
+                error: null
+        '400':
+          description: Missing required parameters
           content:
             application/json:
               schema:
@@ -406,6 +676,184 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/RouteData'
+        error:
+          type: 'null'
+      required: [data, error]
+
+    # ── LRT Station ──────────────────────────────────────
+    LrtStation:
+      type: object
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+      required: [slug, name]
+
+    LrtStationsEnvelope:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/LrtStation'
+        error:
+          type: 'null'
+      required: [data, error]
+
+    # ── LRT Schedule ─────────────────────────────────────
+    LrtScheduleEnvelope:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            times:
+              type: array
+              items:
+                type: string
+              description: Departure times (HH:MM) for the requested day type
+            capturedAt:
+              type: string
+              description: When this snapshot was captured from the upstream schedule
+          required: [times, capturedAt]
+        error:
+          type: 'null'
+      required: [data, error]
+
+    # ── LRT Journey ──────────────────────────────────────
+    LrtDirectJourney:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [direct]
+        from:
+          type: string
+        fromName:
+          type: string
+        to:
+          type: string
+        toName:
+          type: string
+        headingTowards:
+          type: string
+        stations:
+          type: array
+          description: List of stations passed through in travel order, including origin and destination
+          items:
+            type: object
+            properties:
+              slug:
+                type: string
+              name:
+                type: string
+            required: [slug, name]
+        schedule:
+          type: object
+          properties:
+            weekday:
+              type: array
+              items:
+                type: string
+            holiday:
+              type: array
+              items:
+                type: string
+            capturedAt:
+              type: string
+              description: When this snapshot was captured from the upstream schedule
+          required: [weekday, holiday, capturedAt]
+      required: [type, from, fromName, to, toName, headingTowards, stations, schedule]
+
+    LrtTransferJourney:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [transfer]
+        transferStation:
+          type: string
+        legs:
+          type: array
+          items:
+            $ref: '#/components/schemas/LrtDirectJourney'
+          minItems: 2
+          maxItems: 2
+      required: [type, transferStation, legs]
+
+    LrtJourneyEnvelope:
+      type: object
+      properties:
+        data:
+          oneOf:
+            - $ref: '#/components/schemas/LrtDirectJourney'
+            - $ref: '#/components/schemas/LrtTransferJourney'
+        error:
+          type: 'null'
+      required: [data, error]
+
+    # ── MRT Station ──────────────────────────────────────
+    MrtStation:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        name:
+          type: string
+      required: [id, slug, name]
+
+    MrtStationsEnvelope:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MrtStation'
+        error:
+          type: 'null'
+      required: [data, error]
+
+    # ── MRT Fare/Schedule ────────────────────────────────
+    MrtFareData:
+      type: object
+      properties:
+        fare:
+          type: integer
+        timeEstimation:
+          type: integer
+          description: Estimated travel time in minutes
+        direction:
+          type: object
+          properties:
+            start:
+              type: string
+            end:
+              type: string
+          required: [start, end]
+        headingTowards:
+          type: string
+        schedule:
+          type: object
+          properties:
+            weekdays:
+              type: array
+              items:
+                type: string
+            weekends:
+              type: array
+              items:
+                type: string
+          required: [weekdays, weekends]
+      required: [fare, timeEstimation, direction, headingTowards, schedule]
+
+    MrtFareEnvelope:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/MrtFareData'
         error:
           type: 'null'
       required: [data, error]

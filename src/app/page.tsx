@@ -2,10 +2,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import KRLLogo from './assets/images/krl_logo.png'
 import MRTLogo from './assets/images/mrt_logo.svg'
+import LRTLogo from './assets/images/lrt_logo.jpg'
 
 const NAVIGATIONS = [
   { name: 'Kereta Rel Listrik (KRL)', href: '/krl', logo: KRLLogo },
   { name: 'Mass Rapid Transit (MRT)', href: '/mrt', logo: MRTLogo },
+  { name: 'Light Rail Transit (LRT)', href: '/lrt', logo: LRTLogo },
 ]
 
 export default async function Home() {

@@ -1,10 +1,10 @@
 {
   "trainId": "506",
-  "capturedAt": "2026-07-04T23:57:04.972Z",
+  "capturedAt": "2026-07-08T14:33:50.583Z",
   "data": [
     {
       "train_id": "506",
-      "ka_name": "COMMUTER LINE PRAMEKS KUTOARJO",
+      "ka_name": "COMMUTER LINE PRAMEKS",
       "station_id": "KTA",
       "station_name": "KUTOARJO",
       "time_est": "16:50:00",
@@ -14,7 +14,7 @@
     },
     {
       "train_id": "506",
-      "ka_name": "COMMUTER LINE PRAMEKS KUTOARJO",
+      "ka_name": "COMMUTER LINE PRAMEKS",
       "station_id": "JN",
       "station_name": "JENAR",
       "time_est": "17:03:00",
@@ -24,7 +24,7 @@
     },
     {
       "train_id": "506",
-      "ka_name": "COMMUTER LINE PRAMEKS KUTOARJO",
+      "ka_name": "COMMUTER LINE PRAMEKS",
       "station_id": "WJ",
       "station_name": "WOJO",
       "time_est": "17:13:00",
@@ -34,7 +34,7 @@
     },
     {
       "train_id": "506",
-      "ka_name": "COMMUTER LINE PRAMEKS KUTOARJO",
+      "ka_name": "COMMUTER LINE PRAMEKS",
       "station_id": "WT",
       "station_name": "WATES",
       "time_est": "17:28:00",
@@ -44,7 +44,7 @@
     },
     {
       "train_id": "506",
-      "ka_name": "COMMUTER LINE PRAMEKS KUTOARJO",
+      "ka_name": "COMMUTER LINE PRAMEKS",
       "station_id": "YK",
       "station_name": "YOGYAKARTA",
       "time_est": "17:52:00",

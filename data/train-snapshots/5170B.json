@@ -1,20 +1,7 @@
 {
   "trainId": "5170B",
-  "capturedAt": "2026-07-04T15:07:19.176Z",
+  "capturedAt": "2026-07-11T00:51:55.992Z",
   "data": [
-    {
-      "train_id": "5170B",
-      "ka_name": "COMMUTER LINE CIKARANG",
-      "station_id": "KPB",
-      "station_name": "KAMPUNG BANDAN",
-      "time_est": "20:40:00",
-      "transit_station": true,
-      "color": "#0084D8",
-      "transit": [
-        "#ff8095",
-        "#0000ff"
-      ]
-    },
     {
       "train_id": "5170B",
       "ka_name": "COMMUTER LINE CIKARANG",

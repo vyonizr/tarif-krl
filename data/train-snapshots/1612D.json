@@ -1,0 +1,56 @@
+{
+  "trainId": "1612D",
+  "capturedAt": "2026-07-05T22:17:10.967Z",
+  "data": [
+    {
+      "train_id": "1612D",
+      "ka_name": "COMMUTER LINE RANGKASBITUNG",
+      "station_id": "PRP",
+      "station_name": "PARUNG PANJANG",
+      "time_est": "05:25:00",
+      "transit_station": false,
+      "color": "#16812B",
+      "transit": ""
+    },
+    {
+      "train_id": "1612D",
+      "ka_name": "COMMUTER LINE RANGKASBITUNG",
+      "station_id": "CJT",
+      "station_name": "CILEJIT",
+      "time_est": "05:32:30",
+      "transit_station": false,
+      "color": "#16812B",
+      "transit": ""
+    },
+    {
+      "train_id": "1612D",
+      "ka_name": "COMMUTER LINE RANGKASBITUNG",
+      "station_id": "DAR",
+      "station_name": "DARU",
+      "time_est": "05:37:00",
+      "transit_station": false,
+      "color": "#16812B",
+      "transit": ""
+    },
+    {
+      "train_id": "1612D",
+      "ka_name": "COMMUTER LINE RANGKASBITUNG",
+      "station_id": "TEJ",
+      "station_name": "TENJO",
+      "time_est": "05:41:30",
+      "transit_station": false,
+      "color": "#16812B",
+      "transit": ""
+    },
+    {
+      "train_id": "1612D",
+      "ka_name": "COMMUTER LINE RANGKASBITUNG",
+      "station_id": "TGS",
+      "station_name": "TIGARAKSA",
+      "time_est": "05:46:00",
+      "transit_station": false,
+      "color": "#16812B",
+      "transit": ""
+    }
+  ]
+}

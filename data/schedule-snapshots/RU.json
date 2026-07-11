@@ -1,6 +1,6 @@
 {
   "stationId": "RU",
-  "capturedAt": "2026-07-04T22:37:38.927Z",
+  "capturedAt": "2026-07-10T23:19:41.512Z",
   "data": [
     {
       "train_id": "1820D",
@@ -1018,15 +1018,6 @@
       "time_est": "16:45:00",
       "color": "#16812B",
       "dest_time": "17:16:00"
-    },
-    {
-      "train_id": "1742D",
-      "ka_name": "COMMUTER LINE RANGKASBITUNG",
-      "route_name": "TANAHABANG-PARUNGPANJANG",
-      "dest": "PARUNGPANJANG",
-      "time_est": "16:52:00",
-      "color": "#16812B",
-      "dest_time": "17:12:00"
     },
     {
       "train_id": "1757D",

@@ -1,6 +1,6 @@
 {
   "stationId": "GDD",
-  "capturedAt": "2026-07-04T22:42:36.779Z",
+  "capturedAt": "2026-07-10T23:07:35.842Z",
   "data": [
     {
       "train_id": "1470",
@@ -523,15 +523,6 @@
       "time_est": "08:39:00",
       "color": "#E30A16",
       "dest_time": "09:00:00"
-    },
-    {
-      "train_id": "R1207-2",
-      "ka_name": "DINAS RANGKAIAN KRL",
-      "route_name": "JAKARTAKOTA-MANGGARAI",
-      "dest": "MANGGARAI",
-      "time_est": "08:46:00",
-      "color": "#E30A16",
-      "dest_time": "08:54:00"
     },
     {
       "train_id": "1225",

@@ -1,6 +1,6 @@
 {
   "stationId": "JUA",
-  "capturedAt": "2026-07-04T22:37:13.862Z",
+  "capturedAt": "2026-07-10T23:10:33.117Z",
   "data": [
     {
       "train_id": "1469",
@@ -503,15 +503,6 @@
       "route_name": "BOGOR-JAKARTAKOTA",
       "dest": "JAKARTAKOTA",
       "time_est": "08:39:00",
-      "color": "#E30A16",
-      "dest_time": "08:54:00"
-    },
-    {
-      "train_id": "R1207-2",
-      "ka_name": "DINAS RANGKAIAN KRL",
-      "route_name": "JAKARTAKOTA-MANGGARAI",
-      "dest": "MANGGARAI",
-      "time_est": "08:40:00",
       "color": "#E30A16",
       "dest_time": "08:54:00"
     },
