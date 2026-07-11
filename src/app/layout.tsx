@@ -48,6 +48,13 @@ export default function RootLayout({
             </Link>
           </p>
           <p className="mt-1">v{pkg.version}</p>
+          <p className="mx-auto mt-2 max-w-xs px-4 text-slate-400">
+            Jadwal KRL bukan aplikasi resmi dari KAI Commuter, MRT Jakarta,
+            maupun LRT Jakarta. Logo dan merek dagang digunakan hanya untuk
+            identifikasi moda transportasi; hak cipta tetap menjadi milik
+            masing-masing pemilik. Data jadwal dan tarif bersumber dari API
+            publik masing-masing operator.
+          </p>
         </footer>
         <Script src="/fixVH.js" />
       </body>
