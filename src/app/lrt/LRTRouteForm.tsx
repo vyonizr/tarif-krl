@@ -1,28 +1,22 @@
 "use client"
 import { useState, useEffect, useMemo, useCallback, useRef } from "react"
-import { Star, ArrowRightLeft, Train, MapPin } from "lucide-react"
+import { Star, ArrowRightLeft, MapPin } from "lucide-react"
 
 import Spinner from "@/components/Spinner"
 import { Button } from "@/components/ui/button"
 
-import {
-  ILRTStation,
-  ILRTDirectJourney,
-  ILRTTransferJourney,
-  ILRTJourneyResult,
-} from "@/lib/lrt/types"
+import { ILRTStation, ILRTJourneyResult } from "@/lib/lrt/types"
 import { ILRTFavoriteRoute } from "../types"
 
-import { LRT_MINUTES_PER_STOP } from "@/lib/lrt/constants"
 import {
   getCurrentTimeInHHMM,
   getTypeOfDay,
   convertTimeToHHMM,
-  calculateMRTETA,
 } from "../utils"
 
 import LRTStationCombobox from "./LRTStationCombobox"
 import LRTFavoriteRoutesBar from "./LRTFavoriteRoutesBar"
+import LRTDepartureRow from "./LRTDepartureRow"
 import SwapButton from "../krl/SwapButton"
 
 const STORAGE_KEY = "lrt-favorites"
@@ -176,82 +170,19 @@ export default function LRTRouteForm({ stations }: LRTRouteFormProps) {
     saveFavorites(updated)
   }, [favorites])
 
-  function computeDepartureTimes(schedule: { weekday: string[]; holiday: string[] }) {
-    const daySchedule = typeOfDay === "holiday" ? schedule.holiday : schedule.weekday
+  const departureTimes = useMemo(() => {
+    if (!journeyResult) return []
+    const schedule =
+      journeyResult.type === "direct"
+        ? journeyResult.schedule
+        : journeyResult.legs[0].schedule
+    const daySchedule =
+      typeOfDay === "holiday" ? schedule.holiday : schedule.weekday
     const currentTime = getCurrentTimeInHHMM()
     return daySchedule
       .filter((t) => convertTimeToHHMM(t) >= currentTime)
       .slice(0, 5)
-  }
-
-  function renderDirectLeg(
-    leg: ILRTDirectJourney,
-    label?: string,
-  ) {
-    const departureTimes = computeDepartureTimes(leg.schedule)
-
-    if (departureTimes.length === 0) {
-      return (
-        <div className="rounded-lg border border-slate-200 p-4 text-center text-sm text-slate-500">
-          Tidak ada jadwal keberangkatan tersedia.
-        </div>
-      )
-    }
-
-    return (
-      <div>
-        {label && (
-          <p className="mb-1 text-xs font-medium text-slate-500">{label}</p>
-        )}
-        <div className="w-full">
-          <p className="mb-1 text-center text-sm font-medium text-slate-700">
-            Kereta Berikutnya
-          </p>
-          <div className="divide-y divide-slate-100">
-            {departureTimes.map((t, i) => (
-              <div
-                key={i}
-                data-testid="lrt-departure-row"
-                className={`px-3 py-1.5 text-center text-sm tabular-nums ${
-                  i === 0
-                    ? "rounded-md bg-[#E7EEF8] font-semibold text-[#19519A]"
-                    : "text-slate-600"
-                }`}
-              >
-                <div>
-                  {convertTimeToHHMM(t)}
-                  <span className="text-slate-400">
-                    {" "}
-                    &rarr; tiba{" "}
-                    {calculateMRTETA(
-                      convertTimeToHHMM(t),
-                      String((leg.stations.length - 1) * LRT_MINUTES_PER_STOP)
-                    )}
-                  </span>
-                </div>
-                {(leg.stations.length > 2) && (
-                  <div className="mt-1 space-x-1 text-[10px] text-slate-400">
-                    {leg.stations.slice(1).map((st, si) => (
-                      <span key={st.slug}>
-                        {si > 0 && <span className="text-slate-300"> → </span>}
-                        <span>
-                          {calculateMRTETA(
-                            convertTimeToHHMM(t),
-                            String((si + 1) * LRT_MINUTES_PER_STOP)
-                          )}{" "}
-                          {st.name}
-                        </span>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
+  }, [journeyResult, typeOfDay])
 
   const showSameStationNotice =
     originStation &&
@@ -371,48 +302,45 @@ export default function LRTRouteForm({ stations }: LRTRouteFormProps) {
 
       {!showSameStationNotice && !isLoadingJourney && journeyResult && (
         <div className="mt-8">
-          {journeyResult.type === "direct" && (
-            <div className="mb-4 rounded-lg border border-blue-200/60 bg-blue-50 p-4">
-              <div className="mb-3 grid grid-cols-[20px_1fr] items-center gap-x-3 text-blue-900">
-                <MapPin className="h-4 w-4" />
-                <span className="text-sm">
-                  {journeyResult.fromName} → {journeyResult.toName}
-                </span>
-              </div>
-              <div className="mb-3 grid grid-cols-[20px_1fr] items-center gap-x-3 text-blue-900">
+          <div className="mb-4 rounded-lg border border-blue-200/60 bg-blue-50 px-4 py-3 text-blue-900">
+            <div className="grid grid-cols-[20px_1fr] items-center gap-x-3">
+              <MapPin className="h-4 w-4" />
+              <span className="text-sm">
+                {journeyResult.type === "direct"
+                  ? `${journeyResult.fromName} → ${journeyResult.toName}`
+                  : `${journeyResult.legs[0].fromName} → ${journeyResult.legs[1].toName}`}
+              </span>
+            </div>
+            {journeyResult.type === "direct" && (
+              <div className="mt-1 grid grid-cols-[20px_1fr] items-center gap-x-3">
                 <ArrowRightLeft className="h-4 w-4" />
                 <span className="text-sm">
                   Arah {journeyResult.headingTowards}
                 </span>
               </div>
-              {renderDirectLeg(journeyResult)}
-            </div>
-          )}
+            )}
+          </div>
 
-          {journeyResult.type === "transfer" && (
-            <div>
-              {journeyResult.legs.map((leg, legIndex) => (
-                <div key={legIndex} className="mb-4 rounded-lg border border-blue-200/60 bg-blue-50 p-4">
-                  <div className="mb-3 grid grid-cols-[20px_1fr] items-center gap-x-3 text-blue-900">
-                    <MapPin className="h-4 w-4" />
-                    <span className="text-sm">
-                      {leg.fromName} → {leg.toName}
-                    </span>
-                  </div>
-                  <div className="mb-3 grid grid-cols-[20px_1fr] items-center gap-x-3 text-blue-900">
-                    <ArrowRightLeft className="h-4 w-4" />
-                    <span className="text-sm">
-                      Arah {leg.headingTowards}
-                    </span>
-                  </div>
-                  {renderDirectLeg(leg)}
-                </div>
-              ))}
-              <div className="-mt-3 mb-4 flex justify-center">
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-                  Transit di {journeyResult.transferStation}
-                </span>
+          {departureTimes.length > 0 ? (
+            <div className="w-full">
+              <p className="mb-2 text-center text-sm font-medium text-slate-700">
+                Kereta Berikutnya
+              </p>
+              <div className="divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-200">
+                {departureTimes.map((t, i) => (
+                  <LRTDepartureRow
+                    key={i}
+                    departureTime={t}
+                    journeyResult={journeyResult}
+                    typeOfDay={typeOfDay}
+                    isFirst={i === 0}
+                  />
+                ))}
               </div>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-slate-200 p-4 text-center text-sm text-slate-500">
+              Tidak ada jadwal keberangkatan tersedia.
             </div>
           )}
 
