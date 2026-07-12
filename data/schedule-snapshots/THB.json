@@ -1,6 +1,6 @@
 {
   "stationId": "THB",
-  "capturedAt": "2026-07-10T23:23:12.659Z",
+  "capturedAt": "2026-07-12T21:55:12.169Z",
   "data": [
     {
       "train_id": "5198B",
@@ -219,6 +219,15 @@
       "dest_time": "06:25:00"
     },
     {
+      "train_id": "1628D",
+      "ka_name": "COMMUTER LINE RANGKASBITUNG",
+      "route_name": "TANAHABANG-SERPONG",
+      "dest": "SERPONG",
+      "time_est": "06:19:00",
+      "color": "#93ca3e",
+      "dest_time": "06:54:00"
+    },
+    {
       "train_id": "5028B",
       "ka_name": "COMMUTER LINE CIKARANG",
       "route_name": "ANGKE-BEKASI",
@@ -262,6 +271,15 @@
       "time_est": "06:35:00",
       "color": "#0084D8",
       "dest_time": "06:53:00"
+    },
+    {
+      "train_id": "1632D",
+      "ka_name": "COMMUTER LINE RANGKASBITUNG",
+      "route_name": "TANAHABANG-PARUNGPANJANG",
+      "dest": "PARUNGPANJANG",
+      "time_est": "06:39:00",
+      "color": "#16812B",
+      "dest_time": "07:29:00"
     },
     {
       "train_id": "6004C",
@@ -408,6 +426,15 @@
       "dest_time": "07:26:00"
     },
     {
+      "train_id": "1640D",
+      "ka_name": "COMMUTER LINE RANGKASBITUNG",
+      "route_name": "TANAHABANG-PARUNGPANJANG",
+      "dest": "PARUNGPANJANG",
+      "time_est": "07:19:00",
+      "color": "#16812B",
+      "dest_time": "08:09:00"
+    },
+    {
       "train_id": "5049B",
       "ka_name": "COMMUTER LINE CIKARANG",
       "route_name": "CIKARANG-ANGKE",
@@ -552,6 +579,15 @@
       "dest_time": "08:18:00"
     },
     {
+      "train_id": "1648D",
+      "ka_name": "COMMUTER LINE RANGKASBITUNG",
+      "route_name": "TANAHABANG-PARUNGPANJANG",
+      "dest": "PARUNGPANJANG",
+      "time_est": "08:01:00",
+      "color": "#16812B",
+      "dest_time": "08:51:00"
+    },
+    {
       "train_id": "5055C",
       "ka_name": "COMMUTER LINE CIKARANG",
       "route_name": "CIKARANG-ANGKE",
@@ -669,6 +705,15 @@
       "dest_time": "08:48:00"
     },
     {
+      "train_id": "1656D",
+      "ka_name": "COMMUTER LINE RANGKASBITUNG",
+      "route_name": "TANAHABANG-PARUNGPANJANG",
+      "dest": "PARUNGPANJANG",
+      "time_est": "08:40:00",
+      "color": "#16812B",
+      "dest_time": "09:30:00"
+    },
+    {
       "train_id": "5056B",
       "ka_name": "COMMUTER LINE CIKARANG",
       "route_name": "ANGKE-BEKASI",
@@ -784,6 +829,15 @@
       "time_est": "09:18:00",
       "color": "#0084D8",
       "dest_time": "09:28:00"
+    },
+    {
+      "train_id": "1664D",
+      "ka_name": "COMMUTER LINE RANGKASBITUNG",
+      "route_name": "TANAHABANG-PARUNGPANJANG",
+      "dest": "PARUNGPANJANG",
+      "time_est": "09:23:00",
+      "color": "#16812B",
+      "dest_time": "10:13:00"
     },
     {
       "train_id": "6016B",
