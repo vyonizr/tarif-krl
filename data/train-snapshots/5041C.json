@@ -1,6 +1,6 @@
 {
   "trainId": "5041C",
-  "capturedAt": "2026-07-04T14:25:49.404Z",
+  "capturedAt": "2026-07-13T01:24:57.625Z",
   "data": [
     {
       "train_id": "5041C",
@@ -163,19 +163,6 @@
       "transit_station": false,
       "color": "#0084D8",
       "transit": ""
-    },
-    {
-      "train_id": "5041C",
-      "ka_name": "COMMUTER LINE CIKARANG",
-      "station_id": "KPB",
-      "station_name": "KAMPUNG BANDAN",
-      "time_est": "07:15:00",
-      "transit_station": true,
-      "color": "#0084D8",
-      "transit": [
-        "#ff8095",
-        "#0000ff"
-      ]
     }
   ]
 }
